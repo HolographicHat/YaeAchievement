@@ -203,6 +203,14 @@ const upload = async data => {
     return await cloud.post("/achievement-export", data)
 }
 
+const keypress = async () => {
+    process.stdin.setRawMode(true)
+    return new Promise(resolve => process.stdin.once("data", () => {
+        process.stdin.setRawMode(false)
+        resolve()
+    }))
+}
+
 const checkUpdate = async () => {
     const data = (await cloud.get("/latest-version")).data
     if (data["vc"] !== version.code) {
@@ -282,5 +290,5 @@ class KPacket {
 
 module.exports = {
     log, sleep, encodeProto, decodeProto, initConfig, splitPacket, upload, brotliCompressSync, brotliDecompressSync,
-    setupHost, loadCache, debug, checkCDN, checkUpdate, KPacket, cdnUrlFormat
+    setupHost, loadCache, debug, checkCDN, checkUpdate, keypress, KPacket, cdnUrlFormat
 }

@@ -3,7 +3,7 @@ const proxy = require("udp-proxy")
 const cp = require("child_process")
 const rs = require("./regionServer")
 const appcenter = require("./appcenter")
-const { initConfig, splitPacket, upload, decodeProto, log, setupHost, KPacket, debug, checkCDN, checkUpdate } = require("./utils")
+const { initConfig, splitPacket, upload, decodeProto, log, setupHost, KPacket, debug, checkCDN, checkUpdate, keypress} = require("./utils")
 const { exportData } = require("./export");
 
 // TODO: i18n
@@ -94,6 +94,8 @@ const { exportData } = require("./export");
                             const data = zlib.brotliDecompressSync(response.data)
                             const proto = await decodeProto(data,"AllAchievement")
                             await exportData(proto)
+                            console.log("按任意键退出.")
+                            await keypress()
                         }
                         process.exit(0)
                     }
