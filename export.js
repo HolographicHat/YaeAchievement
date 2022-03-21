@@ -62,7 +62,7 @@ const exportToCocogoat = async proto => {
         })
     })
     spawnSync("clip", { input: JSON.stringify(out,null,2) })
-    console.log("导出内容已复制到剪贴板.")
+    console.log("导出内容已复制到剪贴板")
 }
 
 const exportToCsv = async proto => {

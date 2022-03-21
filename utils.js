@@ -172,7 +172,7 @@ const loadCache = async (fp, repo = "Dimbreath/GenshinData") => {
         validateStatus: _ => true
     })
     if (headResponse.status === 304) {
-        debug("文件 %s 命中缓存", fp)
+        console.log("文件 %s 命中缓存", fp)
         const etagLength = fd.readUInt8()
         return JSON.parse(fd.subarray(1 + etagLength).toString())
     } else {
@@ -203,14 +203,6 @@ const upload = async data => {
     return await cloud.post("/achievement-export", data)
 }
 
-const keypress = async () => {
-    process.stdin.setRawMode(true)
-    return new Promise(resolve => process.stdin.once("data", () => {
-        process.stdin.setRawMode(false)
-        resolve()
-    }))
-}
-
 const checkUpdate = async () => {
     const data = (await cloud.get("/latest-version")).data
     if (data["vc"] !== version.code) {
@@ -231,34 +223,38 @@ const brotliDecompressSync = data => zlib.brotliDecompressSync(data)
 
 let hostsContent = ""
 
-const setupHost = _ => {
+const setupHost = (restore = false) => {
     const path = "C:\\Windows\\System32\\drivers\\etc\\hosts"
     fs.chmodSync(path, 0o777)
-    hostsContent = fs.readFileSync(path, "utf-8")
-    const requireHosts = new Map()
-    requireHosts.set(conf.dispatchUrl, "127.0.0.1")
-    requireHosts.set("localdispatch.yuanshen.com", "127.0.0.1")
-    const currentHosts = new Map()
-    hostsContent.split("\n").map(l => l.trim()).filter(l => !l.startsWith("#") && l.length > 0).forEach(value => {
-        const pair = value.trim().split(" ").filter(v => v.trim().length !== 0)
-        currentHosts.set(pair[1], pair[0])
-    })
-    requireHosts.forEach((value, key) => {
-        if (currentHosts.has(key)) {
-            if (currentHosts.get(key) === value) {
-                requireHosts.delete(key)
-            } else {
-                currentHosts.delete(key)
+    if (restore) {
+        fs.writeFileSync(path, hostsContent)
+    } else {
+        hostsContent = fs.readFileSync(path, "utf-8")
+        const requireHosts = new Map()
+        requireHosts.set(conf.dispatchUrl, "127.0.0.1")
+        requireHosts.set("localdispatch.yuanshen.com", "127.0.0.1")
+        const currentHosts = new Map()
+        hostsContent.split("\n").map(l => l.trim()).filter(l => !l.startsWith("#") && l.length > 0).forEach(value => {
+            const pair = value.trim().split(" ").filter(v => v.trim().length !== 0)
+            currentHosts.set(pair[1], pair[0])
+        })
+        requireHosts.forEach((value, key) => {
+            if (currentHosts.has(key)) {
+                if (currentHosts.get(key) === value) {
+                    requireHosts.delete(key)
+                } else {
+                    currentHosts.delete(key)
+                }
             }
-        }
-    })
-    requireHosts.forEach((ip, host) => {
-        currentHosts.set(host, ip)
-    })
-    const newContent = Array.from(currentHosts.entries()).map(pair => {
-        return `${pair[1]} ${pair[0]}`
-    }).join("\n")
-    fs.writeFileSync(path, newContent)
+        })
+        requireHosts.forEach((ip, host) => {
+            currentHosts.set(host, ip)
+        })
+        const newContent = Array.from(currentHosts.entries()).map(pair => {
+            return `${pair[1]} ${pair[0]}`
+        }).join("\n")
+        fs.writeFileSync(path, newContent)
+    }
     debug("修改SystemHosts")
     process.on("exit", () => {
         fs.writeFileSync(path, hostsContent)
@@ -290,5 +286,5 @@ class KPacket {
 
 module.exports = {
     log, sleep, encodeProto, decodeProto, initConfig, splitPacket, upload, brotliCompressSync, brotliDecompressSync,
-    setupHost, loadCache, debug, checkCDN, checkUpdate, keypress, KPacket, cdnUrlFormat
+    setupHost, loadCache, debug, checkCDN, checkUpdate, KPacket, cdnUrlFormat
 }

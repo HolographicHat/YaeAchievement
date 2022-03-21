@@ -3,7 +3,7 @@ const proxy = require("udp-proxy")
 const cp = require("child_process")
 const rs = require("./regionServer")
 const appcenter = require("./appcenter")
-const { initConfig, splitPacket, upload, decodeProto, log, setupHost, KPacket, debug, checkCDN, checkUpdate, keypress} = require("./utils")
+const { initConfig, splitPacket, upload, decodeProto, log, setupHost, KPacket, debug, checkCDN, checkUpdate } = require("./utils")
 const { exportData } = require("./export");
 
 // TODO: i18n
@@ -62,6 +62,7 @@ const { exportData } = require("./export");
                         hServer.close()
                         gameProcess.kill()
                         clearInterval(monitor)
+                        setupHost(true)
                         console.log("正在处理数据，请稍后...")
                         let packets = Array.from(cache.values())
                         cache.clear()
@@ -94,8 +95,8 @@ const { exportData } = require("./export");
                             const data = zlib.brotliDecompressSync(response.data)
                             const proto = await decodeProto(data,"AllAchievement")
                             await exportData(proto)
-                            console.log("按任意键退出.")
-                            await keypress()
+                            console.log("按任意键退出")
+                            cp.execSync("pause > nul", { stdio: "inherit" })
                         }
                         process.exit(0)
                     }
@@ -131,7 +132,7 @@ const { exportData } = require("./export");
                 })
             })
             return server
-        }).then(() => console.log("加载完毕."))
+        }).then(() => console.log("加载完毕"))
     } catch (e) {
         if (e instanceof Error) {
             appcenter.uploadError(e, true)
