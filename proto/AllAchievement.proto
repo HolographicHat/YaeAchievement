@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+message AllAchievement {
+	repeated Achievement list = 1;
+}
+
+message Achievement {
+
+	enum Status {
+		INVALID = 0;
+		UNFINISHED = 1;
+		FINISHED = 2;
+		REWARD_TAKEN = 3;
+	}
+
+	uint32 id = 1;
+	Status status = 2;
+	uint32 current = 3;
+	uint32 require = 4;
+	uint32 finish_timestamp = 5;
+
+}

@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+message QueryCurRegion {
+	bytes field0 = 11;
+	bytes field1 = 12;
+	bytes field2 = 13;
+	RegionInfo info = 3;
+}
+
+message RegionInfo {
+	string ip = 1;
+	uint32 port = 2;
+	string field0 = 3;
+	string field1 = 7;
+	string field2 = 8;
+	string field3 = 9;
+	string field4 = 10;
+	string field5 = 11;
+	uint32 field6 = 14;
+	string field7 = 16;
+	uint32 field8 = 18;
+	string field9 = 19;
+	string fieldA = 20;
+	bytes  fieldB = 23;
+	string fieldC = 24;
+	string fieldD = 26;
+	string fieldE = 27;
+	string fieldF = 30;
+	string fieldG = 31;
+	string fieldH = 32;
+	string fieldI = 33;
+	ResVersionConfig fieldJ = 22;
+}
+
+message ResVersionConfig {
+	uint32 field0 = 1;
+	string field1 = 3;
+	string field2 = 4;
+	string field3 = 5;
+	string field4 = 6;
+}
