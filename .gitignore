@@ -3,4 +3,5 @@ config.json
 out.*
 node_modules
 .idea
+secret.js
 package-lock.json
