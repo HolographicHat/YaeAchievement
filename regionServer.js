@@ -2,6 +2,8 @@ const fs = require("fs")
 const https = require("https")
 const axios = require("axios")
 const { decodeProto, encodeProto, debug } = require("./utils")
+const path = require("path")
+const cert = path.join(__dirname, "./cert/root.p12")
 
 const preparedRegions = {}
 let currentProxy = undefined
@@ -64,7 +66,7 @@ const create = async (conf, regionListLoadedCallback, regionSelectCallback) => {
     const regions = await getModifiedRegionList(conf)
     regionListLoadedCallback()
     const hServer = https.createServer({
-        pfx: fs.readFileSync("./cert/root.p12"),
+        pfx: fs.readFileSync(cert),
         passphrase: ""
     }, async (request, response) => {
         const url = request.url

@@ -1,13 +1,34 @@
 syntax = "proto3";
 
+message AllAchievement {
+	repeated Achievement list = 1;
+}
+
+message Achievement {
+
+	enum Status {
+		INVALID = 0;
+		UNFINISHED = 1;
+		FINISHED = 2;
+		REWARD_TAKEN = 3;
+	}
+
+	uint32 id = 1;
+	Status status = 2;
+	uint32 current = 3;
+	uint32 require = 4;
+	uint32 finish_timestamp = 5;
+
+}
+
 message QueryCurRegion {
 	bytes field0 = 11;
 	bytes field1 = 12;
 	bytes field2 = 13;
-	RegionInfo info = 3;
+	msg0 info = 3;
 }
 
-message RegionInfo {
+message msg0 {
 	string ip = 1;
 	uint32 port = 2;
 	string field0 = 3;
@@ -29,13 +50,27 @@ message RegionInfo {
 	string fieldG = 31;
 	string fieldH = 32;
 	string fieldI = 33;
-	ResVersionConfig fieldJ = 22;
+	msg1 fieldJ = 22;
 }
 
-message ResVersionConfig {
+message msg1 {
 	uint32 field0 = 1;
 	string field1 = 3;
 	string field2 = 4;
 	string field3 = 5;
 	string field4 = 6;
+}
+
+message QueryRegionList {
+	bytes field0 = 5;
+	bytes field1 = 6;
+	bool  field2 = 7;
+	repeated msg2 list = 2;
+}
+
+message msg2 {
+	string field0 = 1;
+	string field1 = 2;
+	string field2 = 3;
+	string url = 4;
 }

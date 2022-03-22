@@ -8,6 +8,8 @@ const readline = require("readline")
 const protobuf = require("protobufjs")
 const { version } = require("./version")
 const { createHash } = require("crypto")
+const path = require("path")
+const messages = path.join(__dirname, "./proto/Messages.proto")
 
 let axios = require("axios")
 
@@ -15,13 +17,13 @@ const sleep = ms => new Promise(resolve => {
     setTimeout(resolve, ms)
 })
 
-const encodeProto = (object, name) => protobuf.load(`proto/${name}.proto`).then(r => {
+const encodeProto = (object, name) => protobuf.load(messages).then(r => {
     const msgType = r.lookupType(name)
     const msgInst = msgType.create(object)
     return msgType.encode(msgInst).finish()
 })
 
-const decodeProto = (buf, name) => protobuf.load(`proto/${name}.proto`).then(r => {
+const decodeProto = (buf, name) => protobuf.load(messages).then(r => {
     return r.lookupType(name).decode(buf)
 })
 

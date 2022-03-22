@@ -134,10 +134,14 @@ const { exportData } = require("./export");
             return server
         }).then(() => console.log("加载完毕"))
     } catch (e) {
+        console.log(e)
         if (e instanceof Error) {
             appcenter.uploadError(e, true)
         } else {
             appcenter.uploadError(Error(e), true)
         }
+        console.log("按任意键退出")
+        cp.execSync("pause > nul", { stdio: "inherit" })
+        process.exit(0)
     }
 })()
