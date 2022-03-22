@@ -1,5 +1,7 @@
 # 原神成就导出工具  
 
+![GitHub](https://img.shields.io/github/license/HolographicHat/genshin-achievement-export?label=License&style=flat-square) ![GitHub issues](https://img.shields.io/github/issues/HolographicHat/genshin-achievement-export?label=Issues&style=flat-square) ![Downloads](https://img.shields.io/github/downloads/HolographicHat/genshin-achievement-export/total?color=brightgreen&label=Downloads&style=flat-square) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
+
 - 支持导出所有成就
 - 没有窗口大小游戏或语言等要求
 - 更快、更准
@@ -22,4 +24,4 @@
    A: 执行命令或修改hosts引发，相关代码可在./utils.js,./appcenter.js下找到  
 
 ## TODO
-- [ ] 整个GUI
+- [ ] GUI
