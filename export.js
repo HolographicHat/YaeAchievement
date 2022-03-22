@@ -1,7 +1,6 @@
 const fs = require("fs")
-const util = require("util")
 const readline = require("readline")
-const { spawnSync } = require("child_process")
+const { exec } = require("child_process")
 const { loadCache } = require("./utils")
 
 const exportToSeelie = proto => {
@@ -61,7 +60,7 @@ const exportToCocogoat = async proto => {
             date: getDate(finishTimestamp)
         })
     })
-    spawnSync("clip", { input: JSON.stringify(out,null,2) })
+    exec("clip").stdin.end(JSON.stringify(out,null,2))
     console.log("导出内容已复制到剪贴板")
 }
 
@@ -106,7 +105,9 @@ const exportData = async proto => {
         input: process.stdin,
         output: process.stdout
     })
-    const question = util.promisify(rl.question).bind(rl)
+    const question = (query) => new Promise(resolve => {
+        rl.question(query, resolve)
+    })
     const chosen = await question("导出至: \n[0] 椰羊 (https://cocogoat.work/achievement)\n[1] Paimon.moe\n[2] Seelie.me\n[3] 表格文件 (默认)\n> ")
     rl.close()
     switch (chosen) {

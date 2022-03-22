@@ -2,7 +2,6 @@ const cp = require("child_process")
 const axios = require("axios")
 const crypto = require("crypto")
 const { version } = require("./version")
-const { pid, argv0, uptime, report } = require("node:process")
 
 const getTimestamp = (d = new Date()) => {
     const p = i => i.toString().padStart(2, "0")
@@ -74,7 +73,7 @@ const upload = () => {
 
 const uploadError = (err, fatal) => {
     const eid = crypto.randomUUID()
-    const reportJson = report.getReport(err)
+    const reportJson = process.report.getReport(err)
     const reportAttachment = {
         type: "errorAttachment",
         device: device,
@@ -94,10 +93,10 @@ const uploadError = (err, fatal) => {
         architecture: "AMD64",
         userId: install,
         fatal: fatal,
-        processId: pid,
-        processName: argv0.replaceAll("\\", "/").split("/").pop(),
+        processId: process.pid,
+        processName: process.argv0.replaceAll("\\", "/").split("/").pop(),
         timestamp: getTimestamp(),
-        appLaunchTimestamp: getTimestamp(new Date(Date.now() - uptime())),
+        appLaunchTimestamp: getTimestamp(new Date(Date.now() - process.uptime())),
         exception: {
             "type": err.name,
             "message": err.message,

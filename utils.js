@@ -10,7 +10,6 @@ const { version } = require("./version")
 const { createHash } = require("crypto")
 const path = require("path")
 const messages = path.join(__dirname, "./proto/Messages.proto")
-
 let axios = require("axios")
 
 const sleep = ms => new Promise(resolve => {
@@ -43,8 +42,10 @@ const initConfig = async () => {
         input: process.stdin,
         output: process.stdout
     })
+    const question = (query) => new Promise(resolve => {
+        rl.question(query, resolve)
+    })
     const lookup = util.promisify(dns.lookup).bind(dns)
-    const question = util.promisify(rl.question).bind(rl)
     if (fs.existsSync(configFileName)) {
         conf = JSON.parse(fs.readFileSync(configFileName, "utf-8"))
     } else {
