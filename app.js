@@ -4,12 +4,17 @@ const cp = require("child_process")
 const rs = require("./regionServer")
 const appcenter = require("./appcenter")
 const { initConfig, splitPacket, upload, decodeProto, log, setupHost, KPacket, debug, checkCDN, checkUpdate } = require("./utils")
-const { exportData } = require("./export");
+const { exportData } = require("./export")
+const { exitHook } = require("./exitHook.js");
 
 // TODO: i18n
 // TODO: send ack to avoid resend
 (async () => {
     try {
+        exitHook(() => {
+            console.log("按任意键退出")
+            cp.execSync("pause > nul", { stdio: "inherit" })
+        })
         appcenter.init()
         let conf = await initConfig()
         try {
@@ -95,8 +100,6 @@ const { exportData } = require("./export");
                             const data = zlib.brotliDecompressSync(response.data)
                             const proto = await decodeProto(data,"AllAchievement")
                             await exportData(proto)
-                            console.log("按任意键退出")
-                            cp.execSync("pause > nul", { stdio: "inherit" })
                         }
                         process.exit(0)
                     }
@@ -140,8 +143,6 @@ const { exportData } = require("./export");
         } else {
             appcenter.uploadError(Error(e), true)
         }
-        console.log("按任意键退出")
-        cp.execSync("pause > nul", { stdio: "inherit" })
         process.exit(0)
     }
 })()
