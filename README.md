@@ -12,7 +12,7 @@
 ## 下载地址
 [releases/latest](https://github.com/HolographicHat/genshin-achievement-export/releases/latest)
 
-## 问题反馈()
+## 问题反馈
 [issues](https://github.com/HolographicHat/genshin-achievement-export/issues)或[QQ群: 913777414](https://qm.qq.com/cgi-bin/qm/qr?k=9UGz-chQVTjZa4b82RA_A41vIcBVNpms&jump_from=webapi)
 
 ## FAQ
