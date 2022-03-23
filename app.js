@@ -7,11 +7,11 @@ const { initConfig, splitPacket, upload, decodeProto, log, setupHost, KPacket, d
 const { exportData } = require("./export")
 const { exitHook } = require("./exitHook.js");
 
-// TODO: i18n
-// TODO: send ack to avoid resend
+// TODO: use kotlin rewrite it
 (async () => {
     try {
         exitHook(() => {
+            setupHost(true)
             console.log("按任意键退出")
             cp.execSync("pause > nul", { stdio: "inherit" })
         })
@@ -25,17 +25,18 @@ const { exitHook } = require("./exitHook.js");
         }
         await checkUpdate()
         checkCDN().then(_ => debug("CDN check success."))
+        let gameProcess
         let unexpectedExit = true
-        const gameProcess = cp.execFile(conf.executable, { cwd: conf.path },err => {
-            if (err !== null && !err.killed) {
-                throw err
-            }
-        })
-        gameProcess.on("exit", () => {
-            if (unexpectedExit) process.exit(0)
-        })
         rs.create(conf,() => {
             setupHost()
+            gameProcess = cp.execFile(conf.executable, { cwd: conf.path },err => {
+                if (err !== null && !err.killed) {
+                    throw err
+                }
+            })
+            gameProcess.on("exit", () => {
+                if (unexpectedExit) process.exit(0)
+            })
         },(ip, port, hServer) => {
             let login = false
             let cache = new Map()
@@ -143,6 +144,6 @@ const { exitHook } = require("./exitHook.js");
         } else {
             appcenter.uploadError(Error(e), true)
         }
-        process.exit(0)
+        process.exit(1)
     }
 })()

@@ -4,8 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "pkg": "pkg -t node16-win-x64 -C Brotli app.js --build",
-    "pkg-for-windows7": "pkg -t node14-win-x64 -C Brotli app.js --build"
+    "pkg": "pkg -t node16-win-x64 -C Brotli app.js --build -o app.exe",
+    "pkg-for-windows7": "pkg -t node14-win-x64 -C Brotli app.js --build -o app-win7.exe"
   },
   "keywords": [],
   "author": "",

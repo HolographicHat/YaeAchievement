@@ -64,7 +64,6 @@ const agent = new https.Agent({
 
 const create = async (conf, regionListLoadedCallback, regionSelectCallback) => {
     const regions = await getModifiedRegionList(conf)
-    regionListLoadedCallback()
     const hServer = https.createServer({
         pfx: fs.readFileSync(cert),
         passphrase: ""
@@ -84,7 +83,16 @@ const create = async (conf, regionListLoadedCallback, regionSelectCallback) => {
             })
             response.end(frontResponse.data)
         }
-    }).listen(443, "127.0.0.1")
+    })
+    hServer.on("error", err => {
+        if (err["code"] === "EADDRINUSE") {
+            console.log("本机 443 端口被其它程序占用，请关闭后重试")
+        }
+        throw err
+    })
+    hServer.listen(443, "127.0.0.1", () => {
+        regionListLoadedCallback()
+    })
 }
 
 module.exports = {
