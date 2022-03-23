@@ -10,7 +10,10 @@
 **打开程序前需要关闭正在运行的原神主程序**  
 第一次打开需要先设置原神主程序所在路径，支持多个路径, 使用符号'*'分隔
 ![alt](https://upload-bbs.mihoyo.com/upload/2022/03/22/165631158/a1bbf8d0604a29830c09822add53f749_8463600217231045373.png)   
-- 自定义代理: 配置文件内添加proxy字段，详细请参看[Axios-请求配置](https://axios-http.com/zh/docs/req_config)
+### Windows7   
+系统变量添加名为```NODE_SKIP_PLATFORM_CHECK```的变量并将值设为```1```   
+### 自定义代理   
+配置文件内添加proxy字段，详细请参看[Axios-请求配置](https://axios-http.com/zh/docs/req_config)
 ```json
 {
   "path": [],
@@ -36,5 +39,3 @@
 2. Q: 报毒?   
    A: 执行命令或修改hosts引发，相关代码可在./utils.js,./appcenter.js下找到  
 
-## TODO
-- [ ] GUI
