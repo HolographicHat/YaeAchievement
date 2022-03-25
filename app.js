@@ -5,16 +5,24 @@ const rs = require("./regionServer")
 const appcenter = require("./appcenter")
 const { initConfig, splitPacket, upload, decodeProto, log, setupHost, KPacket, debug, checkCDN, checkUpdate } = require("./utils")
 const { exportData } = require("./export")
-const { exitHook } = require("./exitHook.js");
+
+const onExit = () => {
+    setupHost(true)
+    console.log("按任意键退出")
+    cp.execSync("pause > nul", { stdio: "inherit" })
+};
 
 // TODO: use kotlin rewrite it
 (async () => {
     try {
-        exitHook(() => {
-            setupHost(true)
-            console.log("按任意键退出")
-            cp.execSync("pause > nul", { stdio: "inherit" })
+        process.on("uncaughtException", (err, origin) => {
+            appcenter.uploadError(err, true)
+            console.log(err)
+            console.log(`Origin: ${origin}`)
+            process.exit(1)
         })
+        process.once("exit", onExit)
+        process.once("SIGINT", onExit)
         appcenter.init()
         let conf = await initConfig()
         try {
