@@ -60,8 +60,12 @@ const exportToCocogoat = async proto => {
             date: getDate(finishTimestamp)
         })
     })
-    exec("clip").stdin.end(JSON.stringify(out,null,2))
-    console.log("导出内容已复制到剪贴板")
+    const ts = Date.now()
+    const json = JSON.stringify(out,null,2)
+    exec("clip").stdin.end(json)
+    const fp = `./export-${ts}-cocogoat.json`
+    fs.writeFileSync(fp, json)
+    console.log(`导出内容已复制到剪贴板，若拷贝失败请手动复制 export-${ts}-cocogoat.json 文件内容`)
 }
 
 const exportToCsv = async proto => {

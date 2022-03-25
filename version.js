@@ -1,6 +1,6 @@
 const version = {
-    code: 2,
-    name: "1.0.1"
+    code: 3,
+    name: "1.2"
 }
 
 module.exports = { version }

@@ -57,17 +57,15 @@ const device = (() => {
 
 const upload = () => {
     if (queue.length > 0) {
-        try {
-            const data = JSON.stringify({ "logs": queue })
-            axios.post("https://in.appcenter.ms/logs?api-version=1.0.0", data,{
-                headers: {
-                    "App-Secret": key,
-                    "Install-ID": install
-                }
-            }).then(_ => {
-                queue.length = 0
-            })
-        } catch (e) {}
+        const data = JSON.stringify({ "logs": queue })
+        axios.post("https://in.appcenter.ms/logs?api-version=1.0.0", data,{
+            headers: {
+                "App-Secret": key,
+                "Install-ID": install
+            }
+        }).then(_ => {
+            queue.length = 0
+        }).catch(_ => {})
     }
 }
 
