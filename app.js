@@ -120,6 +120,8 @@ const onExit = () => {
                     login = true
                 }
             })
+            server.on("error", err => console.log(`Proxy error: ${err.message}` + err.message))
+            server.on("proxyError", err => console.log(`Proxy error: ${err.message}` + err.message))
             server.on("proxyMsg", (msg, _) => {
                 lastRecvTimestamp = parseInt(Date.now() / 1000)
                 let buf = Buffer.from(msg)

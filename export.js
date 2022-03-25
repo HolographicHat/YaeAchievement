@@ -1,6 +1,6 @@
 const fs = require("fs")
 const readline = require("readline")
-const { exec } = require("child_process")
+const { spawnSync } = require("child_process")
 const { loadCache } = require("./utils")
 
 const exportToSeelie = proto => {
@@ -62,7 +62,7 @@ const exportToCocogoat = async proto => {
     })
     const ts = Date.now()
     const json = JSON.stringify(out,null,2)
-    exec("clip").stdin.end(json)
+    spawnSync("clip", { input: json })
     const fp = `./export-${ts}-cocogoat.json`
     fs.writeFileSync(fp, json)
     console.log(`导出内容已复制到剪贴板，若拷贝失败请手动复制 export-${ts}-cocogoat.json 文件内容`)
