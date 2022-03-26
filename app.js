@@ -131,6 +131,9 @@ const onExit = () => {
                             createMonitor()
                             debug("服务端握手应答")
                             break
+                        case 404:
+                            lastRecvTimestamp = parseInt(Date.now() / 1000) - 2333
+                            break
                         default:
                             console.log(`Unhandled: ${buf.toString("hex")}`)
                             process.exit(2)
