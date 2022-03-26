@@ -8,17 +8,21 @@ const getTimestamp = (d = new Date()) => {
     return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())}T${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())}.${p(d.getUTCMilliseconds())}Z`
 }
 
-const readRegistry = (path, key) => {
-    const i = cp.execSync(`reg query "${path}" /v ${key}`, {
-        encoding: "utf-8"
-    }).split("\n")[2].split(" ").filter(s => s.length > 0).map(s => s.trim())
-    switch (i[1]) {
-        case "REG_SZ":
-            return i[2]
-        case "REG_DWORD":
-            return parseInt(i[2])
-        default:
-            throw "Unsupported"
+const readRegistry = (path, key, def) => {
+    try {
+        const i = cp.execSync(`reg query "${path}" /v ${key}`, {
+            encoding: "utf-8"
+        }).split("\n")[2].split(" ").filter(s => s.length > 0).map(s => s.trim())
+        switch (i[1]) {
+            case "REG_SZ":
+                return i[2]
+            case "REG_DWORD":
+                return parseInt(i[2])
+            default:
+                return def
+        }
+    } catch (e) {
+        return def
     }
 }
 
@@ -44,8 +48,8 @@ const device = (() => {
         timeZoneOffset: parseInt(osi[1]),
         osBuild: `${osi[2]}.${readRegistry("HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", "UBR")}`,
         osVersion: osi[2],
-        locale: readRegistry("HKCU\\Control Panel\\International", "LocaleName"),
-        carrierCountry: readRegistry("HKCU\\Control Panel\\International\\Geo", "Name"),
+        locale: readRegistry("HKCU\\Control Panel\\International", "LocaleName", "zh-CN"),
+        carrierCountry: readRegistry("HKCU\\Control Panel\\International\\Geo", "Name", "CN"),
         sdkName: "appcenter.wpf.netcore",
         sdkVersion: "4.5.0",
         osName: "WINDOWS",
