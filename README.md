@@ -36,10 +36,13 @@
 ## FAQ
 0. Q: 程序异常退出或被强行终止后，原神启动时报错: 无法连接网络(4201)   
    A: 用文本编辑器打开```C:\Windows\System32\drivers\etc\hosts```，删除```127.0.0.1 dispatch**global.yuanshen.com```后保存，重启原神   
+   
 1. Q: 原神启动时报错: 数据异常(31-4302)   
    A: 不要把软件和原神主程序放一起   
+   
 2. Q: 为什么需要管理员权限  
    A: 临时修改Hosts和启动原神  
+   
 3. Q: 报毒?   
    A: 执行命令或修改hosts引发，相关代码可在./utils.js,./appcenter.js下找到  
 
