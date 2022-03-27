@@ -14,7 +14,7 @@ const exportToSeelie = proto => {
 }
 
 const exportToPaimon = async proto => {
-    const out = { achievements: {} }
+    const out = { achievement: {} }
     const achTable = new Map()
     const excel = await loadCache("ExcelBinOutput/AchievementExcelConfigData.json")
     excel.forEach(({GoalId, Id}) => {
@@ -22,10 +22,10 @@ const exportToPaimon = async proto => {
     })
     proto.list.filter(achievement => achievement.status === 3).forEach(({id}) => {
         const gid = achTable.get(id)
-        if (out.achievements[gid] === undefined) {
-            out.achievements[gid] = {}
+        if (out.achievement[gid] === undefined) {
+            out.achievement[gid] = {}
         }
-        out.achievements[gid][id] = true
+        out.achievement[gid][id] = true
     })
     const fp = `./export-${Date.now()}-paimon.json`
     fs.writeFileSync(fp, JSON.stringify(out))
