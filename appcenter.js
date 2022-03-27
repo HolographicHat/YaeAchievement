@@ -31,7 +31,7 @@ const session = crypto.randomUUID()
 const key = "648b83bf-d439-49bd-97f4-e1e506bdfe39"
 
 const install = (() => {
-    const s = readRegistry("HKCU\\SOFTWARE\\miHoYoSDK", "MIHOYOSDK_DEVICE_ID")
+    const s = readRegistry("HKCU\\SOFTWARE\\miHoYoSDK", "MIHOYOSDK_DEVICE_ID", crypto.randomUUID())
     return `${s.substring(0, 8)}-${s.substring(8, 12)}-${s.substring(12, 16)}-${s.substring(16, 20)}-${s.substring(20, 32)}`
 })()
 

@@ -3,5 +3,7 @@ config.json
 out.*
 node_modules
 .idea
+app*.exe
+export*.json
 secret.js
 package-lock.json
