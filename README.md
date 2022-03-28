@@ -34,7 +34,7 @@
 ## 问题反馈
 [issues](https://github.com/HolographicHat/genshin-achievement-export/issues)或[QQ群: 913777414](https://qm.qq.com/cgi-bin/qm/qr?k=9UGz-chQVTjZa4b82RA_A41vIcBVNpms&jump_from=webapi)
 
-## FAQ
+## 常见问题   
 0. Q: 程序异常退出或被强行终止后，原神启动时报错: 无法连接网络(4201)   
    A: 用文本编辑器打开```C:\Windows\System32\drivers\etc\hosts```，删除```127.0.0.1 dispatch**global.yuanshen.com```后保存，重启原神   
    
