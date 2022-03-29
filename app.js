@@ -15,6 +15,12 @@ const onExit = () => {
 // TODO: use kotlin rewrite it
 (async () => {
     try {
+        process.once("SIGHUP", () => {
+            setupHost(true)
+        })
+        process.on("unhandledRejection", (reason, promise) => {
+            console.log("Unhandled Rejection at: ", promise, "\n0Reason:", reason)
+        })
         process.on("uncaughtException", (err, origin) => {
             appcenter.uploadError(err, true)
             console.log(err)
@@ -43,7 +49,10 @@ const onExit = () => {
                 }
             })
             gameProcess.on("exit", () => {
-                if (unexpectedExit) process.exit(0)
+                if (unexpectedExit) {
+                    console.log("游戏进程异常退出")
+                    process.exit(0)
+                }
             })
         },(ip, port, hServer) => {
             let login = false
