@@ -12,7 +12,6 @@ const onExit = () => {
     cp.execSync("pause > nul", { stdio: "inherit" })
 };
 
-// TODO: use kotlin rewrite it
 (async () => {
     try {
         process.once("SIGHUP", () => {
@@ -77,11 +76,13 @@ const onExit = () => {
                 }
             }
             let monitor;
+            let stopped = false
             const createMonitor = () => {
                 monitor = setInterval(async () => {
-                    if (login && lastRecvTimestamp + 2 < parseInt(Date.now() / 1000)) {
+                    if (login && lastRecvTimestamp + 2 < parseInt(Date.now() / 1000) && !stopped) {
+                        stopped = true
                         unexpectedExit = false
-                        server.close()
+                        server.close(() => {})
                         hServer.close()
                         gameProcess.kill()
                         clearInterval(monitor)

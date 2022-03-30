@@ -124,6 +124,10 @@ const exportData = async proto => {
         case "2":
             await exportToSeelie(proto)
             break
+        case "raw":
+            fs.writeFileSync(`./export-${Date.now()}-raw.json`, JSON.stringify(proto,null,2))
+            console.log("OK")
+            break
         default:
             await exportToCsv(proto)
     }
