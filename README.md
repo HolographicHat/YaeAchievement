@@ -3,13 +3,14 @@
 ![GitHub](https://img.shields.io/github/license/HolographicHat/genshin-achievement-export?label=License&style=flat-square) ![GitHub issues](https://img.shields.io/github/issues/HolographicHat/genshin-achievement-export?label=Issues&style=flat-square) ![Downloads](https://img.shields.io/github/downloads/HolographicHat/genshin-achievement-export/total?color=brightgreen&label=Downloads&style=flat-square) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
 
 - 支持导出所有成就
+- 支持官服，B服与国际服
 - 没有窗口大小游戏或语言等要求
 - 更快、更准
 
 ## 使用说明
 **打开程序前需要关闭正在运行的原神主程序**  
 第一次打开需要先设置原神主程序所在路径，支持多个路径, 使用符号'*'分隔
-![alt](https://upload-bbs.mihoyo.com/upload/2022/03/22/165631158/a1bbf8d0604a29830c09822add53f749_8463600217231045373.png)   
+![alt](https://upload-bbs.mihoyo.com/upload/2022/03/27/165631158/c716791daa878a473b1eb28402f5db43_1004744076428253015.png)   
 ### Windows7   
 系统变量添加名为```NODE_SKIP_PLATFORM_CHECK```的变量并将值设为```1```   
 ### 自定义代理   
@@ -33,7 +34,7 @@
 ## 问题反馈
 [issues](https://github.com/HolographicHat/genshin-achievement-export/issues)或[QQ群: 913777414](https://qm.qq.com/cgi-bin/qm/qr?k=9UGz-chQVTjZa4b82RA_A41vIcBVNpms&jump_from=webapi)
 
-## FAQ
+## 常见问题   
 0. Q: 程序异常退出或被强行终止后，原神启动时报错: 无法连接网络(4201)   
    A: 用文本编辑器打开```C:\Windows\System32\drivers\etc\hosts```，删除```127.0.0.1 dispatch**global.yuanshen.com```后保存，重启原神   
    
