@@ -228,6 +228,9 @@ let hostsContent = ""
 
 const setupHost = (restore = false) => {
     const path = "C:\\Windows\\System32\\drivers\\etc\\hosts"
+    if (!fs.existsSync(path)) {
+        fs.writeFileSync(path, "")
+    }
     fs.chmodSync(path, 0o777)
     if (restore) {
         fs.writeFileSync(path, hostsContent)

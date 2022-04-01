@@ -111,12 +111,12 @@ const onExit = () => {
                         const merged = Buffer.concat(packets)
                         const compressed = zlib.brotliCompressSync(merged)
                         const response = await upload(compressed)
+                        const data = zlib.brotliDecompressSync(response.data)
                         if (response.status !== 200) {
-                            log(`发生错误: ${response.data.toString()}`)
+                            log(`发生错误: ${data}`)
                             log(`请求ID: ${response.headers["x-api-requestid"]}`)
                             log("请联系开发者以获取帮助")
                         } else {
-                            const data = zlib.brotliDecompressSync(response.data)
                             const proto = await decodeProto(data,"AllAchievement")
                             await exportData(proto)
                         }
