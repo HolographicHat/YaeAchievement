@@ -22,10 +22,24 @@ message Achievement {
 }
 
 message QueryCurRegion {
-	bytes field0 = 11;
-	bytes field1 = 12;
-	bytes field2 = 13;
-	msg0 info = 3;
+	int32  retcode = 1;
+	string message = 2;
+	msg0   info    = 3;
+	oneof group {
+		msg3 field2  = 4;
+		msg4 field3  = 5;
+	}
+	bytes  field4  = 11;
+	bytes  field5  = 12;
+	bytes  field6  = 13;
+}
+
+message QueryRegionList {
+	int32 retcode = 1;
+	bytes field0  = 5;
+	bytes field1  = 6;
+	bool  field2  = 7;
+	repeated msg2 list = 2;
 }
 
 message msg0 {
@@ -37,35 +51,36 @@ message msg0 {
 	string field3 = 9;
 	string field4 = 10;
 	string field5 = 11;
-	uint32 field6 = 14;
-	string field7 = 16;
-	uint32 field8 = 18;
-	string field9 = 19;
-	string fieldA = 20;
-	bytes  fieldB = 23;
-	string fieldC = 24;
-	string fieldD = 26;
-	string fieldE = 27;
-	string fieldF = 30;
-	string fieldG = 31;
-	string fieldH = 32;
-	string fieldI = 33;
-	msg1 fieldJ = 22;
+	string field6 = 12;
+	string field7 = 13;
+	uint32 field8 = 14;
+	string field9 = 16;
+	uint32 fieldA = 18;
+	string fieldB = 19;
+	string fieldC = 20;
+	msg1   fieldD = 22;
+	bytes  fieldE = 23;
+	string fieldF = 24;
+	string fieldG = 26;
+	string fieldH = 27;
+	bool   fieldI = 28;
+	string fieldJ = 29;
+	string fieldK = 30;
+	string fieldL = 31;
+	string fieldM = 32;
+	string fieldN = 33;
+	string fieldO = 34;
+	msg1   fieldP = 35;
 }
 
 message msg1 {
 	uint32 field0 = 1;
-	string field1 = 3;
-	string field2 = 4;
-	string field3 = 5;
-	string field4 = 6;
-}
-
-message QueryRegionList {
-	bytes field0 = 5;
-	bytes field1 = 6;
-	bool  field2 = 7;
-	repeated msg2 list = 2;
+	bool   field1 = 2;
+	string field2 = 3;
+	string field3 = 4;
+	string field4 = 5;
+	string field5 = 6;
+	string field6 = 7;
 }
 
 message msg2 {
@@ -73,4 +88,15 @@ message msg2 {
 	string field1 = 2;
 	string field2 = 3;
 	string url = 4;
+}
+
+message msg3 {
+	string field0 = 1;
+}
+
+message msg4 {
+	uint32 field0 = 1;
+	uint32 field1 = 2;
+	string field2 = 3;
+	string field3 = 4;
 }
