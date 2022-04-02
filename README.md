@@ -13,7 +13,7 @@
 ![alt](https://upload-bbs.mihoyo.com/upload/2022/03/27/165631158/c716791daa878a473b1eb28402f5db43_1004744076428253015.png)   
 ### Windows7   
 系统变量添加名为```NODE_SKIP_PLATFORM_CHECK```的变量并将值设为```1```   
-### 自定义代理   
+### 自定义代理(可选)   
 配置文件内添加proxy字段，详细请参看[Axios-请求配置](https://axios-http.com/zh/docs/req_config)
 ```json
 {
@@ -45,5 +45,7 @@
    A: 临时修改Hosts和启动原神  
    
 3. Q: 报毒?   
-   A: 执行命令或修改hosts引发，相关代码可在./utils.js,./appcenter.js下找到  
+   A: 执行命令或修改hosts引发，相关代码可在./utils.js,./appcenter.js下找到
 
+4. Q: 原神进门后没有自动退出，程序输出停留在“加载完成”
+   A: 关闭Shadowsocks全局代理
