@@ -1,6 +1,6 @@
 # 原神成就导出工具  
 
-![GitHub](https://img.shields.io/github/license/HolographicHat/genshin-achievement-export?label=License&style=flat-square) ![GitHub issues](https://img.shields.io/github/issues/HolographicHat/genshin-achievement-export?label=Issues&style=flat-square) ![Downloads](https://img.shields.io/github/downloads/HolographicHat/genshin-achievement-export/total?color=brightgreen&label=Downloads&style=flat-square) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
+![GitHub](https://img.shields.io/badge/License-GPL--3.0-brightgreen?style=flat-square) ![GitHub issues](https://img.shields.io/github/issues/HolographicHat/genshin-achievement-export?label=Issues&style=flat-square) ![Downloads](https://img.shields.io/github/downloads/HolographicHat/genshin-achievement-export/total?color=brightgreen&label=Downloads&style=flat-square) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
 
 - 支持导出所有成就
 - 支持官服，B服与国际服
@@ -49,3 +49,6 @@
 
 4. Q: 原神进门后没有自动退出，程序输出停留在“加载完成”   
    A: 关闭Shadowsocks全局代理
+
+5. Q: 报错 EACCES: permission denied 127.0.0.1:443
+   A: 443端口被其它程序占用，结束该进程后重试
