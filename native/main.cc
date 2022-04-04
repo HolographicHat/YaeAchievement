@@ -1,58 +1,96 @@
-#include <string>
 #include "utils.h"
 #include "define.h"
+#include <iphlpapi.h>
+#pragma comment(lib,"ws2_32.lib")
+#pragma comment(lib,"iphlpapi.lib")
 
 namespace native {
 
-    Value checkGameIsRunning(Env env, CallbackInfo info) {
-        ull argc = 0;
-        Value args[1];
-        if (GetCallbackInfo(env, info, &argc, args, nullptr, nullptr) != napi_ok) {
-            return nullptr;
+    Value checkGameIsRunning(const CallbackInfo &info) {
+        Env env = info.Env();
+        if (info.Length() != 1 || !info[0].IsString()) {
+            TypeError::New(env, "Wrong arguments").ThrowAsJavaScriptException();
+            return env.Null();
         }
-        char nameBuffer[256];
-        GetUTF8String(env, args[0], (char *) &nameBuffer, sizeof(nameBuffer), nullptr);
-        wstring pn = StringToWString(nameBuffer);
+        wstring name = StringToWString(info[0].As<Napi::String>().Utf8Value());
         bool isRunning = false;
         PROCESSENTRY32 entry;
         entry.dwSize = sizeof(entry);
         HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
         if (Process32First(snapshot, &entry) == TRUE) {
             while (Process32Next(snapshot, &entry) == TRUE) {
-                if (wstring(entry.szExeFile) == pn) {
+                if (wstring(entry.szExeFile) == name) {
                     isRunning = true;
                 }
             }
         }
         CloseHandle(snapshot);
-        Value ret;
-        GetBoolean(env, isRunning, &ret);
-        return ret;
+        return Napi::Boolean::New(env, isRunning);
     }
 
-    Value selectGameExecutable(Env env, CallbackInfo args) {
-        Value path;
-        LSTATUS retcode = OpenFile(env, path);
-        if (retcode != ERROR_SUCCESS) {
-            SetLastError(retcode);
-            return nullptr;
+    Value selectGameExecutable(const CallbackInfo &info) {
+        Env env = info.Env();
+        Napi::String path;
+        if (OpenFile(env, path) != ERROR_SUCCESS) {
+            Error::New(env, "Failed to open file: " + to_string(CommDlgExtendedError())).ThrowAsJavaScriptException();
+            return env.Null();
         }
         return path;
     }
 
-    Value init(Env env, Value exports) {
-        EnablePrivilege(L"SeDebugPrivilege");
-        if (RegisterFunction(env, exports, checkGameIsRunning, "checkGameIsRunning") != napi_ok) {
-            ThrowError(env, nullptr, "Failed to register checkGameIsRunning");
-            return nullptr;
+    Value whoUseThePort(const CallbackInfo &info) {
+        Env env = info.Env();
+        if (info.Length() != 1 || !info[0].IsNumber()) {
+            TypeError::New(env, "Wrong arguments").ThrowAsJavaScriptException();
+            return env.Null();
         }
-        if (RegisterFunction(env, exports, selectGameExecutable, "selectGameExecutable") != napi_ok) {
-            ThrowError(env, nullptr, "Failed to register selectGameExecutable");
-            return nullptr;
+        DWORD dwSize = 0;
+        PMIB_TCPTABLE_OWNER_PID pTcpTable = nullptr;
+        GetExtendedTcpTable(pTcpTable, &dwSize, TRUE,AF_INET,TCP_TABLE_OWNER_PID_ALL,0);
+        pTcpTable = (PMIB_TCPTABLE_OWNER_PID)new byte[dwSize];
+        if(GetExtendedTcpTable(pTcpTable,&dwSize,TRUE,AF_INET,TCP_TABLE_OWNER_PID_ALL,0) != NO_ERROR) {
+            Error::New(env, "GetExtendedTcpTable failed").ThrowAsJavaScriptException();
+            return env.Null();
         }
+        int port = info[0].As<Napi::Number>().Int32Value();
+        auto nNum = (int)pTcpTable->dwNumEntries;
+        DWORD pid = 0;
+        for(int i = 0; i < nNum; i++) {
+            if (htons(pTcpTable->table[i].dwLocalPort) == port) {
+                pid = pTcpTable->table[i].dwOwningPid;
+                break;
+            }
+        }
+        delete pTcpTable;
+        Value ret = env.Null();
+        if (pid != 0) {
+            HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+            if (hProcess == nullptr) {
+                Error::New(env, "OpenProcess error: " + to_string(GetLastError())).ThrowAsJavaScriptException();
+                return env.Null();
+            }
+            TCHAR fnBuf[MAX_PATH];
+            DWORD length = MAX_PATH;
+            if (QueryFullProcessImageName(hProcess, 0, fnBuf, &length) == 0) {
+                Error::New(env, "QueryFullProcessImageName error: " + to_string(GetLastError())).ThrowAsJavaScriptException();
+                return env.Null();
+            }
+            Object obj = Object::New(env);
+            obj.Set("pid", Napi::Number::New(env, pid));
+            obj.Set("path", Napi::String::New(env, WStringToString(fnBuf)));
+            ret = obj;
+        }
+        return ret;
+    }
+
+    Object init(Env env, Object exports) {
+        EnablePrivilege(env, L"SeDebugPrivilege");
+        exports.Set("whoUseThePort", Function::New(env, whoUseThePort));
+        exports.Set("checkGameIsRunning", Function::New(env, checkGameIsRunning));
+        exports.Set("selectGameExecutable", Function::New(env, selectGameExecutable));
         return exports;
     }
 
-    NAPI_MODULE(NODE_GYP_MODULE_NAME, init)
+    NODE_API_MODULE(addon, init)
 
 }

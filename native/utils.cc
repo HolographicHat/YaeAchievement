@@ -23,7 +23,17 @@ string WStringToString(const wstring &src) {
     return result;
 }
 
-LSTATUS OpenFile(Env env, Value &result, HWND parent) {
+void Log(Env env, const string &msg) {
+    auto logFunc = env.Global().Get("console").As<Object>().Get("log").As<Function>();
+    logFunc.Call({ Napi::String::New(env, msg) });
+}
+
+void Log(Env env, const wstring &msg) {
+    auto logFunc = env.Global().Get("console").As<Object>().Get("log").As<Function>();
+    logFunc.Call({ Napi::String::New(env, WStringToString(msg)) });
+}
+
+LSTATUS OpenFile(Env env, Napi::String &result, HWND parent) {
     OPENFILENAME open;
     ZeroMemory(&open, sizeof(open));
     WCHAR file[32768];
@@ -36,30 +46,17 @@ LSTATUS OpenFile(Env env, Value &result, HWND parent) {
     open.lpstrFilter = L"国服/国际服主程序 (YuanShen/GenshinImpact.exe)\0YuanShen.exe;GenshinImpact.exe\0";
     open.lStructSize = sizeof(open);
     if(GetOpenFileName(&open)) {
-        string s = WStringToString(file);
-        if (CreateUTF8String(env, s.c_str(), NAPI_AUTO_LENGTH, &result) == napi_ok) {
-            return ERROR_SUCCESS;
-        } else {
-            return ERROR_ERRORS_ENCOUNTERED;
-        }
+        result = Napi::String::New(env, WStringToString(file));
+        return ERROR_SUCCESS;
     } else {
-        return (LSTATUS)CommDlgExtendedError();
+        return ERROR_ERRORS_ENCOUNTERED;
     }
 }
 
-Status RegisterFunction(Env env, Value exports, Callback cb, const string &name) {
-    Value fn;
-    Status status = CreateFunction(env, nullptr, 0, cb, nullptr, &fn);
-    if (status != napi_ok) return status;
-    status = SetNamedProperty(env, exports, name.c_str(), fn);
-    if (status != napi_ok) return status;
-    return napi_ok;
-}
-
-BOOL EnablePrivilege(const wstring &name) {
+BOOL EnablePrivilege(Env env, const wstring &name) {
     HANDLE hToken;
     if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &hToken)) {
-        cout << "OpenProcessToken error: %lu\n" << GetLastError() << endl;
+        Error::New(env, "OpenProcessToken error: " + to_string(GetLastError())).ThrowAsJavaScriptException();
         return FALSE;
     }
     TOKEN_PRIVILEGES tp;
@@ -67,15 +64,15 @@ BOOL EnablePrivilege(const wstring &name) {
     tp.PrivilegeCount = 1;
     tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
     if (!LookupPrivilegeValue(nullptr, name.c_str(), &tp.Privileges[0].Luid)) {
-        cout << "LookupPrivilegeValue error: %lu\n" << GetLastError() << endl;
+        Error::New(env, "LookupPrivilegeValue error: " + to_string(GetLastError())).ThrowAsJavaScriptException();
         return FALSE;
     }
     if (!AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(tp), nullptr, nullptr)) {
-        cout << "AdjustTokenPrivileges error: %lu\n" << GetLastError() << endl;
+        Error::New(env, "AdjustTokenPrivileges error: " + to_string(GetLastError())).ThrowAsJavaScriptException();
         return FALSE;
     }
     if (GetLastError() == ERROR_NOT_ALL_ASSIGNED) {
-        cout <<"The token does not have the specified privilege." << endl;
+        Error::New(env, "The token does not have the specified privilege.").ThrowAsJavaScriptException();
         return FALSE;
     }
     CloseHandle(hToken);

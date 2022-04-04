@@ -8,5 +8,8 @@
   "gypfile": true,
   "devDependencies": {
     "node-gyp": "^9.0.0"
+  },
+  "dependencies": {
+    "node-addon-api": "^4.3.0"
   }
 }
