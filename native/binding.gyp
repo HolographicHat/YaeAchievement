@@ -3,10 +3,18 @@
     {
       "target_name": "native",
       "sources": [
-        "main.cc",
-        "utils.cc",
-        "utils.h",
-        "define.h"
+        "src/main.cc",
+        "src/utils.h",
+        "src/utils.cc",
+        "src/define.h",
+        "src/wmi/wmi.cpp",
+        "src/wmi/wmi.hpp",
+        "src/wmi/unistd.h",
+        "src/wmi/wmiresult.cpp",
+        "src/wmi/wmiresult.hpp",
+        "src/wmi/wmiclasses.hpp",
+        "src/wmi/wmiexception.hpp",
+        "src/registry/registry.hpp"
       ],
       "cflags!": [
         "-fno-exceptions"

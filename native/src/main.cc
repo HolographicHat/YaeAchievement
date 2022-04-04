@@ -1,8 +1,13 @@
 #include "utils.h"
 #include "define.h"
+#include "wmi/wmi.hpp"
+#include "wmi/wmiclasses.hpp"
+#include "registry/registry.hpp"
 #include <iphlpapi.h>
 #pragma comment(lib,"ws2_32.lib")
 #pragma comment(lib,"iphlpapi.lib")
+
+using Wmi::Win32_ComputerSystem, Wmi::Win32_OperatingSystem, Wmi::retrieveWmi;
 
 namespace native {
 
@@ -83,8 +88,49 @@ namespace native {
         return ret;
     }
 
+    Value getDeviceID(const CallbackInfo &info) {
+        Env env = info.Env();
+        wstring uuid;
+        if (RegUtils::GetString(HKEY_CURRENT_USER, L"SOFTWARE\\miHoYoSDK", L"MIHOYOSDK_DEVICE_ID", uuid) != ERROR_SUCCESS) {
+            return env.Null();
+        }
+        return Napi::String::New(env, WStringToString(uuid));
+    }
+
+    Value getDeviceInfo(const CallbackInfo &info) {
+        Env env = info.Env();
+        HDC desktop = GetDC(nullptr);
+        int sw = GetDeviceCaps(desktop, DESKTOPHORZRES);
+        int sh = GetDeviceCaps(desktop, DESKTOPVERTRES);
+        ReleaseDC(nullptr, desktop);
+        DWORD buildNum = RegUtils::GetInt(env, HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"UBR");
+        wstring locale;
+        if (RegUtils::GetString(HKEY_CURRENT_USER, L"Control Panel\\International", L"LocaleName", locale) != ERROR_SUCCESS) {
+            locale = L"zh-CN";
+        }
+        wstring country;
+        if (RegUtils::GetString(HKEY_CURRENT_USER, L"Control Panel\\International\\Geo", L"Name", country) != ERROR_SUCCESS) {
+            country = L"CN";
+        }
+        auto computer = retrieveWmi<Win32_ComputerSystem>();
+        auto os  = retrieveWmi<Win32_OperatingSystem>();
+        string osv = os.Version;
+        Object obj = Object::New(env);
+        obj.Set("model", Napi::String::New(env, computer.Model));
+        obj.Set("locale", Napi::String::New(env, WStringToString(locale)));
+        obj.Set("oemName", Napi::String::New(env, computer.Manufacturer));
+        obj.Set("osBuild", Napi::String::New(env, osv + "." + to_string(buildNum)));
+        obj.Set("osVersion", Napi::String::New(env, osv));
+        obj.Set("screenSize", Napi::String::New(env, to_string(sw) + "x" + to_string(sh)));
+        obj.Set("carrierCountry", Napi::String::New(env, WStringToString(country)));
+        obj.Set("timeZoneOffset", Napi::Number::New(env, os.CurrentTimeZone));
+        return obj;
+    }
+
     Object init(Env env, Object exports) {
         EnablePrivilege(env, L"SeDebugPrivilege");
+        exports.Set("getDeviceID", Function::New(env, getDeviceID));
+        exports.Set("getDeviceInfo", Function::New(env, getDeviceInfo));
         exports.Set("whoUseThePort", Function::New(env, whoUseThePort));
         exports.Set("checkGameIsRunning", Function::New(env, checkGameIsRunning));
         exports.Set("selectGameExecutable", Function::New(env, selectGameExecutable));
