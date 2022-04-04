@@ -7,3 +7,4 @@ app*.exe
 export*.json
 secret.js
 package-lock.json
+native.node

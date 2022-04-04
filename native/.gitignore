@@ -1,0 +1,5 @@
+CMakeLists.txt
+.idea
+cmake-build-debug
+node_modules
+build

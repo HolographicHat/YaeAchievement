@@ -1,0 +1,12 @@
+{
+  "name": "genshin-export-native",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "node-gyp rebuild && copy .\\build\\Release\\native.node ..\\genshin-export\\"
+  },
+  "gypfile": true,
+  "devDependencies": {
+    "node-gyp": "^9.0.0"
+  }
+}
