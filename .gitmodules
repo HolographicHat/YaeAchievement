@@ -1,0 +1,3 @@
+[submodule "wmi"]
+	path = native/src/wmi
+	url = https://github.com/Thomas-Sparber/wmi

@@ -90,11 +90,12 @@ namespace native {
 
     Value getDeviceID(const CallbackInfo &info) {
         Env env = info.Env();
-        wstring uuid;
-        if (RegUtils::GetString(HKEY_CURRENT_USER, L"SOFTWARE\\miHoYoSDK", L"MIHOYOSDK_DEVICE_ID", uuid) != ERROR_SUCCESS) {
+        wstring wd;
+        if (RegUtils::GetString(HKEY_CURRENT_USER, L"SOFTWARE\\miHoYoSDK", L"MIHOYOSDK_DEVICE_ID", wd) != ERROR_SUCCESS) {
             return env.Null();
         }
-        return Napi::String::New(env, WStringToString(uuid));
+        string id = WStringToString(wd);
+        return Napi::String::New(env, id.substr(0, 8) + id.substr(8, 4) + id.substr(12, 4) + id.substr(16, 4) + id.substr(20, 12));
     }
 
     Value getDeviceInfo(const CallbackInfo &info) {
