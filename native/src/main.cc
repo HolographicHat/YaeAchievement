@@ -95,7 +95,7 @@ namespace native {
             return env.Null();
         }
         string id = WStringToString(wd);
-        return Napi::String::New(env, id.substr(0, 8) + id.substr(8, 4) + id.substr(12, 4) + id.substr(16, 4) + id.substr(20, 12));
+        return Napi::String::New(env, id.substr(0, 8) + "-" + id.substr(8, 4) + "-" + id.substr(12, 4) + "-" + id.substr(16, 4) + "-" + id.substr(20, 12));
     }
 
     Value getDeviceInfo(const CallbackInfo &info) {

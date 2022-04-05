@@ -1,3 +1,3 @@
-[submodule "wmi"]
+[submodule "native/src/wmi"]
 	path = native/src/wmi
-	url = https://github.com/Thomas-Sparber/wmi
+	url = https://github.com/Thomas-Sparber/wmi.git

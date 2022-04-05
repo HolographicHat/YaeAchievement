@@ -1,29 +1,11 @@
-const cp = require("child_process")
 const axios = require("axios")
 const crypto = require("crypto")
 const { version } = require("./version")
+const { getDeviceID, getDeviceInfo } = require("./native")
 
 const getTimestamp = (d = new Date()) => {
     const p = i => i.toString().padStart(2, "0")
     return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())}T${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())}.${p(d.getUTCMilliseconds())}Z`
-}
-
-const readRegistry = (path, key, def) => {
-    try {
-        const i = cp.execSync(`reg query "${path}" /v ${key}`, {
-            encoding: "utf-8"
-        }).split("\n")[2].split(" ").filter(s => s.length > 0).map(s => s.trim())
-        switch (i[1]) {
-            case "REG_SZ":
-                return i[2]
-            case "REG_DWORD":
-                return parseInt(i[2])
-            default:
-                return def
-        }
-    } catch (e) {
-        return def
-    }
 }
 
 const queue = []
@@ -31,32 +13,21 @@ const session = crypto.randomUUID()
 const key = "648b83bf-d439-49bd-97f4-e1e506bdfe39"
 
 const install = (() => {
-    const s = readRegistry("HKCU\\SOFTWARE\\miHoYoSDK", "MIHOYOSDK_DEVICE_ID", crypto.randomUUID())
-    return `${s.substring(0, 8)}-${s.substring(8, 12)}-${s.substring(12, 16)}-${s.substring(16, 20)}-${s.substring(20, 32)}`
+    const id = getDeviceID()
+    return id === undefined ? crypto.randomUUID() : id
 })()
 
 const device = (() => {
-    const csi = cp.execSync("wmic computersystem get manufacturer,model /format:csv", {
-        encoding: "utf-8"
-    }).split("\n")[2].split(",").map(s => s.trim())
-    const osi = cp.execSync("wmic os get currentTimeZone, version /format:csv", {
-        encoding: "utf-8"
-    }).split("\n")[2].split(",").map(s => s.trim())
-    return {
-        model: csi[2],
-        oemName: csi[1],
-        timeZoneOffset: parseInt(osi[1]),
-        osBuild: `${osi[2]}.${readRegistry("HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", "UBR")}`,
-        osVersion: osi[2],
-        locale: readRegistry("HKCU\\Control Panel\\International", "LocaleName", "zh-CN"),
-        carrierCountry: readRegistry("HKCU\\Control Panel\\International\\Geo", "Name", "CN"),
-        sdkName: "appcenter.wpf.netcore",
-        sdkVersion: "4.5.0",
-        osName: "WINDOWS",
-        appVersion: version.name,
-        appBuild: version.code,
-        appNamespace: "default"
-    }
+    console.time("Initialize device info")
+    const info = getDeviceInfo()
+    info.appBuild     = version.code
+    info.appVersion   = version.name
+    info.sdkName      = "appcenter.wpf.netcore"
+    info.sdkVersion   = "4.5.0"
+    info.osName       = "WINDOWS"
+    info.appNamespace = "default"
+    console.timeEnd("Initialize device info")
+    return info
 })()
 
 const upload = () => {
