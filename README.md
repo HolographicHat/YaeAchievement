@@ -50,5 +50,5 @@
 4. Q: 原神进门后没有自动退出，程序输出停留在“加载完成”   
    A: 关闭Shadowsocks全局代理
 
-5. Q: 报错 EACCES: permission denied 127.0.0.1:443
+5. Q: 报错 EACCES: permission denied 127.0.0.1:443   
    A: 443端口被其它程序占用，结束该进程后重试
