@@ -18,7 +18,6 @@ const install = (() => {
 })()
 
 const device = (() => {
-    console.time("Initialize device info")
     const info = getDeviceInfo()
     info.appBuild     = version.code
     info.appVersion   = version.name
@@ -26,7 +25,6 @@ const device = (() => {
     info.sdkVersion   = "4.5.0"
     info.osName       = "WINDOWS"
     info.appNamespace = "default"
-    console.timeEnd("Initialize device info")
     return info
 })()
 
@@ -81,7 +79,7 @@ const uploadError = (err, fatal) => {
     upload()
 }
 
-const init = () => {
+const startup = () => {
     queue.push({
         type: "startService",
         services: [ "Analytics","Crashes" ],
@@ -99,5 +97,5 @@ const init = () => {
 }
 
 module.exports = {
-    init, upload, uploadError
+    startup, upload, uploadError
 }

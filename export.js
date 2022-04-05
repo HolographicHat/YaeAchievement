@@ -1,7 +1,7 @@
 const fs = require("fs")
 const readline = require("readline")
-const { spawnSync } = require("child_process")
-const { loadCache } = require("./utils")
+const { loadCache, log } = require("./utils")
+const { copyToClipboard } = require("./native")
 
 const exportToSeelie = proto => {
     const out = { achievements: {} }
@@ -10,7 +10,7 @@ const exportToSeelie = proto => {
     })
     const fp = `./export-${Date.now()}-seelie.json`
     fs.writeFileSync(fp, JSON.stringify(out))
-    console.log(`导出为文件: ${fp}`)
+    log(`导出为文件: ${fp}`)
 }
 
 const exportToPaimon = async proto => {
@@ -29,7 +29,7 @@ const exportToPaimon = async proto => {
     })
     const fp = `./export-${Date.now()}-paimon.json`
     fs.writeFileSync(fp, JSON.stringify(out))
-    console.log(`导出为文件: ${fp}`)
+    log(`导出为文件: ${fp}`)
 }
 
 const exportToCocogoat = async proto => {
@@ -62,10 +62,10 @@ const exportToCocogoat = async proto => {
     })
     const ts = Date.now()
     const json = JSON.stringify(out,null,2)
-    spawnSync("clip", { input: json })
+    copyToClipboard(json)
     const fp = `./export-${ts}-cocogoat.json`
     fs.writeFileSync(fp, json)
-    console.log(`导出内容已复制到剪贴板，若拷贝失败请手动复制 export-${ts}-cocogoat.json 文件内容`)
+    log(`导出内容已复制到剪贴板`)
 }
 
 const exportToCsv = async proto => {
@@ -88,20 +88,23 @@ const exportToCsv = async proto => {
         const p = i => i.toString().padStart(2, "0")
         return `${d.getFullYear()}/${p(d.getMonth() + 1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`
     }
+    const bl = [84517]
     proto.list.forEach(({current, finishTimestamp, id, status, require}) => {
-        const desc = achievementMap.get(id) === undefined ? (() => {
-            console.log(`Error get id ${id} in excel`)
-            return {
-                goal: "未知",
-                name: "未知",
-                desc: "未知"
-            }
-        })() : achievementMap.get(id)
-        outputLines.push(`${id},${getStatusText(status)},${excel.goal[desc.goal]},${desc.name},${desc.desc},${status !== 1 ? current === 0 ? require : current : current},${require},${status === 1 ? "" : getTime(finishTimestamp)}`)
+        if (!bl.includes(id)) {
+            const desc = achievementMap.get(id) === undefined ? (() => {
+                console.log(`Error get id ${id} in excel`)
+                return {
+                    goal: "未知",
+                    name: "未知",
+                    desc: "未知"
+                }
+            })() : achievementMap.get(id)
+            outputLines.push(`${id},${getStatusText(status)},${excel.goal[desc.goal]},${desc.name},${desc.desc},${status !== 1 ? current === 0 ? require : current : current},${require},${status === 1 ? "" : getTime(finishTimestamp)}`)
+        }
     })
     const fp = `./export-${Date.now()}.csv`
     fs.writeFileSync(fp, `\uFEFF${outputLines.join("\n")}`)
-    console.log(`导出为文件: ${fp}`)
+    log(`导出为文件: ${fp}`)
 }
 
 const exportData = async proto => {
@@ -126,7 +129,7 @@ const exportData = async proto => {
             break
         case "raw":
             fs.writeFileSync(`./export-${Date.now()}-raw.json`, JSON.stringify(proto,null,2))
-            console.log("OK")
+            log("OK")
             break
         default:
             await exportToCsv(proto)
