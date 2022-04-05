@@ -1,20 +1,17 @@
 const fs = require("fs")
 const dns = require("dns")
 const ini = require("ini")
-const util = require("util")
 const zlib = require("zlib")
 const cloud = require("./secret")
+const native = require("./native")
 const readline = require("readline")
 const protobuf = require("protobufjs")
 const { version } = require("./version")
+const { promisify } = require("util")
 const { createHash } = require("crypto")
 const path = require("path")
 const messages = path.join(__dirname, "./proto/Messages.proto")
 let axios = require("axios")
-
-const sleep = ms => new Promise(resolve => {
-    setTimeout(resolve, ms)
-})
 
 const encodeProto = (object, name) => protobuf.load(messages).then(r => {
     const msgType = r.lookupType(name)
@@ -26,44 +23,33 @@ const decodeProto = (buf, name) => protobuf.load(messages).then(r => {
     return r.lookupType(name).decode(buf)
 })
 
-const checkPath = (path, cb) => {
-    if (!fs.existsSync(`${path}/UnityPlayer.dll`) && !fs.existsSync(`${path}/pkg_version`)) {
-        throw Error(`路径有误: ${path}`)
+const checkPath = path => new Promise((resolve, reject) => {
+    if (!fs.existsSync(`${path}/UnityPlayer.dll`) || !fs.existsSync(`${path}/pkg_version`)) {
+        reject(`路径有误 ${path}`)
     } else {
-        cb(path)
+        resolve(path)
     }
-}
+})
 
 let conf
 
 const initConfig = async () => {
     const configFileName = "./config.json"
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    })
-    const question = (query) => new Promise(resolve => {
-        rl.question(query, resolve)
-    })
-    const lookup = util.promisify(dns.lookup).bind(dns)
     if (fs.existsSync(configFileName)) {
         conf = JSON.parse(fs.readFileSync(configFileName, "utf-8"))
     } else {
-        const p = await question("原神主程序(YuanShen.exe或GenshinImpact.exe)所在路径: (支持多个路径, 使用符号'*'分隔)\n")
         conf = {
             path: [],
             offlineResource: false,
             customCDN: ""
         }
-        p.split("*").forEach(s => {
-            checkPath(s, () => {
-                if (!conf.path.includes(s)) {
-                    conf.path.push(s)
-                }
-            })
+        const p = path.dirname(native.selectGameExecutable())
+        await checkPath(p).catch(reason => {
+            console.log(reason)
+            process.exit(1)
         })
+        conf.path.push(p)
         fs.writeFileSync(configFileName, JSON.stringify(conf, null, 2))
-        rl.close()
     }
     if (conf.proxy !== undefined) {
         axios = axios.create({
@@ -71,32 +57,59 @@ const initConfig = async () => {
         })
     }
     if (conf.path.length === 1) {
-        checkPath(conf.path[0], p => {
+        await checkPath(conf.path[0]).catch(reason => {
+            console.log(reason)
+            process.exit(1)
+        }).then(p => {
             conf.path = p
         })
     } else {
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        })
+        const question = (query) => new Promise(resolve => {
+            rl.question(query, resolve)
+        })
         const idx = await question(`选择客户端: \n${conf.path.map((s, i) => {
             const fp = fs.existsSync(`${s}/GenshinImpact.exe`) ? `${s}\\GenshinImpact.exe` : `${s}\\YuanShen.exe`
             return `[${i}] ${fp}`
         }).join("\n")}\n> `)
-        checkPath(conf.path[parseInt(idx)], p => {
+        await checkPath(conf.path[parseInt(idx)]).catch(reason => {
+            console.log(reason)
+            process.exit(1)
+        }).then(p => {
             conf.path = p
         })
+        rl.close()
     }
-    rl.close()
     conf.isOversea = fs.existsSync(conf.path + "/GenshinImpact.exe")
     conf.dataDir = conf.isOversea ? conf.path + "/GenshinImpact_Data" : conf.path + "/YuanShen_Data"
-    const readGameRes = (path) => fs.readFileSync(conf.dataDir + path)
-    // noinspection JSUnresolvedVariable
-    const genshinConf = ini.parse(fs.readFileSync(conf.path + "/config.ini", "utf-8")).General
-    conf.channel = genshinConf.channel
-    // noinspection JSUnresolvedVariable
-    conf.subChannel = genshinConf.sub_channel
-    conf.version = readGameRes("/Persistent/ChannelName").toString() + readGameRes("/Persistent/ScriptVersion").toString()
-    conf.executable = conf.isOversea ? conf.path + "/GenshinImpact.exe" : conf.path + "/YuanShen.exe"
+    const readGameRes = (path) => fs.readFileSync(conf.dataDir + path, "utf-8")
+    const genshinConf = ini.parse(fs.readFileSync(`${conf.path}/config.ini`, "utf-8"))["General"]
+    conf.channel = genshinConf["channel"]
+    conf.subChannel = genshinConf["sub_channel"]
+    conf.version = readGameRes("/Persistent/ChannelName") + readGameRes("/Persistent/ScriptVersion")
+    conf.executable = conf.isOversea ? `${conf.path}/GenshinImpact.exe` : `${conf.path}/YuanShen.exe`
     conf.dispatchUrl = `dispatch${conf.isOversea ? "os" : "cn"}global.yuanshen.com`
-    conf.dispatchIP = (await lookup(conf.dispatchUrl, 4)).address
+    conf.dispatchIP = (await promisify(dns.lookup).bind(dns)(conf.dispatchUrl, 4)).address
     return conf
+}
+
+const checkGameIsRunning = () => {
+    const name = path.basename(conf.executable)
+    if (native.checkGameIsRunning(name)) {
+        console.log("原神正在运行，请关闭后重试")
+        process.exit(301)
+    }
+}
+
+const checkPortIsUsing = () => {
+    const portUsage = native.whoUseThePort(443)
+    if (portUsage !== undefined) {
+        console.log(`443端口被 ${path.basename(portUsage["path"])}(${portUsage["pid"]}) 占用，结束该进程后重试`)
+        process.exit(14)
+    }
 }
 
 const splitPacket = buf => {
@@ -152,11 +165,11 @@ const checkCDN = async () => {
         await axios.head(cdnUrlFormat.format("github/fetch", ".gitignore"))
         return
     } catch (e) {}
-    throw "没有可用的CDN"
+    throw "网络错误，请检查配置文件/网络后重试 (11-3)"
 }
 
 const loadCache = async (fp, repo = "Dimbreath/GenshinData") => {
-    console.log(cdnUrlFormat.format(repo, fp))
+    log(`预检资源: ${cdnUrlFormat.format(repo, fp)}`)
     fs.mkdirSync("./cache", { recursive: true })
     const localPath = `./cache/${md5(fp)}`
     if (conf.offlineResource) {
@@ -175,17 +188,17 @@ const loadCache = async (fp, repo = "Dimbreath/GenshinData") => {
         validateStatus: _ => true
     })
     if (headResponse.status === 304) {
-        console.log("文件 %s 命中缓存", fp)
+        log("%s 命中缓存", fp)
         const etagLength = fd.readUInt8()
         return JSON.parse(fd.subarray(1 + etagLength).toString())
     } else {
-        console.log("正在下载资源, 请稍后...")
+        log("下载所需资源, 请稍后...")
         const response = await axios.get(cdnUrlFormat.format(repo, fp))
         const etag = response.headers.etag
         const str = JSON.stringify(response.data)
         const comp = brotliCompressSync(Buffer.concat([Buffer.of(etag.length), Buffer.from(etag), Buffer.from(str)]))
         fs.writeFileSync(localPath, comp)
-        console.log("完成.")
+        log("下载完成")
         return response.data
     }
 }
@@ -209,9 +222,9 @@ const upload = async data => {
 const checkUpdate = async () => {
     const data = (await cloud.get("/latest-version")).data
     if (data["vc"] !== version.code) {
-        console.log(`有可用更新: ${version.name} => ${data["vn"]}`)
-        console.log(`更新内容: \n${data["ds"]}`)
-        console.log("下载地址: https://github.com/HolographicHat/genshin-achievement-export/releases\n")
+        log(`有可用更新: ${version.name} => ${data["vn"]}`)
+        log(`更新内容: \n${data["ds"]}`)
+        log("下载地址: https://github.com/HolographicHat/genshin-achievement-export/releases\n")
     }
 }
 
@@ -224,9 +237,10 @@ const brotliCompressSync = data => zlib.brotliCompressSync(data,{
 
 const brotliDecompressSync = data => zlib.brotliDecompressSync(data)
 
-let hostsContent = ""
+let hostsContent = undefined
 
 const setupHost = (restore = false) => {
+    if (restore && hostsContent === undefined) return
     const path = "C:\\Windows\\System32\\drivers\\etc\\hosts"
     if (!fs.existsSync(path)) {
         fs.writeFileSync(path, "")
@@ -291,6 +305,6 @@ class KPacket {
 }
 
 module.exports = {
-    log, sleep, encodeProto, decodeProto, initConfig, splitPacket, upload, brotliCompressSync, brotliDecompressSync,
-    setupHost, loadCache, debug, checkCDN, checkUpdate, KPacket, cdnUrlFormat
+    log, encodeProto, decodeProto, initConfig, splitPacket, upload, brotliCompressSync, brotliDecompressSync,
+    setupHost, loadCache, debug, checkCDN, checkUpdate, KPacket, cdnUrlFormat, checkGameIsRunning, checkPortIsUsing
 }
