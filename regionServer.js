@@ -16,8 +16,15 @@ const getModifiedRegionList = async (conf) => {
             channel_id: conf.channel,
             sub_channel_id: conf.subChannel
         }
+    }).catch(_ => {
+        console.log("网络错误，请检查网络后重试 (22-1)")
+        process.exit(221)
     })
     const regions = await decodeProto(Buffer.from(d.data,"base64"),"QueryRegionList")
+    if (regions["retcode"] !== 0) {
+        console.log(`系统错误，请稍后重试 (${regions["retcode"]}-23)`)
+        process.exit(23)
+    }
     regions.list = regions.list.map(item => {
         const host = new URL(item.url).host
         if (regions.list.length === 1) {
@@ -36,12 +43,19 @@ const getModifiedRegionInfo = async (url, uc, hs) => {
     const query = noQueryRequest ? "" : `?${splitUrl[1]}`
     const d = await axios.get(`https://${host}/query_cur_region${query}`, {
         responseType: "text"
+    }).catch(_ => {
+        console.log("网络错误，请检查网络后重试 (22-2)")
+        process.exit(222)
     })
     if (noQueryRequest) {
         preparedRegions[host] = true
         return d.data
     } else {
         const region = await decodeProto(Buffer.from(d.data,"base64"),"QueryCurRegion")
+        if (region["retcode"] !== 0) {
+            console.log(`${region["message"]} (${region["retcode"]}-24)`)
+            process.exit(24)
+        }
         const info = region.info
         if (preparedRegions[host]) {
             if (currentProxy !== undefined) {
@@ -69,7 +83,7 @@ const create = async (conf, regionListLoadedCallback, regionSelectCallback) => {
         passphrase: ""
     }, async (request, response) => {
         const url = request.url
-        debug("HTTP请求: %s", url)
+        debug("HTTP: %s", url)
         response.writeHead(200, { "Content-Type": "text/html" })
         if (url.startsWith("/query_region_list")) {
             response.end(regions)
@@ -80,17 +94,14 @@ const create = async (conf, regionListLoadedCallback, regionSelectCallback) => {
             const frontResponse = await axios.get(`https://${conf.dispatchIP}${url}`, {
                 responseType: "arraybuffer",
                 httpsAgent: agent
+            }).catch(err => {
+                console.log("网络错误，请检查网络后重试 (22-3)")
+                console.log(err.message)
+                process.exit(223)
             })
             response.end(frontResponse.data)
         }
-    })
-    hServer.on("error", err => {
-        if (err["code"] === "EADDRINUSE") {
-            console.log("本机 443 端口被其它程序占用，请关闭后重试")
-        }
-        throw err
-    })
-    hServer.listen(443, "127.0.0.1", () => {
+    }).listen(443, "127.0.0.1", () => {
         regionListLoadedCallback()
     })
 }

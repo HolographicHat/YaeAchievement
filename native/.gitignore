@@ -3,4 +3,3 @@ CMakeLists.txt
 cmake-build-debug
 node_modules
 build
-src/wmi
