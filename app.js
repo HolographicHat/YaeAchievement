@@ -1,10 +1,13 @@
-const zlib = require("zlib")
 const proxy = require("udp-proxy")
 const cp = require("child_process")
 const rs = require("./regionServer")
 const appcenter = require("./appcenter")
-const { initConfig, splitPacket, upload, decodeProto, log, setupHost, KPacket, debug, checkCDN, checkUpdate } = require("./utils")
+const {
+    initConfig, splitPacket, upload, decodeProto, log, setupHost, KPacket, debug, checkCDN, checkUpdate,
+    brotliCompressSync, brotliDecompressSync, checkGameIsRunning, checkPortIsUsing
+} = require("./utils")
 const { exportData } = require("./export")
+const { enablePrivilege } = require("./native")
 
 const onExit = () => {
     setupHost(true)
@@ -14,13 +17,11 @@ const onExit = () => {
 
 (async () => {
     try {
-        process.once("SIGHUP", () => {
-            setupHost(true)
-        })
+        process.once("SIGHUP", () => setupHost(true))
         process.on("unhandledRejection", (reason, promise) => {
             console.log("Unhandled Rejection at: ", promise, "\n0Reason:", reason)
         })
-        process.on("uncaughtException", (err, origin) => {
+        process.once("uncaughtException", (err, origin) => {
             appcenter.uploadError(err, true)
             console.log(err)
             console.log(`Origin: ${origin}`)
@@ -28,16 +29,22 @@ const onExit = () => {
         })
         process.once("exit", onExit)
         process.once("SIGINT", onExit)
-        appcenter.init()
-        let conf = await initConfig()
         try {
-            cp.execSync("net session", { stdio: "ignore" })
+            enablePrivilege()
         } catch (e) {
-            console.log("\x1b[91m请使用管理员身份运行此程序\x1b[0m")
-            return
+            console.log("请使用管理员身份运行此程序")
+            process.exit(-1)
         }
+        appcenter.startup()
+        let conf = await initConfig()
+        checkPortIsUsing()
+        checkGameIsRunning()
+        log("检查更新")
         await checkUpdate()
-        checkCDN().then(_ => debug("CDN check success."))
+        checkCDN().then(_ => debug("CDN check success.")).catch(reason => {
+            console.log(reason)
+            process.exit(113)
+        })
         let gameProcess
         let unexpectedExit = true
         rs.create(conf,() => {
@@ -47,6 +54,7 @@ const onExit = () => {
                     throw err
                 }
             })
+            log("启动原神")
             gameProcess.on("exit", () => {
                 if (unexpectedExit) {
                     console.log("游戏进程异常退出")
@@ -87,7 +95,7 @@ const onExit = () => {
                         gameProcess.kill()
                         clearInterval(monitor)
                         setupHost(true)
-                        console.log("正在处理数据，请稍后...")
+                        log("正在处理数据，请稍后...")
                         let packets = Array.from(cache.values())
                         cache.clear()
                         packets.sort((a, b) => a.frg - b.frg)
@@ -109,9 +117,9 @@ const onExit = () => {
                                 return Buffer.concat([len, data])
                             })
                         const merged = Buffer.concat(packets)
-                        const compressed = zlib.brotliCompressSync(merged)
+                        const compressed = brotliCompressSync(merged)
                         const response = await upload(compressed)
-                        const data = zlib.brotliDecompressSync(response.data)
+                        const data = brotliDecompressSync(response.data)
                         if (response.status !== 200) {
                             log(`发生错误: ${data}`)
                             log(`请求ID: ${response.headers["x-api-requestid"]}`)
@@ -159,7 +167,7 @@ const onExit = () => {
                 })
             })
             return server
-        }).then(() => console.log("加载完毕"))
+        }).then(() => log("加载完毕"))
     } catch (e) {
         console.log(e)
         if (e instanceof Error) {
