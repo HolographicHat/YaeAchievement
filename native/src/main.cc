@@ -15,7 +15,7 @@ namespace native {
         Env env = info.Env();
         if (info.Length() != 1 || !info[0].IsString()) {
             TypeError::New(env, "Wrong arguments").ThrowAsJavaScriptException();
-            return env.Null();
+            return env.Undefined();
         }
         wstring name = StringToWString(info[0].As<Napi::String>().Utf8Value());
         bool isRunning = false;
@@ -38,7 +38,7 @@ namespace native {
         Napi::String path;
         if (OpenFile(env, path) != ERROR_SUCCESS) {
             Error::New(env, "Failed to open file: " + to_string(CommDlgExtendedError())).ThrowAsJavaScriptException();
-            return env.Null();
+            return env.Undefined();
         }
         return path;
     }
@@ -47,7 +47,7 @@ namespace native {
         Env env = info.Env();
         if (info.Length() != 1 || !info[0].IsNumber()) {
             TypeError::New(env, "Wrong arguments").ThrowAsJavaScriptException();
-            return env.Null();
+            return env.Undefined();
         }
         DWORD dwSize = 0;
         PMIB_TCPTABLE_OWNER_PID pTcpTable = nullptr;
@@ -55,7 +55,7 @@ namespace native {
         pTcpTable = (PMIB_TCPTABLE_OWNER_PID)new byte[dwSize];
         if(GetExtendedTcpTable(pTcpTable,&dwSize,TRUE,AF_INET,TCP_TABLE_OWNER_PID_ALL,0) != NO_ERROR) {
             Error::New(env, "GetExtendedTcpTable failed").ThrowAsJavaScriptException();
-            return env.Null();
+            return env.Undefined();
         }
         int port = info[0].As<Napi::Number>().Int32Value();
         auto nNum = (int)pTcpTable->dwNumEntries;
@@ -67,18 +67,18 @@ namespace native {
             }
         }
         delete pTcpTable;
-        Value ret = env.Null();
+        Value ret = env.Undefined();
         if (pid != 0) {
             HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
             if (hProcess == nullptr) {
                 Error::New(env, "OpenProcess error: " + to_string(GetLastError())).ThrowAsJavaScriptException();
-                return env.Null();
+                return env.Undefined();
             }
             TCHAR fnBuf[MAX_PATH];
             DWORD length = MAX_PATH;
             if (QueryFullProcessImageName(hProcess, 0, fnBuf, &length) == 0) {
                 Error::New(env, "QueryFullProcessImageName error: " + to_string(GetLastError())).ThrowAsJavaScriptException();
-                return env.Null();
+                return env.Undefined();
             }
             Object obj = Object::New(env);
             obj.Set("pid", Napi::Number::New(env, pid));
@@ -92,7 +92,7 @@ namespace native {
         Env env = info.Env();
         wstring wd;
         if (RegUtils::GetString(HKEY_CURRENT_USER, L"SOFTWARE\\miHoYoSDK", L"MIHOYOSDK_DEVICE_ID", wd) != ERROR_SUCCESS) {
-            return env.Null();
+            return env.Undefined();
         }
         string id = WStringToString(wd);
         return Napi::String::New(env, id.substr(0, 8) + "-" + id.substr(8, 4) + "-" + id.substr(12, 4) + "-" + id.substr(16, 4) + "-" + id.substr(20, 12));
@@ -128,11 +128,34 @@ namespace native {
         return obj;
     }
 
-    Object init(Env env, Object exports) {
+    Value enablePrivilege(const CallbackInfo &info) {
+        Env env = info.Env();
         EnablePrivilege(env, L"SeDebugPrivilege");
+        return env.Undefined();
+    }
+
+    Value copyToClipboard(const CallbackInfo &info) {
+        Env env = info.Env();
+        string text = info[0].As<Napi::String>().Utf8Value();
+        if (OpenClipboard(nullptr)) {
+            EmptyClipboard();
+            HGLOBAL hg = GlobalAlloc(GMEM_MOVEABLE, text.length() + 1);
+            if (hg != nullptr) {
+                memcpy(GlobalLock(hg), text.c_str(), text.length() + 1);
+                GlobalUnlock(hg);
+                SetClipboardData(CF_TEXT, hg);
+            }
+            CloseClipboard();
+        }
+        return env.Undefined();
+    }
+
+    Object init(Env env, Object exports) {
         exports.Set("getDeviceID", Function::New(env, getDeviceID));
         exports.Set("getDeviceInfo", Function::New(env, getDeviceInfo));
         exports.Set("whoUseThePort", Function::New(env, whoUseThePort));
+        exports.Set("copyToClipboard", Function::New(env, copyToClipboard));
+        exports.Set("enablePrivilege", Function::New(env, enablePrivilege));
         exports.Set("checkGameIsRunning", Function::New(env, checkGameIsRunning));
         exports.Set("selectGameExecutable", Function::New(env, selectGameExecutable));
         return exports;
