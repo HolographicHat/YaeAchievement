@@ -7,12 +7,12 @@ const {
     brotliCompressSync, brotliDecompressSync, checkGameIsRunning, checkPortIsUsing
 } = require("./utils")
 const { exportData } = require("./export")
-const { enablePrivilege } = require("./native")
+const { enablePrivilege, pause } = require("./native")
 
 const onExit = () => {
     setupHost(true)
     console.log("按任意键退出")
-    cp.execSync("pause > nul", { stdio: "inherit" })
+    pause()
 };
 
 (async () => {

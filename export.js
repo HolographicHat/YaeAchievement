@@ -5,7 +5,7 @@ const { copyToClipboard } = require("./native")
 
 const exportToSeelie = proto => {
     const out = { achievements: {} }
-    proto.list.filter(achievement => achievement.status === 3).forEach(({id}) => {
+    proto.list.filter(a => a.status === 3 || a.status === 2).forEach(({id}) => {
         out.achievements[id] = { done: true }
     })
     const fp = `./export-${Date.now()}-seelie.json`
@@ -20,7 +20,7 @@ const exportToPaimon = async proto => {
     excel.forEach(({GoalId, Id}) => {
         achTable.set(Id, GoalId === undefined ? 0 : GoalId)
     })
-    proto.list.filter(achievement => achievement.status === 3).forEach(({id}) => {
+    proto.list.filter(a => a.status === 3 || a.status === 2).forEach(({id}) => {
         const gid = achTable.get(id)
         if (out.achievement[gid] === undefined) {
             out.achievement[gid] = {}
@@ -52,7 +52,7 @@ const exportToCocogoat = async proto => {
         const d = new Date(parseInt(`${ts}000`))
         return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())}`
     }
-    proto.list.filter(achievement => achievement.status === 3).forEach(({current, finishTimestamp, id, require}) => {
+    proto.list.filter(a => a.status === 3 || a.status === 2).forEach(({current, finishTimestamp, id, require}) => {
         out.value.achievements.push({
             id: id,
             status: current === undefined || current === 0 || preStageAchievementIdList.includes(id) ? `${require}/${require}` : `${current}/${require}`,

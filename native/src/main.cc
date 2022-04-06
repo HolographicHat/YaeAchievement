@@ -3,6 +3,7 @@
 #include "wmi/wmi.hpp"
 #include "wmi/wmiclasses.hpp"
 #include "registry/registry.hpp"
+#include <conio.h>
 #include <iphlpapi.h>
 #pragma comment(lib,"ws2_32.lib")
 #pragma comment(lib,"iphlpapi.lib")
@@ -161,7 +162,15 @@ namespace native {
         return env.Undefined();
     }
 
+    Value pause(const CallbackInfo &info) {
+        while(!_kbhit()) {
+            Sleep(10);
+        }
+        return info.Env().Undefined();
+    }
+
     Object init(Env env, Object exports) {
+        exports.Set("pause", Function::New(env, pause));
         exports.Set("getDeviceID", Function::New(env, getDeviceID));
         exports.Set("getDeviceInfo", Function::New(env, getDeviceInfo));
         exports.Set("whoUseThePort", Function::New(env, whoUseThePort));
