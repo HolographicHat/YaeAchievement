@@ -9,8 +9,8 @@
 
 ## 使用说明
 **打开程序前需要关闭正在运行的原神主程序**  
-第一次打开需要先设置原神主程序所在路径，支持多个路径, 使用符号'*'分隔
-![alt](https://upload-bbs.mihoyo.com/upload/2022/03/27/165631158/c716791daa878a473b1eb28402f5db43_1004744076428253015.png)   
+第一次打开需要先设置原神主程序(YuanShen.exe/GenshinImpact.exe)所在路径
+![alt](https://upload-bbs.mihoyo.com/upload/2022/04/06/165631158/e540a5a6d50cd5fdee19665435548e00_514247033566841954.jpg)   
 ### Windows7   
 系统变量添加名为```NODE_SKIP_PLATFORM_CHECK```的变量并将值设为```1```   
 ### 自定义代理(可选)   
@@ -49,6 +49,3 @@
 
 4. Q: 原神进门后没有自动退出，程序输出停留在“加载完成”   
    A: 关闭Shadowsocks全局代理
-
-5. Q: 报错 EACCES: permission denied 127.0.0.1:443   
-   A: 443端口被其它程序占用，结束该进程后重试
