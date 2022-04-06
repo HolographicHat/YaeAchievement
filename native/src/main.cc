@@ -113,18 +113,29 @@ namespace native {
         if (RegUtils::GetString(HKEY_CURRENT_USER, L"Control Panel\\International\\Geo", L"Name", country) != ERROR_SUCCESS) {
             country = L"CN";
         }
-        auto computer = retrieveWmi<Win32_ComputerSystem>();
-        auto os  = retrieveWmi<Win32_OperatingSystem>();
-        string osv = os.Version;
         Object obj = Object::New(env);
-        obj.Set("model", Napi::String::New(env, computer.Model));
         obj.Set("locale", Napi::String::New(env, WStringToString(locale)));
-        obj.Set("oemName", Napi::String::New(env, computer.Manufacturer));
-        obj.Set("osBuild", Napi::String::New(env, osv + "." + to_string(buildNum)));
-        obj.Set("osVersion", Napi::String::New(env, osv));
         obj.Set("screenSize", Napi::String::New(env, to_string(sw) + "x" + to_string(sh)));
         obj.Set("carrierCountry", Napi::String::New(env, WStringToString(country)));
-        obj.Set("timeZoneOffset", Napi::Number::New(env, os.CurrentTimeZone));
+        try {
+            auto computer = retrieveWmi<Win32_ComputerSystem>();
+            obj.Set("model", Napi::String::New(env, computer.Model));
+            obj.Set("oemName", Napi::String::New(env, computer.Manufacturer));
+        } catch (Wmi::WmiException &e) {
+            obj.Set("model", Napi::String::New(env, "Unknown"));
+            obj.Set("oemName", Napi::String::New(env, "Unknown"));
+        }
+        try {
+            auto os  = retrieveWmi<Win32_OperatingSystem>();
+            string osv = os.Version;
+            obj.Set("osBuild", Napi::String::New(env, osv + "." + to_string(buildNum)));
+            obj.Set("osVersion", Napi::String::New(env, osv));
+            obj.Set("timeZoneOffset", Napi::Number::New(env, os.CurrentTimeZone));
+        } catch (Wmi::WmiException &e) {
+            obj.Set("osBuild", Napi::String::New(env, "Unknown"));
+            obj.Set("osVersion", Napi::String::New(env, "Unknown"));
+            obj.Set("timeZoneOffset", Napi::Number::New(env, 480));
+        }
         return obj;
     }
 

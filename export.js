@@ -115,7 +115,7 @@ const exportData = async proto => {
     const question = (query) => new Promise(resolve => {
         rl.question(query, resolve)
     })
-    const chosen = await question("导出至: \n[0] 椰羊 (https://cocogoat.work/achievement)\n[1] Paimon.moe\n[2] Seelie.me\n[3] 表格文件 (默认)\n> ")
+    const chosen = await question("导出至: \n[0] 椰羊 (https://cocogoat.work/achievement)\n[1] Paimon.moe\n[2] Seelie.me\n[3] 表格文件 (默认)\n输入一个数字(0-3): ")
     rl.close()
     switch (chosen) {
         case "0":
