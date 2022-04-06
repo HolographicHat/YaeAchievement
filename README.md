@@ -4,7 +4,8 @@
 
 - 支持导出所有成就
 - 支持官服，B服与国际服
-- 没有窗口大小游戏或语言等要求
+- 支持导出至[椰羊](https://cocogoat.work/achievement)、[SnapGenshin](https://github.com/DGP-Studio/Snap.Genshin)、[Paimon.moe](https://paimon.moe/achievement/)、[Seelie.me](https://seelie.me/achievements)和表格文件(csv)
+- 没有窗口大小、游戏语言等要求
 - 更快、更准
 
 ## 使用说明
