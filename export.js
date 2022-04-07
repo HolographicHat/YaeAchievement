@@ -2,7 +2,7 @@ const fs = require("fs")
 const axios = require("axios")
 const readline = require("readline")
 const { loadCache, log } = require("./utils")
-const { openUrl } = require("./native")
+const { openUrl, copyToClipboard } = require("./native")
 
 const exportToSeelie = proto => {
     const out = { achievements: {} }
@@ -31,6 +31,24 @@ const exportToPaimon = async proto => {
     const fp = `./export-${Date.now()}-paimon.json`
     fs.writeFileSync(fp, JSON.stringify(out))
     log(`导出为文件: ${fp}`)
+}
+
+const exportToSnapGenshin = async proto => {
+    const out = []
+    const p = i => i.toString().padStart(2, "0")
+    const getDate = ts => {
+        const d = new Date(parseInt(`${ts}000`))
+        return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`
+    }
+    proto.list.filter(a => a.status === 3 || a.status === 2).forEach(({id, finishTimestamp}) => {
+        out.push({
+            id: id,
+            dateTime: getDate(finishTimestamp)
+        })
+    })
+    const json = JSON.stringify(out, null, 2)
+    copyToClipboard(json)
+    log("导出内容已复制到剪贴板")
 }
 
 const exportToCocogoat = async proto => {
@@ -122,16 +140,19 @@ const exportData = async proto => {
     const question = (query) => new Promise(resolve => {
         rl.question(query, resolve)
     })
-    const chosen = await question("导出至: \n[0] 椰羊 (https://cocogoat.work/achievement)\n[1] Paimon.moe\n[2] Seelie.me\n[3] 表格文件 (默认)\n输入一个数字(0-3): ")
+    const chosen = await question("导出至: \n[0] 椰羊 (https://cocogoat.work/achievement)\n[1] SnapGenshin\n[2] Paimon.moe\n[3] Seelie.me\n[4] 表格文件 (默认)\n输入一个数字(0-4): ")
     rl.close()
     switch (chosen) {
         case "0":
             await exportToCocogoat(proto)
             break
         case "1":
-            await exportToPaimon(proto)
+            await exportToSnapGenshin(proto)
             break
         case "2":
+            await exportToPaimon(proto)
+            break
+        case "3":
             await exportToSeelie(proto)
             break
         case "raw":
