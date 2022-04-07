@@ -169,8 +169,16 @@ namespace native {
         return info.Env().Undefined();
     }
 
+    Value openUrl(const CallbackInfo &info) {
+        Env env = info.Env();
+        wstring url = StringToWString(info[0].As<Napi::String>().Utf8Value());
+        HINSTANCE retcode = ShellExecute(GetConsoleWindow(), L"open", url.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+        return Napi::Number::New(env, (INT_PTR)retcode); // NOLINT(cppcoreguidelines-narrowing-conversions)
+    }
+
     Object init(Env env, Object exports) {
         exports.Set("pause", Function::New(env, pause));
+        exports.Set("openUrl", Function::New(env, openUrl));
         exports.Set("getDeviceID", Function::New(env, getDeviceID));
         exports.Set("getDeviceInfo", Function::New(env, getDeviceInfo));
         exports.Set("whoUseThePort", Function::New(env, whoUseThePort));

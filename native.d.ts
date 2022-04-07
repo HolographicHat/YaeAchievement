@@ -5,4 +5,5 @@ export function copyToClipboard(value: string): any
 export function enablePrivilege(): any
 export function getDeviceInfo(): any
 export function getDeviceID(): string
+export function openUrl(url: string): number
 export function pause(): any

@@ -1,7 +1,8 @@
 const fs = require("fs")
+const axios = require("axios")
 const readline = require("readline")
 const { loadCache, log } = require("./utils")
-const { copyToClipboard } = require("./native")
+const { openUrl } = require("./native")
 
 const exportToSeelie = proto => {
     const out = { achievements: {} }
@@ -34,9 +35,7 @@ const exportToPaimon = async proto => {
 
 const exportToCocogoat = async proto => {
     const out = {
-        value: {
-            achievements: []
-        }
+        achievements: []
     }
     const achTable = new Map()
     const preStageAchievementIdList = []
@@ -53,19 +52,27 @@ const exportToCocogoat = async proto => {
         return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())}`
     }
     proto.list.filter(a => a.status === 3 || a.status === 2).forEach(({current, finishTimestamp, id, require}) => {
-        out.value.achievements.push({
+        out.achievements.push({
             id: id,
             status: current === undefined || current === 0 || preStageAchievementIdList.includes(id) ? `${require}/${require}` : `${current}/${require}`,
             categoryId: achTable.get(id),
             date: getDate(finishTimestamp)
         })
     })
-    const ts = Date.now()
-    const json = JSON.stringify(out,null,2)
-    copyToClipboard(json)
-    const fp = `./export-${ts}-cocogoat.json`
-    fs.writeFileSync(fp, json)
-    log(`导出内容已复制到剪贴板`)
+    const response = await axios.post(`https://77.cocogoat.work/v1/memo?source=${encodeURI("全部成就")}`, out).catch(_ => {
+        console.log("网络错误，请检查网络后重试 (26-1)")
+        process.exit(261)
+    })
+    if (response.status !== 201) {
+        console.log(`API StatusCode 错误，请联系开发者以获取帮助 (26-2-${response.status})`)
+        process.exit(262)
+    }
+    const retcode = openUrl(`https://cocogoat.work/achievement?memo=${response.data.key}`)
+    if (retcode > 32) {
+        log("在浏览器内进行下一步操作")
+    } else {
+        log(`导出失败，请联系开发者以获取帮助 (26-3-${retcode})`)
+    }
 }
 
 const exportToCsv = async proto => {
