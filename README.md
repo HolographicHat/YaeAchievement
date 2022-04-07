@@ -6,7 +6,6 @@
 - 支持官服，B服与国际服
 - 支持导出至[椰羊](https://cocogoat.work/achievement)、[SnapGenshin](https://github.com/DGP-Studio/Snap.Genshin)、[Paimon.moe](https://paimon.moe/achievement/)、[Seelie.me](https://seelie.me/achievements)和表格文件(csv)
 - 没有窗口大小、游戏语言等要求
-- 更快、更准
 
 ## 使用说明
 **打开程序前需要关闭正在运行的原神主程序**  
@@ -49,4 +48,4 @@
    A: 执行命令或修改hosts引发，相关代码可在./utils.js,./appcenter.js下找到
 
 4. Q: 原神进门后没有自动退出，程序输出停留在“加载完成”   
-   A: 关闭Shadowsocks全局代理
+   A: 关闭代理后重试

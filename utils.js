@@ -241,7 +241,7 @@ let hostsContent = undefined
 
 const setupHost = (restore = false) => {
     if (restore && hostsContent === undefined) return
-    const path = "C:\\Windows\\System32\\drivers\\etc\\hosts"
+    const path = `${process.env.windir}\\System32\\drivers\\etc\\hosts`
     if (!fs.existsSync(path)) {
         fs.writeFileSync(path, "")
     }
