@@ -129,7 +129,7 @@ const md5 = str => {
     return h.digest("hex")
 }
 
-let cdnUrlFormat = null
+let cdnUrlFormat = undefined
 
 String.prototype.format = function() {
     const args = arguments;
@@ -137,35 +137,31 @@ String.prototype.format = function() {
 }
 
 const checkCDN = async () => {
-    try {
-        cdnUrlFormat = "https://cdn.jsdelivr.net/gh/{0}@master/{1}"
-        await axios.head(cdnUrlFormat.format("github/fetch", ".gitignore"))
-        return
-    } catch (e) {}
-    try {
-        cdnUrlFormat = "https://raw.githubusercontent.com/{0}/master/{1}"
-        await axios.head(cdnUrlFormat.format("github/fetch", ".gitignore"))
-        return
-    } catch (e) {}
-    try {
-        const s = conf === undefined ? "" : conf.customCDN.trim()
-        if (s.length > 0) {
-            cdnUrlFormat = s
-            await axios.head(cdnUrlFormat.format("github/fetch", ".gitignore"))
-            return
-        }
-    } catch (e) {}
-    try {
-        cdnUrlFormat = "https://raw.fastgit.org/{0}/master/{1}"
-        await axios.head(cdnUrlFormat.format("github/fetch", ".gitignore"))
-        return
-    } catch (e) {}
-    try {
-        cdnUrlFormat = "https://ghproxy.net/https://raw.githubusercontent.com/{0}/master/{1}"
-        await axios.head(cdnUrlFormat.format("github/fetch", ".gitignore"))
-        return
-    } catch (e) {}
-    throw "网络错误，请检查配置文件/网络后重试 (11-3)"
+    const controller = new AbortController()
+    const a = new Promise(resolve => axios.get("https://cdn.jsdelivr.net/gh/HolographicHat/genshin-achievement-export@master/2MB.bin", {
+        signal: controller.signal
+    }).then(_ => resolve(["jsdelivr", "https://cdn.jsdelivr.net/gh/{0}@master/{1}"])))
+    const b = new Promise(resolve => axios.get("https://raw.githubusercontent.com/HolographicHat/genshin-achievement-export/master/2MB.bin", {
+        signal: controller.signal
+    }).then(_ => resolve(["githubusercontent", "https://raw.githubusercontent.com/{0}/master/{1}"])))
+    const c = new Promise(resolve => axios.get("https://ghproxy.net/https://raw.githubusercontent.com/HolographicHat/genshin-achievement-export/master/2MB.bin", {
+        signal: controller.signal
+    }).then(_ => resolve(["ghproxy", "https://ghproxy.net/https://raw.githubusercontent.com/{0}/master/{1}"])))
+    const d = new Promise(resolve => {
+        const s = conf === undefined ? "" : conf.customCDN.trim() // 🤔
+        if (s.length === 0) throw "empty"
+        axios.get(s.format("HolographicHat/genshin-achievement-export", "2MB.bin"), {
+            signal: controller.signal
+        }).then(_ => resolve(["customCDN", s]))
+    })
+    await Promise.any([a, b, c, d]).then(([name, url]) => {
+        debug(`Fastest: ${name}`)
+        controller.abort()
+        cdnUrlFormat = url
+    }).catch()
+    if (cdnUrlFormat === undefined) {
+        throw "网络错误，请检查配置文件/网络后重试 (11-3)"
+    }
 }
 
 const loadCache = async (fp, repo = "Dimbreath/GenshinData") => {
@@ -203,7 +199,7 @@ const loadCache = async (fp, repo = "Dimbreath/GenshinData") => {
     }
 }
 
-const isDebug = false
+const isDebug = true
 
 const debug = (msg, ...params) => {
     if (isDebug) log(msg, ...params)
