@@ -17,7 +17,7 @@ const exportToSeelie = proto => {
 const exportToPaimon = async proto => {
     const out = { achievement: {} }
     const achTable = new Map()
-    const excel = await loadCache("ExcelBinOutput/AchievementExcelConfigData.json")
+    const excel = await loadCache()
     excel.forEach(({GoalId, Id}) => {
         achTable.set(Id, GoalId === undefined ? 0 : GoalId)
     })
@@ -35,15 +35,10 @@ const exportToPaimon = async proto => {
 
 const exportToSnapGenshin = async proto => {
     const out = []
-    const p = i => i.toString().padStart(2, "0")
-    const getDate = ts => {
-        const d = new Date(parseInt(`${ts}000`))
-        return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`
-    }
     proto.list.filter(a => a.status === 3 || a.status === 2).forEach(({id, finishTimestamp}) => {
         out.push({
             id: id,
-            dateTime: getDate(finishTimestamp)
+            ts: finishTimestamp
         })
     })
     const json = JSON.stringify(out, null, 2)
@@ -57,7 +52,7 @@ const exportToCocogoat = async proto => {
     }
     const achTable = new Map()
     const preStageAchievementIdList = []
-    const excel = await loadCache("ExcelBinOutput/AchievementExcelConfigData.json")
+    const excel = await loadCache()
     excel.forEach(({GoalId, Id, PreStageAchievementId}) => {
         if (PreStageAchievementId !== undefined) {
             preStageAchievementIdList.push(PreStageAchievementId)
@@ -94,7 +89,7 @@ const exportToCocogoat = async proto => {
 }
 
 const exportToCsv = async proto => {
-    const excel = await loadCache("achievement-data.json", "HolographicHat/genshin-achievement-export")
+    const excel = await loadCache()
     const achievementMap = new Map()
     excel["achievement"].forEach(obj => {
         achievementMap.set(parseInt(obj.id), obj)
