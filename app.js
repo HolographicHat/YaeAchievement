@@ -3,7 +3,7 @@ const cp = require("child_process")
 const rs = require("./regionServer")
 const appcenter = require("./appcenter")
 const {
-    initConfig, splitPacket, upload, decodeProto, log, setupHost, KPacket, debug, checkCDN, checkUpdate,
+    initConfig, splitPacket, upload, decodeProto, log, setupHost, KPacket, debug, checkUpdate,
     brotliCompressSync, brotliDecompressSync, checkGameIsRunning, checkPortIsUsing
 } = require("./utils")
 const { exportData } = require("./export")
@@ -41,10 +41,6 @@ const onExit = () => {
         checkGameIsRunning()
         log("检查更新")
         await checkUpdate()
-        checkCDN().then(_ => debug("CDN check success.")).catch(reason => {
-            console.log(reason)
-            process.exit(113)
-        })
         let gameProcess
         let unexpectedExit = true
         rs.create(conf,() => {

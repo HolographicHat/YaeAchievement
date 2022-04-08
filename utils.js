@@ -175,7 +175,7 @@ const loadCache = async (fp = "latest-data") => {
     }
 }
 
-const isDebug = true
+const isDebug = false
 
 const debug = (msg, ...params) => {
     if (isDebug) log(msg, ...params)
