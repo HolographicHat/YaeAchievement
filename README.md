@@ -13,20 +13,6 @@
 ![alt](https://upload-bbs.mihoyo.com/upload/2022/04/06/165631158/e540a5a6d50cd5fdee19665435548e00_514247033566841954.jpg)   
 ### Windows7   
 系统变量添加名为```NODE_SKIP_PLATFORM_CHECK```的变量并将值设为```1```   
-### 自定义代理(可选)   
-配置文件内添加proxy字段，详细请参看[Axios-请求配置](https://axios-http.com/zh/docs/req_config)
-```json
-{
-  "path": [],
-  "offlineResource": false,
-  "customCDN": "",
-  "proxy": {
-    "protocol": "http",
-    "host": "127.0.0.1",
-    "port": 7890
-  }
-}
-```
 
 ## 下载地址
 [releases/latest](https://github.com/HolographicHat/genshin-achievement-export/releases/latest)

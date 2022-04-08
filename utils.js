@@ -11,7 +11,6 @@ const { promisify } = require("util")
 const { createHash } = require("crypto")
 const path = require("path")
 const messages = path.join(__dirname, "./proto/Messages.proto")
-let axios = require("axios")
 
 const encodeProto = (object, name) => protobuf.load(messages).then(r => {
     const msgType = r.lookupType(name)
@@ -37,11 +36,15 @@ const initConfig = async () => {
     const configFileName = "./config.json"
     if (fs.existsSync(configFileName)) {
         conf = JSON.parse(fs.readFileSync(configFileName, "utf-8"))
+        if (conf.offlineResource !== undefined || conf.customCDN !== undefined || conf.proxy !== undefined) {
+            conf.proxy = undefined
+            conf.customCDN = undefined
+            conf.offlineResource = undefined
+            fs.writeFileSync(configFileName, JSON.stringify(conf, null, 2))
+        }
     } else {
         conf = {
-            path: [],
-            offlineResource: false,
-            customCDN: ""
+            path: []
         }
         const p = path.dirname(native.selectGameExecutable())
         await checkPath(p).catch(reason => {
@@ -50,11 +53,6 @@ const initConfig = async () => {
         })
         conf.path.push(p)
         fs.writeFileSync(configFileName, JSON.stringify(conf, null, 2))
-    }
-    if (conf.proxy !== undefined) {
-        axios = axios.create({
-            proxy: conf.proxy
-        })
     }
     if (conf.path.length === 1) {
         await checkPath(conf.path[0]).catch(reason => {
@@ -129,73 +127,51 @@ const md5 = str => {
     return h.digest("hex")
 }
 
-let cdnUrlFormat = undefined
+/*
+ * Structure:
+ * UInt16 = 0x4321: magic num
+ * UInt8  = 0x2   : version
+ * Char[32]       : data md5
+ * ...            : compressed data
+ */
 
-String.prototype.format = function() {
-    const args = arguments;
-    return this.replace(/{(\d+)}/g, (match, number) => typeof args[number] != "undefined" ? args[number] : match)
-}
-
-const checkCDN = async () => {
-    const controller = new AbortController()
-    const a = new Promise(resolve => axios.get("https://cdn.jsdelivr.net/gh/HolographicHat/genshin-achievement-export@master/2MB.bin", {
-        signal: controller.signal
-    }).then(_ => resolve(["jsdelivr", "https://cdn.jsdelivr.net/gh/{0}@master/{1}"])))
-    const b = new Promise(resolve => axios.get("https://raw.githubusercontent.com/HolographicHat/genshin-achievement-export/master/2MB.bin", {
-        signal: controller.signal
-    }).then(_ => resolve(["githubusercontent", "https://raw.githubusercontent.com/{0}/master/{1}"])))
-    const c = new Promise(resolve => axios.get("https://ghproxy.net/https://raw.githubusercontent.com/HolographicHat/genshin-achievement-export/master/2MB.bin", {
-        signal: controller.signal
-    }).then(_ => resolve(["ghproxy", "https://ghproxy.net/https://raw.githubusercontent.com/{0}/master/{1}"])))
-    const d = new Promise(resolve => {
-        const s = conf === undefined ? "" : conf.customCDN.trim() // 🤔
-        if (s.length === 0) throw "empty"
-        axios.get(s.format("HolographicHat/genshin-achievement-export", "2MB.bin"), {
-            signal: controller.signal
-        }).then(_ => resolve(["customCDN", s]))
-    })
-    await Promise.any([a, b, c, d]).then(([name, url]) => {
-        debug(`Fastest: ${name}`)
-        controller.abort()
-        cdnUrlFormat = url
-    }).catch()
-    if (cdnUrlFormat === undefined) {
-        throw "网络错误，请检查配置文件/网络后重试 (11-3)"
-    }
-}
-
-const loadCache = async (fp, repo = "Dimbreath/GenshinData") => {
-    log(`预检资源: ${cdnUrlFormat.format(repo, fp)}`)
+const loadCache = async (fp = "latest-data") => {
+    log(`正在加载资源: ${fp}`)
+    const startAt = Date.now()
     fs.mkdirSync("./cache", { recursive: true })
-    const localPath = `./cache/${md5(fp)}`
-    if (conf.offlineResource) {
-        const fd = brotliDecompressSync(fs.readFileSync(localPath))
-        return JSON.parse(fd.subarray(1 + fd.readUInt8()).toString())
+    // remove old cache file
+    fs.readdir("./cache/", (err, files) => {
+        if (err === null) files.forEach(s => {
+            const fn = `./cache/${s}`
+            if (!fn.endsWith(".ch")) fs.rm(fn,_ => {})
+        })
+    })
+    const localPath = `./cache/${md5(fp)}.ch`
+    const headers = {
+        "x-content-hash": "0".repeat(32)
     }
-    const header = {}
     let fd = Buffer.alloc(0)
     if (fs.existsSync(localPath)) {
-        fd = brotliDecompressSync(fs.readFileSync(localPath))
-        const etagLength = fd.readUInt8()
-        header["If-None-Match"] = fd.subarray(1, 1 + etagLength).toString()
+        fd = fs.readFileSync(localPath)
+        if (fd.readUInt16BE(0) === 0x4321 && fd.readUInt8(2) === 2) {
+            headers["x-content-hash"] = fd.subarray(3, 35).toString("utf-8")
+        }
     }
-    const headResponse = await axios.head(cdnUrlFormat.format(repo, fp), {
-        headers: header,
-        validateStatus: _ => true
-    })
-    if (headResponse.status === 304) {
-        log("%s 命中缓存", fp)
-        const etagLength = fd.readUInt8()
-        return JSON.parse(fd.subarray(1 + etagLength).toString())
+    const resp = await cloud.get(`/${fp}`, "application/json", headers, "arraybuffer")
+    if (resp.status === 304) {
+        log(`完成 (Cache, ${Date.now() - startAt}ms)`)
+        return JSON.parse(brotliDecompressSync(fd.subarray(35)).toString())
     } else {
-        log("下载所需资源, 请稍后...")
-        const response = await axios.get(cdnUrlFormat.format(repo, fp))
-        const etag = response.headers.etag
-        const str = JSON.stringify(response.data)
-        const comp = brotliCompressSync(Buffer.concat([Buffer.of(etag.length), Buffer.from(etag), Buffer.from(str)]))
-        fs.writeFileSync(localPath, comp)
-        log("下载完成")
-        return response.data
+        const compressedData = resp.data
+        const decompressedData = brotliDecompressSync(compressedData)
+        const buf = Buffer.allocUnsafe(compressedData.length + 35)
+        buf.writeUInt16BE(0x4321, 0)
+        buf.writeUInt8(0x2, 2)
+        buf.fill(md5(decompressedData), 3)
+        buf.fill(compressedData, 35)
+        fs.writeFileSync(localPath, buf)
+        log(`完成 (Network, ${Date.now() - startAt}ms)`)
+        return JSON.parse(decompressedData)
     }
 }
 
@@ -302,5 +278,5 @@ class KPacket {
 
 module.exports = {
     log, encodeProto, decodeProto, initConfig, splitPacket, upload, brotliCompressSync, brotliDecompressSync,
-    setupHost, loadCache, debug, checkCDN, checkUpdate, KPacket, cdnUrlFormat, checkGameIsRunning, checkPortIsUsing
+    setupHost, loadCache, debug, checkUpdate, KPacket, checkGameIsRunning, checkPortIsUsing
 }
