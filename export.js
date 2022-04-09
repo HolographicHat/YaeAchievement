@@ -16,13 +16,9 @@ const exportToSeelie = proto => {
 
 const exportToPaimon = async proto => {
     const out = { achievement: {} }
-    const achTable = new Map()
-    const excel = await loadCache()
-    excel.forEach(({GoalId, Id}) => {
-        achTable.set(Id, GoalId === undefined ? 0 : GoalId)
-    })
+    const data = await loadCache()
     proto.list.filter(a => a.status === 3 || a.status === 2).forEach(({id}) => {
-        const gid = achTable.get(id)
+        const gid = data["a"][id]
         if (out.achievement[gid] === undefined) {
             out.achievement[gid] = {}
         }
@@ -50,25 +46,18 @@ const exportToCocogoat = async proto => {
     const out = {
         achievements: []
     }
-    const achTable = new Map()
-    const preStageAchievementIdList = []
-    const excel = await loadCache()
-    excel.forEach(({GoalId, Id, PreStageAchievementId}) => {
-        if (PreStageAchievementId !== undefined) {
-            preStageAchievementIdList.push(PreStageAchievementId)
-        }
-        achTable.set(Id, GoalId === undefined ? 0 : GoalId)
-    })
+    const data = await loadCache()
     const p = i => i.toString().padStart(2, "0")
     const getDate = ts => {
         const d = new Date(parseInt(`${ts}000`))
         return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())}`
     }
     proto.list.filter(a => a.status === 3 || a.status === 2).forEach(({current, finishTimestamp, id, require}) => {
+        const curAch = data["a"][id]
         out.achievements.push({
             id: id,
-            status: current === undefined || current === 0 || preStageAchievementIdList.includes(id) ? `${require}/${require}` : `${current}/${require}`,
-            categoryId: achTable.get(id),
+            status: current === undefined || current === 0 || curAch["p"] === undefined ? `${require}/${require}` : `${current}/${require}`,
+            categoryId: curAch["g"],
             date: getDate(finishTimestamp)
         })
     })
@@ -89,11 +78,7 @@ const exportToCocogoat = async proto => {
 }
 
 const exportToCsv = async proto => {
-    const excel = await loadCache()
-    const achievementMap = new Map()
-    excel["achievement"].forEach(obj => {
-        achievementMap.set(parseInt(obj.id), obj)
-    })
+    const data = await loadCache()
     const outputLines = ["ID,状态,特辑,名称,描述,当前进度,目标进度,完成时间"]
     const getStatusText = i => {
         switch (i) {
@@ -111,15 +96,15 @@ const exportToCsv = async proto => {
     const bl = [84517]
     proto.list.forEach(({current, finishTimestamp, id, status, require}) => {
         if (!bl.includes(id)) {
-            const desc = achievementMap.get(id) === undefined ? (() => {
+            const curAch = data["a"][id] === undefined ? (() => {
                 console.log(`Error get id ${id} in excel`)
                 return {
-                    goal: "未知",
-                    name: "未知",
-                    desc: "未知"
+                    g: "未知",
+                    n: "未知",
+                    d: "未知"
                 }
-            })() : achievementMap.get(id)
-            outputLines.push(`${id},${getStatusText(status)},${excel.goal[desc.goal]},${desc.name},${desc.desc},${status !== 1 ? current === 0 ? require : current : current},${require},${status === 1 ? "" : getTime(finishTimestamp)}`)
+            })() : data["a"][id]
+            outputLines.push(`${id},${getStatusText(status)},${data["g"][curAch.g]},${curAch.n},${curAch.d},${status !== 1 ? current === 0 ? require : current : current},${require},${status === 1 ? "" : getTime(finishTimestamp)}`)
         }
     })
     const fp = `./export-${Date.now()}.csv`
