@@ -17,18 +17,18 @@ const onExit = () => {
 
 (async () => {
     try {
-        process.once("SIGHUP", () => setupHost(true))
+        process.on("SIGHUP", () => setupHost(true))
         process.on("unhandledRejection", (reason, promise) => {
             console.log("Unhandled Rejection at: ", promise, "\n0Reason:", reason)
         })
-        process.once("uncaughtException", (err, origin) => {
+        process.on("uncaughtException", (err, origin) => {
             appcenter.uploadError(err, true)
             console.log(err)
             console.log(`Origin: ${origin}`)
             process.exit(1)
         })
-        process.once("exit", onExit)
-        process.once("SIGINT", onExit)
+        process.on("exit", onExit)
+        process.on("SIGINT", onExit)
         try {
             enablePrivilege()
         } catch (e) {

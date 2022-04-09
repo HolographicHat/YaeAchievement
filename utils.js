@@ -10,6 +10,7 @@ const { version } = require("./version")
 const { promisify } = require("util")
 const { createHash } = require("crypto")
 const path = require("path")
+const { uploadEvent } = require("./appcenter")
 const messages = path.join(__dirname, "./proto/Messages.proto")
 
 const encodeProto = (object, name) => protobuf.load(messages).then(r => {
@@ -91,6 +92,7 @@ const initConfig = async () => {
     conf.executable = conf.isOversea ? `${conf.path}/GenshinImpact.exe` : `${conf.path}/YuanShen.exe`
     conf.dispatchUrl = `dispatch${conf.isOversea ? "os" : "cn"}global.yuanshen.com`
     conf.dispatchIP = (await promisify(dns.lookup).bind(dns)(conf.dispatchUrl, 4)).address
+    uploadEvent("AppInitialize", { ClientVersion: version.name, GameVersion: conf.version })
     return conf
 }
 

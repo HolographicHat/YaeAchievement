@@ -30,15 +30,17 @@ const device = (() => {
 
 const upload = () => {
     if (queue.length > 0) {
-        const data = JSON.stringify({ "logs": queue })
+        const logs = []
+        for (let i = 0; i <= queue.length; i++) {
+            logs.push(queue.pop())
+        }
+        const data = JSON.stringify({"logs": logs})
         axios.post("https://in.appcenter.ms/logs?api-version=1.0.0", data,{
             headers: {
                 "App-Secret": key,
                 "Install-ID": install
             }
-        }).then(_ => {
-            queue.length = 0
-        }).catch(_ => {})
+        }).catch(_ => {}).then()
     }
 }
 
@@ -79,6 +81,19 @@ const uploadError = (err, fatal) => {
     upload()
 }
 
+const uploadEvent = (name, prop) => {
+    const content = {
+        type: "event",
+        id: crypto.randomUUID(),
+        sid: session,
+        name: name,
+        properties: prop,
+        timestamp: getTimestamp(),
+        device: device
+    }
+    queue.push(content)
+}
+
 const startup = () => {
     queue.push({
         type: "startService",
@@ -93,9 +108,9 @@ const startup = () => {
         device: device
     })
     upload()
-    setInterval(() => upload(), 10000)
+    setInterval(() => upload(), 5000)
 }
 
 module.exports = {
-    startup, upload, uploadError
+    startup, upload, uploadError, uploadEvent
 }
