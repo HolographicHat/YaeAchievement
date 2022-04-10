@@ -7,13 +7,12 @@
 
 namespace RegUtils {
 
-    DWORD GetInt(Env env, HKEY hKey, const wstring &path, const wstring &value) {
+    DWORD GetInt(Env env, HKEY hKey, const wstring &path, const wstring &value, DWORD defaultValue) {
         DWORD data = 0;
         DWORD size = sizeof(DWORD);
         LSTATUS retcode = RegGetValue(hKey, path.c_str(), value.c_str(), RRF_RT_REG_DWORD, nullptr, &data, &size);
         if (retcode != ERROR_SUCCESS) {
-            Error::New(env, "RegGetValue error: " + to_string(retcode)).ThrowAsJavaScriptException();
-            return 0;
+            return defaultValue;
         }
         return data;
     }

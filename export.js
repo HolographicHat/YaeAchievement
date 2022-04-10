@@ -34,7 +34,7 @@ const exportToSnapGenshin = async proto => {
     proto.list.filter(a => a.status === 3 || a.status === 2).forEach(({id, finishTimestamp}) => {
         out.push({
             id: id,
-            ts: finishTimestamp
+            timestamp: finishTimestamp
         })
     })
     const json = JSON.stringify(out, null, 2)

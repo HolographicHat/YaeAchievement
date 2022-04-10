@@ -4,6 +4,7 @@ config.json
 out.*
 node_modules
 .idea
+app*.7z
 app*.exe
 export*.json
 secret.js

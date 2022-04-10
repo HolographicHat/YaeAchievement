@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "build": "node-gyp rebuild && copy .\\build\\Release\\native.node ..\\genshin-export\\"
+    "build": "node-gyp rebuild && copy .\\build\\Release\\native.node ..\\genshin-export\\",
+    "build-for-win7": "node-gyp rebuild --target=v14.17.0 && copy .\\build\\Release\\native.node ..\\genshin-export\\"
   },
   "gypfile": true,
   "devDependencies": {

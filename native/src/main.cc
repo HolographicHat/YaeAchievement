@@ -105,7 +105,7 @@ namespace native {
         int sw = GetDeviceCaps(desktop, DESKTOPHORZRES);
         int sh = GetDeviceCaps(desktop, DESKTOPVERTRES);
         ReleaseDC(nullptr, desktop);
-        DWORD buildNum = RegUtils::GetInt(env, HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"UBR");
+        DWORD buildNum = RegUtils::GetInt(env, HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"UBR", 0);
         wstring locale;
         if (RegUtils::GetString(HKEY_CURRENT_USER, L"Control Panel\\International", L"LocaleName", locale) != ERROR_SUCCESS) {
             locale = L"zh-CN";
