@@ -1,26 +1,31 @@
 #include "utils.h"
 #include "define.h"
 
-wstring StringToWString(const string &src) {
-    wstring result;
-    int len = MultiByteToWideChar(CP_ACP, 0, src.c_str(), src.size(), nullptr, 0); // NOLINT(cppcoreguidelines-narrowing-conversions)
-    auto *buffer = new WCHAR[len + 1];
-    MultiByteToWideChar(CP_ACP, 0, src.c_str(), src.size(), buffer, len); // NOLINT(cppcoreguidelines-narrowing-conversions)
-    buffer[len] = '\0';
-    result.append(buffer);
+string GBKToUTF8(const wstring& src) {
+    int len = WideCharToMultiByte(CP_UTF8, 0, src.c_str(), -1, nullptr, 0, nullptr, nullptr);
+    auto *buffer = new CHAR[len];
+    WideCharToMultiByte(CP_UTF8, 0, src.c_str(), -1, buffer, len, nullptr, nullptr);
+    string strTemp(buffer);
     delete[] buffer;
-    return result;
+    return strTemp;
+}
+
+wstring StringToWString(const string &src) {
+    int len = MultiByteToWideChar(CP_ACP, 0, src.c_str(), -1, nullptr, 0);
+    auto *buffer = new WCHAR[len];
+    MultiByteToWideChar(CP_ACP, 0, src.c_str(), -1, buffer, len);
+    wstring strTemp(buffer);
+    delete[] buffer;
+    return strTemp;
 }
 
 string WStringToString(const wstring &src) {
-    string result;
-    int len = WideCharToMultiByte(CP_ACP, 0, src.c_str(), src.size(), nullptr, 0, nullptr, nullptr); // NOLINT(cppcoreguidelines-narrowing-conversions)
-    char *buffer = new char[len + 1];
-    WideCharToMultiByte(CP_ACP, 0, src.c_str(), src.size(), buffer, len, nullptr, nullptr); // NOLINT(cppcoreguidelines-narrowing-conversions)
-    buffer[len] = '\0';
-    result.append(buffer);
+    int len = WideCharToMultiByte(CP_ACP, 0, src.c_str(), -1, nullptr, 0, nullptr, nullptr);
+    auto *buffer = new CHAR[len];
+    WideCharToMultiByte(CP_ACP, 0, src.c_str(), -1, buffer, len, nullptr, nullptr);
+    string strTemp(buffer);
     delete[] buffer;
-    return result;
+    return strTemp;
 }
 
 void Log(Env env, const string &msg) {
@@ -46,7 +51,11 @@ LSTATUS OpenFile(Env env, Napi::String &result, HWND parent) {
     open.lpstrFilter = L"国服/国际服主程序 (YuanShen/GenshinImpact.exe)\0YuanShen.exe;GenshinImpact.exe\0";
     open.lStructSize = sizeof(open);
     if(GetOpenFileName(&open)) {
-        result = Napi::String::New(env, WStringToString(file));
+        if (GetACP() == 936) {
+            result = Napi::String::New(env, GBKToUTF8(file));
+        } else {
+            result = Napi::String::New(env, WStringToString(file));
+        }
         return ERROR_SUCCESS;
     } else {
         return ERROR_ERRORS_ENCOUNTERED;
