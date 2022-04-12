@@ -1,8 +1,9 @@
 const fs = require("fs")
 const axios = require("axios")
 const readline = require("readline")
+const { randomUUID } = require("crypto")
 const { loadCache, log } = require("./utils")
-const { openUrl, copyToClipboard } = require("./native")
+const { openUrl } = require("./native")
 
 const exportToSeelie = proto => {
     const out = { achievements: {} }
@@ -37,9 +38,11 @@ const exportToSnapGenshin = async proto => {
             timestamp: finishTimestamp
         })
     })
-    const json = JSON.stringify(out, null, 2)
-    copyToClipboard(json)
-    log("导出内容已复制到剪贴板")
+    const json = JSON.stringify(out)
+    const path = `${process.env.TMP}/YaeAchievement-export-${randomUUID()}`
+    fs.writeFileSync(path, json)
+    openUrl(`snapgenshin://achievement/import/file?path=\"${path}\"`)
+    log("在 SnapGenshin 进行下一步操作")
 }
 
 const exportToCocogoat = async proto => {
@@ -122,7 +125,7 @@ const exportData = async proto => {
     })
     const chosen = await question("导出至: \n[0] 椰羊 (https://cocogoat.work/achievement)\n[1] SnapGenshin\n[2] Paimon.moe\n[3] Seelie.me\n[4] 表格文件 (默认)\n输入一个数字(0-4): ")
     rl.close()
-    switch (chosen) {
+    switch (chosen.trim()) {
         case "0":
             await exportToCocogoat(proto)
             break
