@@ -45,7 +45,8 @@ const initConfig = async () => {
         }
     } else {
         conf = {
-            path: []
+            path: [],
+            oversea_api: false
         }
         const p = path.dirname(native.selectGameExecutable())
         await checkPath(p).catch(reason => {
@@ -53,6 +54,10 @@ const initConfig = async () => {
             process.exit(1)
         })
         conf.path.push(p)
+        fs.writeFileSync(configFileName, JSON.stringify(conf, null, 2))
+    }
+    if (conf.oversea_api === undefined) {
+        conf.oversea_api = false
         fs.writeFileSync(configFileName, JSON.stringify(conf, null, 2))
     }
     if (conf.path.length === 1) {

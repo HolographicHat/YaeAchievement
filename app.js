@@ -1,7 +1,8 @@
 const proxy = require("udp-proxy")
 const cp = require("child_process")
-const rs = require("./regionServer")
+const cloud = require("./secret")
 const appcenter = require("./appcenter")
+const regionServer = require("./regionServer")
 const {
     initConfig, splitPacket, upload, decodeProto, log, setupHost, KPacket, debug, checkUpdate,
     brotliCompressSync, brotliDecompressSync, checkGameIsRunning, checkPortIsUsing
@@ -37,13 +38,14 @@ const onExit = () => {
         }
         appcenter.startup()
         let conf = await initConfig()
+        cloud.init(conf)
         checkPortIsUsing()
         checkGameIsRunning()
         log("检查更新")
         await checkUpdate()
         let gameProcess
         let unexpectedExit = true
-        rs.create(conf,() => {
+        regionServer.create(conf,() => {
             setupHost()
             gameProcess = cp.execFile(conf.executable, { cwd: conf.path },err => {
                 if (err !== null && !err.killed) {
