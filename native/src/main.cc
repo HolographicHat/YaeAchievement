@@ -176,6 +176,13 @@ namespace native {
         return Napi::Number::New(env, (INT_PTR)retcode); // NOLINT(cppcoreguidelines-narrowing-conversions)
     }
 
+    Value checkSnapFastcall(const CallbackInfo &info) {
+        Env env = info.Env();
+        wstring queryResult;
+        RegUtils::GetString(HKEY_CLASSES_ROOT, L"snapgenshin", L"", queryResult);
+        return Napi::Boolean::New(env, wcscmp(queryResult.c_str(), L"URL:snapgenshin") == 0);
+    }
+
     Object init(Env env, Object exports) {
         exports.Set("pause", Function::New(env, pause));
         exports.Set("openUrl", Function::New(env, openUrl));
@@ -184,6 +191,7 @@ namespace native {
         exports.Set("whoUseThePort", Function::New(env, whoUseThePort));
         exports.Set("copyToClipboard", Function::New(env, copyToClipboard));
         exports.Set("enablePrivilege", Function::New(env, enablePrivilege));
+        exports.Set("checkSnapFastcall", Function::New(env, checkSnapFastcall));
         exports.Set("checkGameIsRunning", Function::New(env, checkGameIsRunning));
         exports.Set("selectGameExecutable", Function::New(env, selectGameExecutable));
         return exports;

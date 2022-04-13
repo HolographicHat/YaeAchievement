@@ -3,7 +3,7 @@ const axios = require("axios")
 const readline = require("readline")
 const { randomUUID } = require("crypto")
 const { loadCache, log } = require("./utils")
-const { openUrl } = require("./native")
+const { openUrl, checkSnapFastcall, copyToClipboard } = require("./native")
 
 const exportToSeelie = proto => {
     const out = { achievements: {} }
@@ -38,11 +38,17 @@ const exportToSnapGenshin = async proto => {
             timestamp: finishTimestamp
         })
     })
-    const json = JSON.stringify(out)
-    const path = `${process.env.TMP}/YaeAchievement-export-${randomUUID()}`
-    fs.writeFileSync(path, json)
-    openUrl(`snapgenshin://achievement/import/file?path=\"${path}\"`)
-    log("在 SnapGenshin 进行下一步操作")
+    if (checkSnapFastcall()) {
+        const json = JSON.stringify(out)
+        const path = `${process.env.TMP}/YaeAchievement-export-${randomUUID()}`
+        fs.writeFileSync(path, json)
+        openUrl(`snapgenshin://achievement/import/file?path=\"${path}\"`)
+        log("在 SnapGenshin 进行下一步操作")
+    } else {
+        const json = JSON.stringify(out, null, 2)
+        copyToClipboard(json)
+        log("导出内容已复制到剪贴板")
+    }
 }
 
 const exportToCocogoat = async proto => {
