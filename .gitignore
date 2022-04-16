@@ -4,8 +4,8 @@ config.json
 out.*
 node_modules
 .idea
-app*.7z
-app*.exe
+YaeAchievement-*.7z
+YaeAchievement-*.exe
 export*.json
 secret.js
 package-lock.json

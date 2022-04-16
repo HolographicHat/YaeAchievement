@@ -3,18 +3,17 @@
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
-  "scripts": {
-    "pkg": "pkg -t node16-win-x64 -C Brotli app.js --build -o app.exe",
-    "pkg-for-windows7": "pkg -t node14-win-x64 -C Brotli app.js --build -o app-win7.exe"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "private": true,
   "dependencies": {
-    "ini": "^2.0.0",
     "axios": "^0.26.1",
-    "udp-proxy": "^1.2.0",
-    "protobufjs": "^6.11.2"
+    "ini": "^2.0.0",
+    "protobufjs": "^6.11.2",
+    "udp-proxy": "^1.2.0"
+  },
+  "devDependencies": {
+    "pkg": "file:C:/Users/holog/Desktop/pkg-main"
   }
 }

@@ -1,14 +1,8 @@
 const fs = require("fs")
 const pkg = require("pkg")
+const { log } = require("../utils")
 const { version } = require("../version")
 const { execSync } = require("child_process")
-
-// noinspection DuplicatedCode
-const log = (msg, ...params) => {
-    const time = new Date()
-    const timeStr = time.getHours().toString().padStart(2, "0") + ":" + time.getMinutes().toString().padStart(2, "0") + ":" + time.getSeconds().toString().padStart(2, "0")
-    console.log(`${timeStr} ${msg}`, ...params)
-}
 
 const name = `YaeAchievement-${ version.isDev ? "DevBuild" : "Release" }-${((t = new Date()) => {
     const p = i => i.toString().padStart(2, "0")
@@ -40,24 +34,24 @@ const cleanUp = () => {
     fs.rm("./tmp.script", () => {})
 }
 
-const prepare = () => {
+
+const c = {
+    finalName: `${name}-Win7`,
+    nodeVersion: "14.19.1",
+    sevenZipPath: "C:/Program Files/7-Zip/7z.exe"
+};
+
+(async () => {
+    console.log(c)
     log("Generate and compile version info")
     generateAndCompileVersionInfo()
     log("Modify executable file resources")
-    const node = ["14.19.1", "16.14.2"]
-    node.forEach(v => {
-        const path = `C:/Users/holog/.pkg-cache/v3.3/built-v${v}-win-x64`
-        generateScript(path)
-        execSync(`rh.exe -script tmp.script`)
-    })
+    const path = `C:/Users/holog/.pkg-cache/v3.3/built-v${c.nodeVersion}-win-x64`
+    generateScript(path)
+    execSync(`rh.exe -script tmp.script`)
     cleanUp()
+    log("Build and compress package")
+    await pkg.exec(`../app.js -t node${c.nodeVersion.split(".")[0]}-win-x64 -C Brotli --build -o ${c.finalName}.exe`.split(" "))
+    execSync(`${c.sevenZipPath} a ${c.finalName}.7z ${c.finalName}.exe -mx=9 -myx=9 -mmt=4 -sdel -stl`)
     log("Done")
-}
-
-prepare()
-return
-
-/*await Promise.all([
-    pkg.exec(`app.js -t node16-win-x64 -C Brotli --build -o ${name}.exe`.split(" ")),
-    pkg.exec(`app.js -t node14-win-x64 -C Brotli --build -o ${name}-Win7.exe`.split(" "))
-])*/
+})()
