@@ -38,7 +38,7 @@ const cleanUp = () => {
 const c = {
     finalName: `${name}-Win7`,
     nodeVersion: "14.19.1",
-    sevenZipPath: "C:/Program Files/7-Zip/7z.exe"
+    sevenZipPath: "\"C:/Program Files/7-Zip/7z.exe\""
 };
 
 (async () => {

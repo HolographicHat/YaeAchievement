@@ -48,7 +48,12 @@ const initConfig = async () => {
             path: [],
             oversea_api: false
         }
-        const p = path.dirname(native.selectGameExecutable())
+        let p = ""
+        try {
+            p = path.dirname(native.selectGameExecutable())
+        } catch (e) {
+            process.exit(1)
+        }
         await checkPath(p).catch(reason => {
             console.log(reason)
             process.exit(1)
