@@ -1,28 +1,19 @@
 #include "utils.h"
 #include "define.h"
 
-string GBKToUTF8(const wstring& src) {
-    int len = WideCharToMultiByte(CP_UTF8, 0, src.c_str(), -1, nullptr, 0, nullptr, nullptr);
-    auto *buffer = new CHAR[len];
-    WideCharToMultiByte(CP_UTF8, 0, src.c_str(), -1, buffer, len, nullptr, nullptr);
-    string strTemp(buffer);
-    delete[] buffer;
-    return strTemp;
-}
-
-wstring StringToWString(const string &src) {
-    int len = MultiByteToWideChar(CP_ACP, 0, src.c_str(), -1, nullptr, 0);
+wstring StringToWString(const string &src, UINT codePage) {
+    int len = MultiByteToWideChar(codePage, 0, src.c_str(), -1, nullptr, 0);
     auto *buffer = new WCHAR[len];
-    MultiByteToWideChar(CP_ACP, 0, src.c_str(), -1, buffer, len);
+    MultiByteToWideChar(codePage, 0, src.c_str(), -1, buffer, len);
     wstring strTemp(buffer);
     delete[] buffer;
     return strTemp;
 }
 
-string WStringToString(const wstring &src) {
-    int len = WideCharToMultiByte(CP_ACP, 0, src.c_str(), -1, nullptr, 0, nullptr, nullptr);
+string WStringToString(const wstring &src, UINT codePage) {
+    int len = WideCharToMultiByte(codePage, 0, src.c_str(), -1, nullptr, 0, nullptr, nullptr);
     auto *buffer = new CHAR[len];
-    WideCharToMultiByte(CP_ACP, 0, src.c_str(), -1, buffer, len, nullptr, nullptr);
+    WideCharToMultiByte(codePage, 0, src.c_str(), -1, buffer, len, nullptr, nullptr);
     string strTemp(buffer);
     delete[] buffer;
     return strTemp;
@@ -52,7 +43,7 @@ LSTATUS OpenFile(Env env, Napi::String &result, HWND parent) {
     open.lStructSize = sizeof(open);
     if(GetOpenFileName(&open)) {
         if (GetACP() == 936) {
-            result = Napi::String::New(env, GBKToUTF8(file));
+            result = Napi::String::New(env, WStringToString(file, CP_UTF8));
         } else {
             result = Napi::String::New(env, WStringToString(file));
         }

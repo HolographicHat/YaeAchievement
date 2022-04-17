@@ -36,22 +36,22 @@ const cleanUp = () => {
 
 
 const c = {
-    finalName: `${name}-Win7`,
-    nodeVersion: "14.19.1",
+    forWin7: false,
     sevenZipPath: "\"C:/Program Files/7-Zip/7z.exe\""
 };
 
 (async () => {
-    console.log(c)
+    const fn = c.forWin7 ? `${name}-Win7` : name
+    const nv = c.forWin7 ? "14.19.1" : "16.14.2"
     log("Generate and compile version info")
     generateAndCompileVersionInfo()
     log("Modify executable file resources")
-    const path = `C:/Users/holog/.pkg-cache/v3.3/built-v${c.nodeVersion}-win-x64`
+    const path = `C:/Users/holog/.pkg-cache/v3.3/built-v${nv}-win-x64`
     generateScript(path)
     execSync(`rh.exe -script tmp.script`)
     cleanUp()
     log("Build and compress package")
-    await pkg.exec(`../app.js -t node${c.nodeVersion.split(".")[0]}-win-x64 -C Brotli --build -o ${c.finalName}.exe`.split(" "))
-    execSync(`${c.sevenZipPath} a ${c.finalName}.7z ${c.finalName}.exe -mx=9 -myx=9 -mmt=4 -sdel -stl`)
+    await pkg.exec(`../app.js -t node${nv.split(".")[0]}-win-x64 -C Brotli --build -o ${fn}.exe`.split(" "))
+    execSync(`${c.sevenZipPath} a ${fn}.7z ${fn}.exe -mx=9 -myx=9 -mmt=4 -sdel -stl`)
     log("Done")
 })()

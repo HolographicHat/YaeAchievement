@@ -171,7 +171,9 @@ namespace native {
 
     Value openUrl(const CallbackInfo &info) {
         Env env = info.Env();
-        wstring url = StringToWString(info[0].As<Napi::String>().Utf8Value());
+        string nUrl = info[0].As<Napi::String>().Utf8Value();
+        wstring url = GetACP() == 936 ? StringToWString(nUrl, CP_UTF8) : StringToWString(nUrl);
+        Log(env, L"openUrl: " + url);
         HINSTANCE retcode = ShellExecute(GetConsoleWindow(), L"open", url.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
         return Napi::Number::New(env, (INT_PTR)retcode); // NOLINT(cppcoreguidelines-narrowing-conversions)
     }
