@@ -19,7 +19,7 @@ const exportToPaimon = async proto => {
     const out = { achievement: {} }
     const data = await loadCache()
     proto.list.filter(a => a.status === 3 || a.status === 2).forEach(({id}) => {
-        const gid = data["a"][id]
+        const gid = data["a"][id]["g"]
         if (out.achievement[gid] === undefined) {
             out.achievement[gid] = {}
         }
