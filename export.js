@@ -2,8 +2,8 @@ const fs = require("fs")
 const axios = require("axios")
 const readline = require("readline")
 const { randomUUID } = require("crypto")
-const { loadCache, log } = require("./utils")
-const { openUrl, checkSnapFastcall, copyToClipboard } = require("./native")
+const { loadCache, log, openUrl } = require("./utils")
+const { checkSnapFastcall, copyToClipboard } = require("./native")
 
 const exportToSeelie = proto => {
     const out = { achievements: {} }

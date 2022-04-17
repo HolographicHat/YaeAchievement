@@ -42,11 +42,7 @@ LSTATUS OpenFile(Env env, Napi::String &result, HWND parent) {
     open.lpstrFilter = L"国服/国际服主程序 (YuanShen/GenshinImpact.exe)\0YuanShen.exe;GenshinImpact.exe\0";
     open.lStructSize = sizeof(open);
     if(GetOpenFileName(&open)) {
-        if (GetACP() == 936) {
-            result = Napi::String::New(env, WStringToString(file, CP_UTF8));
-        } else {
-            result = Napi::String::New(env, WStringToString(file));
-        }
+        result = GetACP() == 936 ? Napi::String::New(env, WStringToString(file, CP_UTF8)) : Napi::String::New(env, WStringToString(file));
         return ERROR_SUCCESS;
     } else {
         return ERROR_ERRORS_ENCOUNTERED;

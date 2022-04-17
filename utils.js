@@ -122,6 +122,8 @@ const checkPortIsUsing = () => {
     }
 }
 
+const openUrl = url => native.openUrl(encodeURI(url))
+
 const splitPacket = buf => {
     let offset = 0
     let arr = []
@@ -290,5 +292,5 @@ class KPacket {
 
 module.exports = {
     log, encodeProto, decodeProto, initConfig, splitPacket, upload, brotliCompressSync, brotliDecompressSync,
-    setupHost, loadCache, debug, checkUpdate, KPacket, checkGameIsRunning, checkPortIsUsing
+    setupHost, loadCache, debug, checkUpdate, KPacket, checkGameIsRunning, checkPortIsUsing, openUrl
 }
