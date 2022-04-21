@@ -45,7 +45,7 @@ const UIAF = proto => {
         out.list.push({
             id: id,
             timestamp: finishTimestamp,
-            value: current
+            current: current
         })
     })
     return out
