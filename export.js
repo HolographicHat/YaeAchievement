@@ -1,6 +1,7 @@
 const fs = require("fs")
 const axios = require("axios")
 const readline = require("readline")
+const { version } = require("./version")
 const { randomUUID } = require("crypto")
 const { loadCache, log, openUrl } = require("./utils")
 const { checkSnapFastcall, copyToClipboard } = require("./native")
@@ -30,21 +31,42 @@ const exportToPaimon = async proto => {
     log(`导出为文件: ${fp}`)
 }
 
-const exportToSnapGenshin = async proto => {
-    const out = []
-    proto.list.filter(a => a.status === 3 || a.status === 2).forEach(({id, finishTimestamp}) => {
-        out.push({
+const UIAF = proto => {
+    const out = {
+        info: {
+            export_app: "YaeAchievement",
+            export_timestamp: Date.now(),
+            export_app_version: version.name,
+            uiaf_version: "v1.0"
+        },
+        list: []
+    }
+    proto.list.filter(a => a.status === 3 || a.status === 2).forEach(({id, finishTimestamp, current}) => {
+        out.list.push({
             id: id,
-            timestamp: finishTimestamp
+            timestamp: finishTimestamp,
+            value: current
         })
     })
+    return out
+}
+
+const exportToSnapGenshin = async proto => {
     if (checkSnapFastcall()) {
-        const json = JSON.stringify(out)
+        const result = UIAF(proto)
+        const json = JSON.stringify(result)
         const path = `${process.env.TMP}/YaeAchievement-export-${randomUUID()}`
         fs.writeFileSync(path, json)
-        openUrl(`snapgenshin://achievement/import/file?path=\"${path}\"`)
+        openUrl(`snapgenshin://achievement/import-uiaf/file?path=\"${path}\"`)
         log("在 SnapGenshin 进行下一步操作")
     } else {
+        const out = []
+        proto.list.filter(a => a.status === 3 || a.status === 2).forEach(({id, finishTimestamp}) => {
+            out.push({
+                id: id,
+                timestamp: finishTimestamp
+            })
+        })
         const json = JSON.stringify(out, null, 2)
         copyToClipboard(json)
         log("导出内容已复制到剪贴板")
@@ -52,25 +74,8 @@ const exportToSnapGenshin = async proto => {
 }
 
 const exportToCocogoat = async proto => {
-    const out = {
-        achievements: []
-    }
-    const data = await loadCache()
-    const p = i => i.toString().padStart(2, "0")
-    const getDate = ts => {
-        const d = new Date(parseInt(`${ts}000`))
-        return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())}`
-    }
-    proto.list.filter(a => a.status === 3 || a.status === 2).forEach(({current, finishTimestamp, id, require}) => {
-        const curAch = data["a"][id]
-        out.achievements.push({
-            id: id,
-            status: current === undefined || current === 0 || curAch["p"] === undefined ? `${require}/${require}` : `${current}/${require}`,
-            categoryId: curAch["g"],
-            date: getDate(finishTimestamp)
-        })
-    })
-    const response = await axios.post(`https://77.cocogoat.work/v1/memo?source=${encodeURI("全部成就")}`, out).catch(_ => {
+    const result = UIAF(proto)
+    const response = await axios.post(`https://77.cocogoat.work/v1/memo?source=${encodeURI("全部成就")}`, result).catch(_ => {
         console.log("网络错误，请检查网络后重试 (26-1)")
         process.exit(261)
     })
@@ -129,7 +134,16 @@ const exportData = async proto => {
     const question = (query) => new Promise(resolve => {
         rl.question(query, resolve)
     })
-    const chosen = await question("导出至: \n[0] 椰羊 (https://cocogoat.work/achievement)\n[1] SnapGenshin\n[2] Paimon.moe\n[3] Seelie.me\n[4] 表格文件 (默认)\n输入一个数字(0-4): ")
+    const chosen = await question(
+        [
+            "导出至: ",
+            "[0] 椰羊 (https://cocogoat.work/achievement)",
+            "[1] SnapGenshin",
+            "[2] Paimon.moe","[3] Seelie.me",
+            "[4] 表格文件 (默认)",
+            "输入一个数字(0-4): "
+        ].join("\n")
+    )
     rl.close()
     switch (chosen.trim()) {
         case "0":
