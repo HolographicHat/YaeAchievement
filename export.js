@@ -2,7 +2,6 @@ const fs = require("fs")
 const axios = require("axios")
 const readline = require("readline")
 const { version } = require("./version")
-const { randomUUID } = require("crypto")
 const { loadCache, log, openUrl } = require("./utils")
 const { checkSnapFastcall, copyToClipboard } = require("./native")
 
@@ -55,21 +54,11 @@ const exportToSnapGenshin = async proto => {
     if (checkSnapFastcall()) {
         const result = UIAF(proto)
         const json = JSON.stringify(result)
-        const path = `${process.env.TMP}/YaeAchievement-export-${randomUUID()}`
-        fs.writeFileSync(path, json)
-        openUrl(`snapgenshin://achievement/import-uiaf/file?path=\"${path}\"`)
+        copyToClipboard(json)
+        openUrl(`snapgenshin://achievement/import/uiaf`)
         log("在 SnapGenshin 进行下一步操作")
     } else {
-        const out = []
-        proto.list.filter(a => a.status === 3 || a.status === 2).forEach(({id, finishTimestamp}) => {
-            out.push({
-                id: id,
-                timestamp: finishTimestamp
-            })
-        })
-        const json = JSON.stringify(out, null, 2)
-        copyToClipboard(json)
-        log("导出内容已复制到剪贴板")
+        log("请更新 SnapGenshin 后重试")
     }
 }
 
@@ -139,7 +128,8 @@ const exportData = async proto => {
             "导出至: ",
             "[0] 椰羊 (https://cocogoat.work/achievement)",
             "[1] SnapGenshin",
-            "[2] Paimon.moe","[3] Seelie.me",
+            "[2] Paimon.moe",
+            "[3] Seelie.me",
             "[4] 表格文件 (默认)",
             "输入一个数字(0-4): "
         ].join("\n")
