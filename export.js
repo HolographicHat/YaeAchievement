@@ -8,7 +8,7 @@ const { checkSnapFastcall, copyToClipboard } = require("./native")
 const exportToSeelie = proto => {
     const out = { achievements: {} }
     proto.list.filter(a => a.status === 3 || a.status === 2).forEach(({id}) => {
-        out.achievements[id] = { done: true }
+        out.achievements[id === 81222 ? 81219 : id] = { done: true }
     })
     const fp = `./export-${Date.now()}-seelie.json`
     fs.writeFileSync(fp, JSON.stringify(out))
@@ -23,7 +23,7 @@ const exportToPaimon = async proto => {
         if (out.achievement[gid] === undefined) {
             out.achievement[gid] = {}
         }
-        out.achievement[gid][id] = true
+        out.achievement[gid][id === 81222 ? 81219 : id] = true
     })
     const fp = `./export-${Date.now()}-paimon.json`
     fs.writeFileSync(fp, JSON.stringify(out))

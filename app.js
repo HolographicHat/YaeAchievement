@@ -145,9 +145,10 @@ const onExit = () => {
                     switch(buf.readUInt32BE(0)) {
                         case 325:
                             createMonitor()
-                            debug("服务端握手应答")
+                            debug("Connection established.")
                             break
                         case 404:
+                            debug("Connection terminated.")
                             lastRecvTimestamp = parseInt(Date.now() / 1000) - 2333
                             break
                         default:
