@@ -1,6 +1,5 @@
 const proxy = require("udp-proxy")
 const cp = require("child_process")
-const cloud = require("./secret")
 const appcenter = require("./appcenter")
 const regionServer = require("./regionServer")
 const {
@@ -38,7 +37,6 @@ const onExit = () => {
         }
         appcenter.startup()
         let conf = await initConfig()
-        cloud.init(conf)
         checkPortIsUsing()
         checkGameIsRunning()
         log("检查更新")

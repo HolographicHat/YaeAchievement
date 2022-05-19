@@ -29,6 +29,18 @@ void Log(Env env, const wstring &msg) {
     logFunc.Call({ Napi::String::New(env, WStringToString(msg)) });
 }
 
+char* ToHex(const char *bin, int binsz, char **result) {
+    char hexStr[] = "0123456789ABCDEF";
+    if (!(*result = (char *) malloc(binsz * 2 + 1))) return nullptr;
+    (*result)[binsz * 2] = 0;
+    if (!binsz) return nullptr;
+    for (int i = 0; i < binsz; i++) {
+        (*result)[i * 2 + 0] = hexStr[(bin[i] >> 4) & 0x0F];
+        (*result)[i * 2 + 1] = hexStr[(bin[i]) & 0x0F];
+    }
+    return *result;
+}
+
 LSTATUS OpenFile(Env env, Napi::String &result, HWND parent) {
     OPENFILENAME open;
     ZeroMemory(&open, sizeof(open));
@@ -47,30 +59,4 @@ LSTATUS OpenFile(Env env, Napi::String &result, HWND parent) {
     } else {
         return ERROR_ERRORS_ENCOUNTERED;
     }
-}
-
-BOOL EnablePrivilege(Env env, const wstring &name) {
-    HANDLE hToken;
-    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &hToken)) {
-        Error::New(env, "OpenProcessToken error: " + to_string(GetLastError())).ThrowAsJavaScriptException();
-        return FALSE;
-    }
-    TOKEN_PRIVILEGES tp;
-    ZeroMemory(&tp, sizeof(tp));
-    tp.PrivilegeCount = 1;
-    tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-    if (!LookupPrivilegeValue(nullptr, name.c_str(), &tp.Privileges[0].Luid)) {
-        Error::New(env, "LookupPrivilegeValue error: " + to_string(GetLastError())).ThrowAsJavaScriptException();
-        return FALSE;
-    }
-    if (!AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(tp), nullptr, nullptr)) {
-        Error::New(env, "AdjustTokenPrivileges error: " + to_string(GetLastError())).ThrowAsJavaScriptException();
-        return FALSE;
-    }
-    if (GetLastError() == ERROR_NOT_ALL_ASSIGNED) {
-        Error::New(env, "The token does not have the specified privilege.").ThrowAsJavaScriptException();
-        return FALSE;
-    }
-    CloseHandle(hToken);
-    return TRUE;
 }
