@@ -12,7 +12,7 @@ using Wmi::Win32_ComputerSystem, Wmi::Win32_OperatingSystem, Wmi::retrieveWmi;
 
 namespace native {
 
-    Value checkGameIsRunning(const CallbackInfo &info) {
+    Value CheckGameIsRunning(const CallbackInfo &info) {
         Env env = info.Env();
         if (info.Length() != 1 || !info[0].IsString()) {
             TypeError::New(env, "Wrong arguments").ThrowAsJavaScriptException();
@@ -34,7 +34,7 @@ namespace native {
         return Napi::Boolean::New(env, isRunning);
     }
 
-    Value selectGameExecutable(const CallbackInfo &info) {
+    Value SelectGameExecutable(const CallbackInfo &info) {
         Env env = info.Env();
         Napi::String path;
         if (OpenFile(env, path) != ERROR_SUCCESS) {
@@ -44,7 +44,7 @@ namespace native {
         return path;
     }
 
-    Value whoUseThePort(const CallbackInfo &info) {
+    Value WhoUseThePort(const CallbackInfo &info) {
         Env env = info.Env();
         if (info.Length() != 1 || !info[0].IsNumber()) {
             TypeError::New(env, "Wrong arguments").ThrowAsJavaScriptException();
@@ -89,7 +89,7 @@ namespace native {
         return ret;
     }
 
-    Value getDeviceID(const CallbackInfo &info) {
+    Value GetDeviceID(const CallbackInfo &info) {
         Env env = info.Env();
         wstring wd;
         if (RegUtils::GetString(HKEY_CURRENT_USER, L"SOFTWARE\\miHoYoSDK", L"MIHOYOSDK_DEVICE_ID", wd) != ERROR_SUCCESS) {
@@ -99,7 +99,7 @@ namespace native {
         return Napi::String::New(env, id.substr(0, 8) + "-" + id.substr(8, 4) + "-" + id.substr(12, 4) + "-" + id.substr(16, 4) + "-" + id.substr(20, 12));
     }
 
-    Value getDeviceInfo(const CallbackInfo &info) {
+    Value GetDeviceInfo(const CallbackInfo &info) {
         Env env = info.Env();
         HDC desktop = GetDC(nullptr);
         int sw = GetDeviceCaps(desktop, DESKTOPHORZRES);
@@ -140,13 +140,34 @@ namespace native {
         return obj;
     }
 
-    Value enablePrivilege(const CallbackInfo &info) {
+    Value EnablePrivilege(const CallbackInfo &info) {
         Env env = info.Env();
-        EnablePrivilege(env, L"SeDebugPrivilege");
+        HANDLE hToken;
+        if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &hToken)) {
+            Error::New(env, "OpenProcessToken error: " + to_string(GetLastError())).ThrowAsJavaScriptException();
+            return env.Undefined();
+        }
+        TOKEN_PRIVILEGES tp;
+        ZeroMemory(&tp, sizeof(tp));
+        tp.PrivilegeCount = 1;
+        tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+        if (!LookupPrivilegeValue(nullptr, L"SeDebugPrivilege", &tp.Privileges[0].Luid)) {
+            Error::New(env, "LookupPrivilegeValue error: " + to_string(GetLastError())).ThrowAsJavaScriptException();
+            return env.Undefined();
+        }
+        if (!AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(tp), nullptr, nullptr)) {
+            Error::New(env, "AdjustTokenPrivileges error: " + to_string(GetLastError())).ThrowAsJavaScriptException();
+            return env.Undefined();
+        }
+        if (GetLastError() == ERROR_NOT_ALL_ASSIGNED) {
+            Error::New(env, "The token does not have the specified privilege.").ThrowAsJavaScriptException();
+            return env.Undefined();
+        }
+        CloseHandle(hToken);
         return env.Undefined();
     }
 
-    Value copyToClipboard(const CallbackInfo &info) {
+    Value CopyToClipboard(const CallbackInfo &info) {
         Env env = info.Env();
         string text = info[0].As<Napi::String>().Utf8Value();
         if (OpenClipboard(nullptr)) {
@@ -162,38 +183,64 @@ namespace native {
         return env.Undefined();
     }
 
-    Value pause(const CallbackInfo &info) {
+    Value Pause(const CallbackInfo &info) {
         while(!_kbhit()) {
             Sleep(10);
         }
         return info.Env().Undefined();
     }
 
-    Value openUrl(const CallbackInfo &info) {
+    Value OpenUrl(const CallbackInfo &info) {
         Env env = info.Env();
         wstring url = StringToWString(info[0].As<Napi::String>().Utf8Value());
         HINSTANCE retcode = ShellExecute(GetConsoleWindow(), L"open", url.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
         return Napi::Number::New(env, (INT_PTR)retcode); // NOLINT(cppcoreguidelines-narrowing-conversions)
     }
 
-    Value checkSnapFastcall(const CallbackInfo &info) {
+    Value CheckSnapFastcall(const CallbackInfo &info) {
         Env env = info.Env();
         wstring queryResult;
         RegUtils::GetString(HKEY_CLASSES_ROOT, L"snapgenshin", L"", queryResult);
         return Napi::Boolean::New(env, wcscmp(queryResult.c_str(), L"URL:snapgenshin") == 0);
     }
 
+    Value GetMACAddress(const CallbackInfo &info) {
+        Env env = info.Env();
+        ULONG ulOutBufLen = sizeof(IP_ADAPTER_INFO);
+        auto pAdapterInfo = (IP_ADAPTER_INFO *) malloc(ulOutBufLen);
+        if (GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) != ERROR_SUCCESS) {
+            pAdapterInfo = (IP_ADAPTER_INFO *) malloc(ulOutBufLen);
+            if (GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) != ERROR_SUCCESS) { return env.Undefined(); }
+        }
+        PIP_ADAPTER_INFO pAdapter = pAdapterInfo;
+        while (pAdapter) {
+            if (pAdapter->Address[0] == 0x00) {
+                pAdapter = pAdapter->Next;
+                continue;
+            }
+            auto addr = (char *) malloc(16);
+            char *result;
+            ToHex((char *)pAdapter->Address, 6, &result);
+            auto ret = Napi::String::New(env, result);
+            free(result);
+            free(pAdapterInfo);
+            return ret;
+        }
+        return env.Undefined();
+    }
+
     Object init(Env env, Object exports) {
-        exports.Set("pause", Function::New(env, pause));
-        exports.Set("openUrl", Function::New(env, openUrl));
-        exports.Set("getDeviceID", Function::New(env, getDeviceID));
-        exports.Set("getDeviceInfo", Function::New(env, getDeviceInfo));
-        exports.Set("whoUseThePort", Function::New(env, whoUseThePort));
-        exports.Set("copyToClipboard", Function::New(env, copyToClipboard));
-        exports.Set("enablePrivilege", Function::New(env, enablePrivilege));
-        exports.Set("checkSnapFastcall", Function::New(env, checkSnapFastcall));
-        exports.Set("checkGameIsRunning", Function::New(env, checkGameIsRunning));
-        exports.Set("selectGameExecutable", Function::New(env, selectGameExecutable));
+        exports.Set("pause", Function::New(env, Pause));
+        exports.Set("openUrl", Function::New(env, OpenUrl));
+        exports.Set("getDeviceID", Function::New(env, GetDeviceID));
+        exports.Set("getMACAddress", Function::New(env, GetMACAddress));
+        exports.Set("getDeviceInfo", Function::New(env, GetDeviceInfo));
+        exports.Set("whoUseThePort", Function::New(env, WhoUseThePort));
+        exports.Set("copyToClipboard", Function::New(env, CopyToClipboard));
+        exports.Set("enablePrivilege", Function::New(env, EnablePrivilege));
+        exports.Set("checkSnapFastcall", Function::New(env, CheckSnapFastcall));
+        exports.Set("checkGameIsRunning", Function::New(env, CheckGameIsRunning));
+        exports.Set("selectGameExecutable", Function::New(env, SelectGameExecutable));
         return exports;
     }
 

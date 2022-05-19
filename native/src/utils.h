@@ -5,7 +5,7 @@
 string WStringToString(const wstring &src, UINT codePage = CP_ACP);
 wstring StringToWString(const string &src, UINT codePage = CP_ACP);
 LSTATUS OpenFile(Env env, Napi::String &result, HWND parent = GetConsoleWindow());
-BOOL EnablePrivilege(Env env, const wstring &name);
+char* ToHex(const char *bin, int binsz, char **result);
 void Log(Env env, const string &msg);
 void Log(Env env, const wstring &msg);
 

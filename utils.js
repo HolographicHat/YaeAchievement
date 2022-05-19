@@ -206,11 +206,14 @@ const upload = async data => {
 }
 
 const checkUpdate = async () => {
-    const data = (await cloud.get("/latest-version")).data
+    const data = (await cloud.fetchBucket("/latest.json")).data
     if (data["vc"] !== version.code) {
         log(`有可用更新: ${version.name} => ${data["vn"]}`)
         log(`更新内容: \n${data["ds"]}`)
         log("下载地址: https://github.com/HolographicHat/genshin-achievement-export/releases\n")
+    }
+    if (data["fc"] === true) {
+        process.exit(410)
     }
 }
 
