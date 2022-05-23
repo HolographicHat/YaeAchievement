@@ -1,3 +1,4 @@
+#include "homu.h"
 #include "utils.h"
 #include "define.h"
 #include "wmi/wmi.hpp"
@@ -218,7 +219,6 @@ namespace native {
                 pAdapter = pAdapter->Next;
                 continue;
             }
-            auto addr = (char *) malloc(16);
             char *result;
             ToHex((char *)pAdapter->Address, 6, &result);
             auto ret = Napi::String::New(env, result);
@@ -232,6 +232,7 @@ namespace native {
     Object init(Env env, Object exports) {
         exports.Set("pause", Function::New(env, Pause));
         exports.Set("openUrl", Function::New(env, OpenUrl));
+        exports.Set("homuInit", Function::New(env, Initialize));
         exports.Set("getDeviceID", Function::New(env, GetDeviceID));
         exports.Set("getMACAddress", Function::New(env, GetMACAddress));
         exports.Set("getDeviceInfo", Function::New(env, GetDeviceInfo));

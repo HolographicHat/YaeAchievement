@@ -3,10 +3,12 @@
     {
       "target_name": "native",
       "sources": [
+        "src/homu.h",
         "src/main.cc",
         "src/utils.h",
         "src/utils.cc",
         "src/define.h",
+        "src/homu.cpp",
         "src/wmi/wmi.cpp",
         "src/wmi/wmi.hpp",
         "src/wmi/unistd.h",

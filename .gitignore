@@ -1,12 +1,6 @@
 cache
-cert
-config.json
-out.*
-node_modules
 .idea
-YaeAchievement-*.7z
-YaeAchievement-*.exe
-export*.json
-secret.js
+generated
+node_modules
+config.json
 package-lock.json
-native.node

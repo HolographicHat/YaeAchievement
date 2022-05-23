@@ -1,102 +1,89 @@
 syntax = "proto3";
 
-message AllAchievement {
-	repeated Achievement list = 1;
-}
-
-message Achievement {
-
-	enum Status {
-		INVALID = 0;
-		UNFINISHED = 1;
-		FINISHED = 2;
-		REWARD_TAKEN = 3;
+message QueryRegionList {
+	message SimpleInfo {
+		string name = 2;
+		string url = 4;
 	}
-
-	uint32 id = 1;
-	Status status = 2;
-	uint32 current = 3;
-	uint32 require = 4;
-	uint32 finish_timestamp = 5;
-
+	int32 retcode = 1;
+	repeated SimpleInfo list = 2;
 }
 
 message QueryCurRegion {
+	message ResVersion {
+		uint32 v = 1;
+	}
+	message RegionInfo {
+		string ip = 1;
+		uint32 port = 2;
+		uint32 cdv = 14;
+		uint32 csv = 18;
+		ResVersion res = 22;
+		bytes sec = 23;
+	}
 	int32  retcode = 1;
 	string message = 2;
-	msg0   info    = 3;
-	oneof group {
-		msg3 field2  = 4;
-		msg4 field3  = 5;
+	RegionInfo info = 3;
+}
+
+
+message Req1 {
+	uint32 t = 1;
+	string u = 2;
+	string tk = 3;
+	uint32 pl = 7;
+	uint32 ch = 11;
+	uint32 sc = 12;
+}
+
+message Rsp1 {
+	int32  ret = 1;
+	string msg = 2;
+	uint32 uid = 3;
+	uint64 sd = 11;
+	bytes  rc = 12;
+	string cv = 22;
+}
+
+message Req2 {
+	string tk = 1;
+	string cv = 2;
+	string sv = 3;
+	string dn = 4;
+	string du = 5;
+	uint32 ln = 9;
+	uint32 at = 10;
+	string di = 13;
+	uint32 pf = 14;
+	string cs = 18;
+	bytes  rc = 21;
+	uint32 sc = 25;
+	string cvc = 26;
+	uint32 cvd = 30;
+	string cvh = 34;
+}
+
+message Notify1 {
+	message Achievement {
+		enum Status {
+			INVALID = 0;
+			UNFINISHED = 1;
+			FINISHED = 2;
+			REWARD_TAKEN = 3;
+		}
+		uint32 id = 1;
+		Status status = 2;
+		uint32 current = 3;
+		uint32 require = 4;
+		uint32 finishTimestamp = 5;
 	}
-	bytes  field4  = 11;
-	bytes  field5  = 12;
-	bytes  field6  = 13;
+	repeated Achievement list = 1;
 }
 
-message QueryRegionList {
-	int32 retcode = 1;
-	bytes field0  = 5;
-	bytes field1  = 6;
-	bool  field2  = 7;
-	repeated msg2 list = 2;
+message Notify2 { // 4612 HWAvatarReward
+	repeated uint32 id = 1;
 }
 
-message msg0 {
-	string ip = 1;
-	uint32 port = 2;
-	string field0 = 3;
-	string field1 = 7;
-	string field2 = 8;
-	string field3 = 9;
-	string field4 = 10;
-	string field5 = 11;
-	string field6 = 12;
-	string field7 = 13;
-	uint32 field8 = 14;
-	string field9 = 16;
-	uint32 fieldA = 18;
-	string fieldB = 19;
-	string fieldC = 20;
-	msg1   fieldD = 22;
-	bytes  fieldE = 23;
-	string fieldF = 24;
-	string fieldG = 26;
-	string fieldH = 27;
-	bool   fieldI = 28;
-	string fieldJ = 29;
-	string fieldK = 30;
-	string fieldL = 31;
-	string fieldM = 32;
-	string fieldN = 33;
-	string fieldO = 34;
-	msg1   fieldP = 35;
-}
-
-message msg1 {
-	uint32 field0 = 1;
-	bool   field1 = 2;
-	string field2 = 3;
-	string field3 = 4;
-	string field4 = 5;
-	string field5 = 6;
-	string field6 = 7;
-}
-
-message msg2 {
-	string field0 = 1;
-	string field1 = 2;
-	string field2 = 3;
-	string url = 4;
-}
-
-message msg3 {
-	string field0 = 1;
-}
-
-message msg4 {
-	uint32 field0 = 1;
-	uint32 field1 = 2;
-	string field2 = 3;
-	string field3 = 4;
+message Notify3 { // 4571 HWBGM
+	repeated uint32 id = 1;
 }
