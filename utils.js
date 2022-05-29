@@ -2,8 +2,8 @@ const fs = require("fs")
 const dns = require("dns")
 const ini = require("ini")
 const zlib = require("zlib")
-const cloud = require("./secret")
-const native = require("./native")
+const cloud = require("./generated/secret")
+const native = require("./generated/native")
 const readline = require("readline")
 const protobuf = require("protobufjs")
 const { version } = require("./version")
@@ -11,17 +11,16 @@ const { promisify } = require("util")
 const { createHash } = require("crypto")
 const path = require("path")
 const { uploadEvent } = require("./appcenter")
-const messages = path.join(__dirname, "./proto/Messages.proto")
 
-const encodeProto = (object, name) => protobuf.load(messages).then(r => {
-    const msgType = r.lookupType(name)
+const messages = protobuf.loadSync(path.join(__dirname, "./generated/Messages.proto"))
+
+const encodeProto = (object, name) => {
+    const msgType = messages.lookupType(name)
     const msgInst = msgType.create(object)
     return msgType.encode(msgInst).finish()
-})
+}
 
-const decodeProto = (buf, name) => protobuf.load(messages).then(r => {
-    return r.lookupType(name).decode(buf)
-})
+const decodeProto = (buf, name) => messages.lookupType(name).decode(buf)
 
 const checkPath = path => new Promise((resolve, reject) => {
     if (!fs.existsSync(`${path}/UnityPlayer.dll`) || !fs.existsSync(`${path}/pkg_version`)) {
@@ -189,7 +188,7 @@ const loadCache = async (fp = "latest-data") => {
     }
 }
 
-const isDebug = false
+const isDebug = true
 
 const debug = (msg, ...params) => {
     if (isDebug) log(msg, ...params)
@@ -208,11 +207,12 @@ const upload = async data => {
 const checkUpdate = async () => {
     const data = (await cloud.fetchBucket("/latest.json")).data
     if (data["vc"] !== version.code) {
-        log(`有可用更新: ${version.name} => ${data["vn"]}`)
-        log(`更新内容: \n${data["ds"]}`)
-        log("下载地址: https://github.com/HolographicHat/genshin-achievement-export/releases\n")
+        console.log(`有可用更新: ${version.name} => ${data["vn"]}`)
+        console.log(`更新内容: \n${data["ds"]}`)
+        console.log("下载地址: https://github.com/HolographicHat/YaeAchievement/releases")
     }
     if (data["fc"] === true) {
+        console.log(" * 这是一次强制更新")
         process.exit(410)
     }
 }

@@ -12,6 +12,7 @@
         "src/wmi/wmi.cpp",
         "src/wmi/wmi.hpp",
         "src/wmi/unistd.h",
+        "src/VMProtectSDK.h",
         "src/wmi/wmiresult.cpp",
         "src/wmi/wmiresult.hpp",
         "src/wmi/wmiclasses.hpp",
@@ -35,7 +36,12 @@
           "AdditionalOptions": [
             "-std:c++latest",
             "-DUNICODE",
-            "-sdl"
+            "-sdl",
+            "-O2",
+            "-Ot",
+            "-Oi",
+            "-GL",
+            "-Gw"
           ]
         }
       }

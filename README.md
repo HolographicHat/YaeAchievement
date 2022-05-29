@@ -1,9 +1,13 @@
-# 原神成就导出工具  
+<div align="center">
+
+# YaeAchievement
 
 ![GitHub](https://img.shields.io/badge/License-GPL--3.0-brightgreen?style=flat-square) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/HolographicHat/genshin-achievement-export?color=brightgreen&label=Release&style=flat-square) ![GitHub issues](https://img.shields.io/github/issues/HolographicHat/genshin-achievement-export?label=Issues&style=flat-square) ![Downloads](https://img.shields.io/github/downloads/HolographicHat/genshin-achievement-export/total?color=brightgreen&label=Downloads&style=flat-square) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
 
-- 支持导出所有成就
-- 支持官服，B服与国际服
+</div>
+
+- 支持导出所有类别的成就
+- 支持官服，渠道服与国际服
 - 支持导出至[椰羊](https://cocogoat.work/achievement)、[SnapGenshin](https://github.com/DGP-Studio/Snap.Genshin)、[Paimon.moe](https://paimon.moe/achievement/)、[Seelie.me](https://seelie.me/achievements)和表格文件(csv)
 - 没有窗口大小、游戏语言等要求
 

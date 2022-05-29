@@ -2,12 +2,13 @@ const proxy = require("udp-proxy")
 const cp = require("child_process")
 const appcenter = require("./appcenter")
 const regionServer = require("./regionServer")
+const cloud = require("./generated/secret")
 const {
     initConfig, splitPacket, upload, decodeProto, log, setupHost, KPacket, debug, checkUpdate,
     brotliCompressSync, brotliDecompressSync, checkGameIsRunning, checkPortIsUsing
 } = require("./utils")
 const { exportData } = require("./export")
-const { enablePrivilege, pause } = require("./native")
+const { enablePrivilege, pause } = require("./generated/native")
 
 const onExit = () => {
     setupHost(true)
@@ -37,6 +38,7 @@ const onExit = () => {
         }
         appcenter.startup()
         let conf = await initConfig()
+        cloud.init(conf)
         checkPortIsUsing()
         checkGameIsRunning()
         log("检查更新")
@@ -121,7 +123,7 @@ const onExit = () => {
                             log(`请求ID: ${response.headers["x-api-requestid"]}`)
                             log("请联系开发者以获取帮助")
                         } else {
-                            const proto = await decodeProto(data,"AllAchievement")
+                            const proto = await decodeProto(data, "Notify1")
                             await exportData(proto)
                         }
                         process.exit(0)

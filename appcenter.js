@@ -1,7 +1,7 @@
 const axios = require("axios")
 const crypto = require("crypto")
 const { version } = require("./version")
-const { getDeviceID, getDeviceInfo } = require("./native")
+const { getDeviceID, getDeviceInfo } = require("./generated/native")
 
 const getTimestamp = (d = new Date()) => {
     const p = i => i.toString().padStart(2, "0")

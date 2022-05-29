@@ -3,7 +3,7 @@ const axios = require("axios")
 const readline = require("readline")
 const { version } = require("./version")
 const { loadCache, log, openUrl } = require("./utils")
-const { checkSnapFastcall, copyToClipboard } = require("./native")
+const { checkSnapFastcall, copyToClipboard } = require("./generated/native")
 
 const exportToSeelie = proto => {
     const out = { achievements: {} }
@@ -76,7 +76,7 @@ const exportToCocogoat = async proto => {
     if (retcode > 32) {
         log("在浏览器内进行下一步操作")
     } else {
-        log(`导出失败，请联系开发者以获取帮助 (26-3-${retcode})`)
+        log(`打开此链接以进行下一步操作: https://cocogoat.work/achievement?memo=${response.data.key}`)
     }
 }
 

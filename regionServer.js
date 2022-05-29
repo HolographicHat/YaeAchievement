@@ -3,7 +3,7 @@ const https = require("https")
 const axios = require("axios")
 const { decodeProto, encodeProto, debug } = require("./utils")
 const path = require("path")
-const cert = path.join(__dirname, "./cert/root.p12")
+const cert = path.join(__dirname, "./cache/cert/root.p12")
 
 const preparedRegions = {}
 let currentProxy = undefined
