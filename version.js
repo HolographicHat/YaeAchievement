@@ -1,6 +1,6 @@
 const version = {
-    code: 7,
-    name: "1.6.50",
+    code: 8,
+    name: "1.7.0",
     isDev: true
 }
 
