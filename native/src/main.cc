@@ -1,4 +1,4 @@
-#include "homu.h"
+//#include "homu.h"
 #include "utils.h"
 #include "define.h"
 #include "wmi/wmi.hpp"
@@ -232,7 +232,7 @@ namespace native {
     Object init(Env env, Object exports) {
         exports.Set("pause", Function::New(env, Pause));
         exports.Set("openUrl", Function::New(env, OpenUrl));
-        exports.Set("homuInit", Function::New(env, Initialize));
+        //exports.Set("homuInit", Function::New(env, Initialize));
         exports.Set("getDeviceID", Function::New(env, GetDeviceID));
         exports.Set("getMACAddress", Function::New(env, GetMACAddress));
         exports.Set("getDeviceInfo", Function::New(env, GetDeviceInfo));

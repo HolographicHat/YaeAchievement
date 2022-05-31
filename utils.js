@@ -210,10 +210,10 @@ const checkUpdate = async () => {
         console.log(`有可用更新: ${version.name} => ${data["vn"]}`)
         console.log(`更新内容: \n${data["ds"]}`)
         console.log("下载地址: https://github.com/HolographicHat/YaeAchievement/releases")
-    }
-    if (data["fc"] === true) {
-        console.log(" * 这是一次强制更新")
-        process.exit(410)
+        if (data["fc"] === true) {
+            console.log(" * 这是一次强制更新")
+            process.exit(410)
+        }
     }
 }
 
