@@ -5,22 +5,17 @@ namespace YaeAchievement;
 
 public static class Injector {
 
-    public static bool CreateProcess(string path, ref IntPtr phThread, ref IntPtr phProcess) {
-        ProcessInformation pi;
-        unsafe {
-            var si = new StartupInfo();
-            SecurityAttributes* attr = null;
-            var result = Native.CreateProcess(
-                path, null, ref *attr, ref *attr, false,
-                CreationFlags.CreateSuspended, IntPtr.Zero, null, ref si, out pi
-            );
-            if (!result) {
-                return false;
-            }
-        }
-        phThread = pi.hThread;
-        phProcess = pi.hProcess;
-        return true;
+    public static unsafe bool CreateProcess(string path, out IntPtr hProc, out IntPtr hThread, out uint pid) {
+        var si = new StartupInfo();
+        SecurityAttributes* attr = null;
+        var result = Native.CreateProcess(
+            path, null, ref *attr, ref *attr, false,
+            CreationFlags.CreateSuspended, IntPtr.Zero, null, ref si, out var pi
+        );
+        pid = pi.dwProcessID;
+        hProc = pi.hProcess;
+        hThread = pi.hThread;
+        return result;
     }
     
     public static int LoadLibraryAndInject(IntPtr handle, string libPath) {

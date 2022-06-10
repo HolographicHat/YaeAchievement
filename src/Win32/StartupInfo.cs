@@ -7,20 +7,20 @@ namespace YaeAchievement.Win32;
 
 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
 public struct StartupInfo {
-    public int cb;
+    public uint cb;
     public string lpReserved;
     public string lpDesktop;
     public string lpTitle;
-    public int dwX;
-    public int dwY;
-    public int dwXSize;
-    public int dwYSize;
-    public int dwXCountChars;
-    public int dwYCountChars;
-    public int dwFillAttribute;
-    public int dwFlags;
-    public short wShowWindow;
-    public short cbReserved2;
+    public uint dwX;
+    public uint dwY;
+    public uint dwXSize;
+    public uint dwYSize;
+    public uint dwXCountChars;
+    public uint dwYCountChars;
+    public uint dwFillAttribute;
+    public uint dwFlags;
+    public ushort wShowWindow;
+    public ushort cbReserved2;
     public IntPtr lpReserved2;
     public IntPtr hStdInput;
     public IntPtr hStdOutput;

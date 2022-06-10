@@ -1,8 +1,9 @@
 ﻿namespace YaeAchievement.Win32; 
 
-public static class CreationFlags {
-    public const int CreateSuspended = 0x00000004;
-    public const int DetachedProcess = 0x00000008;
-    public const int CreateNoWindow = 0x08000000;
-    public const int ExtendedStartupInfoPresent = 0x00080000;
+[Flags]
+public enum CreationFlags : uint {
+    CreateSuspended = 0x00000004,
+    DetachedProcess = 0x00000008,
+    CreateNoWindow = 0x08000000,
+    ExtendedStartupInfoPresent = 0x00080000
 }

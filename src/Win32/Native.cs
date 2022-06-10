@@ -14,7 +14,7 @@ public static class Native {
         ref SecurityAttributes lpProcessAttributes,
         ref SecurityAttributes lpThreadAttributes,
         bool bInheritHandles,
-        int  dwCreationFlags,
+        CreationFlags dwCreationFlags,
         IntPtr lpEnvironment,
         string? lpCurrentDirectory,
         [In] ref StartupInfo lpStartupInfo,
@@ -46,12 +46,12 @@ public static class Native {
         IntPtr hProcess, 
         IntPtr lpAddress, 
         int dwSize, 
-        int flAllocationType, 
-        int flProtect
+        AllocationType flAllocationType, 
+        MemoryProtection flProtect
     );
     
     [DllImport("kernel32.dll", SetLastError=true, ExactSpelling=true)]
-    public static extern bool VirtualFreeEx(IntPtr hProcess, IntPtr lpAddress, int dwSize, int dwFreeType);
+    public static extern bool VirtualFreeEx(IntPtr hProcess, IntPtr lpAddress, int dwSize, AllocationType dwFreeType);
     
     [DllImport("kernel32.dll", SetLastError = true)]
     public static extern uint ResumeThread(IntPtr hThread);

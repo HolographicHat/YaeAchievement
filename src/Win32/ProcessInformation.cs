@@ -9,6 +9,6 @@ namespace YaeAchievement.Win32;
 public struct ProcessInformation {
     public IntPtr hProcess;
     public IntPtr hThread;
-    public int dwProcessId;
-    public int dwThreadId;
+    public uint dwProcessID;
+    public uint dwThreadID;
 }
