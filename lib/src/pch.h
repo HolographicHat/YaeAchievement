@@ -7,10 +7,20 @@
 #ifndef PCH_H
 #define PCH_H
 
+#define WIN32_LEAN_AND_MEAN             // 从 Windows 头文件中排除极少使用的内容
+// Windows 头文件
+#include <windows.h>
+
 // 添加要在此处预编译的标头
+
+typedef unsigned long long ull;
+
 #include <map>
 #include <vector>
+#include <codecvt>
+#include <cstdint>
 #include <iostream>
-#include "framework.h"
+#include <detours.h>
+#include "il2cpp-appdata.h"
 
 #endif //PCH_H
