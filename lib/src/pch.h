@@ -13,8 +13,6 @@
 
 // 添加要在此处预编译的标头
 
-typedef unsigned long long ull;
-
 #include <map>
 #include <vector>
 #include <codecvt>
