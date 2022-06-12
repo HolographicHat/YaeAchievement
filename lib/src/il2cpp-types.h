@@ -2365,5 +2365,4 @@ namespace Genshin {
         void* monitor;
         struct IMessage_Fields fields;
     };
-
 }

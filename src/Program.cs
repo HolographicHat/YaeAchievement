@@ -58,7 +58,9 @@ StartAndWaitResult(@"D:\Genshin Impact Dev\2.8\YuanShen.exe", evt => {
         case PipeRecvEvent @event: {
             var bytes = @event.GetData();
             GlobalVars.UnexpectedExit = false;
-            return BitConverter.ToUInt32(bytes, 2) == 123456;
+            Console.WriteLine("On PRE");
+            Console.WriteLine(Convert.ToBase64String(bytes));
+            return false;
         }
         default:
             return false;
