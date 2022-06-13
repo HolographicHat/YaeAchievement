@@ -1,10 +1,14 @@
-﻿using YaeAchievement;
+﻿using System.Net;
+using System.Net.Http.Headers;
+using YaeAchievement;
 using static YaeAchievement.Utils;
 
-InstallExitHook();
+/*InstallExitHook();
 InstallExceptionHook();
 CheckGenshinIsRunning();
-LoadConfig();
+LoadConfig();*/
+var ch = GetBucketFileAsString("latest.json");
+//Console.WriteLine(c.Send(msg).StatusCode);
 return;
 StartAndWaitResult(@"D:\Genshin Impact Dev\2.8\YuanShen.exe", str => {
     GlobalVars.UnexpectedExit = false;
