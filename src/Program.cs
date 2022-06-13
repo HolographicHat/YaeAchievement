@@ -1,11 +1,12 @@
-﻿using System.ComponentModel;
-using System.Diagnostics;
-using System.IO.Pipes;
-using YaeAchievement;
-using YaeAchievement.Win32;
+﻿using YaeAchievement;
+using static YaeAchievement.Utils;
 
-
-Utils.StartAndWaitResult(@"D:\Genshin Impact Dev\2.8\YuanShen.exe", str => {
+InstallExitHook();
+InstallExceptionHook();
+CheckGenshinIsRunning();
+LoadConfig();
+return;
+StartAndWaitResult(@"D:\Genshin Impact Dev\2.8\YuanShen.exe", str => {
     GlobalVars.UnexpectedExit = false;
     //AchievementAllDataNotify.Parser.ParseFrom(Convert.FromBase64String(str)).List;
     //var notify = Serializer.Deserialize<AchievementAllDataNotify>(stream)!;

@@ -41,7 +41,7 @@ public static class Native {
     [SuppressMessage("Globalization", "CA2101:指定对 P/Invoke 字符串参数进行封送处理")]
     public static extern IntPtr GetProcAddress(IntPtr hModule, string lpProcName);
     
-    [DllImport("kernel32.dll", SetLastError = true, ExactSpelling=true)]
+    [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
     public static extern IntPtr VirtualAllocEx(
         IntPtr hProcess, 
         IntPtr lpAddress, 
@@ -50,7 +50,7 @@ public static class Native {
         MemoryProtection flProtect
     );
     
-    [DllImport("kernel32.dll", SetLastError=true, ExactSpelling=true)]
+    [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
     public static extern bool VirtualFreeEx(IntPtr hProcess, IntPtr lpAddress, int dwSize, AllocationType dwFreeType);
     
     [DllImport("kernel32.dll", SetLastError = true)]
@@ -71,4 +71,14 @@ public static class Native {
         uint dwCreationFlags,
         out IntPtr lpThreadId
     );
+    
+    [DllImport("kernel32.dll")]
+    public static extern IntPtr GetConsoleWindow();
+    
+    [DllImport("comdlg32.dll", SetLastError = true)]
+    public static extern int CommDlgExtendedError();
+    
+    [DllImport("comdlg32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+    public static extern bool GetOpenFileName([In, Out] OpenFileName ofn);
+    
 }
