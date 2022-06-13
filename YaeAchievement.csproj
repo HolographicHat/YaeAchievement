@@ -9,4 +9,8 @@
         <ApplicationManifest>res\app.manifest</ApplicationManifest>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Google.Protobuf" Version="3.21.1" />
+    </ItemGroup>
+
 </Project>
