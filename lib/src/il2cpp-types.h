@@ -2358,11 +2358,29 @@ namespace Genshin {
         uint8_t vector[32];
     };
 
-    struct __declspec(align(8)) IMessage_Fields {};
-
-    struct IMessage {
-        void* klass;
-        void* monitor;
-        struct IMessage_Fields fields;
+    struct KcpPacket {
+        BYTE* data;
+        UINT32 length;
     };
+
+    enum class KcpEventType : int {
+        EventNotSet = -1,
+        EventConnect = 0,
+        EventConnectFailed = 1,
+        EventDisconnect = 2,
+        EventRecvMsg = 3,
+        EventCount = 4,
+    };
+
+    struct KcpEvent_Fields {
+        KcpEventType type;
+        UINT32 token;
+        UINT32 data;
+        struct KcpPacket* packet;
+    };
+
+    struct ClientKcpEvent {
+        struct KcpEvent_Fields fields;
+    };
+
 }
