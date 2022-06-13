@@ -29,42 +29,44 @@ public static class Utils {
         return c;
     });
 
-    public static string GetBucketFileAsString(string path) {
-        return Encoding.UTF8.GetString(GetBucketFileAsByteArray(path));
+    public static string GetBucketFileAsString(string path, bool cache = true) {
+        return Encoding.UTF8.GetString(GetBucketFileAsByteArray(path, cache));
     }
     
-    public static byte[] GetBucketFileAsByteArray(string path) {
+    public static byte[] GetBucketFileAsByteArray(string path, bool cache = true) {
         using var msg = new HttpRequestMessage {
             Method = HttpMethod.Get,
             RequestUri = new Uri($"{GlobalVars.BucketHost}/{path}")
         };
         CacheItem? ci = null;
-        string?  etag = null;
-        var cacheName = $"./cache/{CalculateMD5(path)[..16]}.miko";
-        if (File.Exists(cacheName)) {
-            using var input = File.OpenRead(cacheName);
-            using var dInput = new GZipStream(input, CompressionMode.Decompress);
-            ci = CacheItem.Parser.ParseFrom(dInput);
-            etag = ci.Etag;
-        }
-        if (etag != null) {
-            msg.Headers.TryAddWithoutValidation("If-None-Match", $"{etag}");
+        var cacheName = cache ? $"./cache/{CalculateMD5(path)[..16]}.miko" : "";
+        if (cache) {
+            Directory.CreateDirectory("cache");
+            if (File.Exists(cacheName)) {
+                using var input = File.OpenRead(cacheName);
+                using var dInput = new GZipStream(input, CompressionMode.Decompress);
+                ci = CacheItem.Parser.ParseFrom(dInput);
+                msg.Headers.TryAddWithoutValidation("If-None-Match", $"{ci.Etag}");
+                
+            }
         }
         using var response = CHttpClient.Value.Send(msg);
-        if (response.StatusCode == HttpStatusCode.NotModified) {
+        if (cache && response.StatusCode == HttpStatusCode.NotModified) {
             return ci!.Content.ToByteArray();
         }
         response.EnsureSuccessStatusCode();
-        etag = response.Headers.ETag!.Tag;
         var responseBytes = response.Content.ReadAsByteArrayAsync().Result;
-        using var os = File.OpenWrite(cacheName);
-        using var cos = new GZipStream(os, CompressionLevel.SmallestSize);
-        new CacheItem {
-            Etag = etag,
-            Version = 3,
-            Checksum = CalculateMD5(responseBytes),
-            Content = ByteString.CopyFrom(responseBytes)
-        }.WriteTo(cos);
+        if (cache) {
+            var etag = response.Headers.ETag!.Tag;
+            using var os = File.OpenWrite(cacheName);
+            using var cos = new GZipStream(os, CompressionLevel.SmallestSize);
+            new CacheItem {
+                Etag = etag,
+                Version = 3,
+                Checksum = CalculateMD5(responseBytes),
+                Content = ByteString.CopyFrom(responseBytes)
+            }.WriteTo(cos);
+        }
         return responseBytes;
     }
 
@@ -81,7 +83,6 @@ public static class Utils {
     }
     
     public static void LoadConfig() {
-        Directory.CreateDirectory("cache");
         var conf = JsonNode.Parse(File.ReadAllText(GlobalVars.ConfigFileName))!;
         var path = conf["genshinPath"];
         if (path == null || CheckGamePathValid(path.GetValue<string>())) {
@@ -90,6 +91,35 @@ public static class Utils {
             File.WriteAllText(GlobalVars.ConfigFileName, conf.ToJsonString());
         } else {
             GlobalVars.GamePath = path.GetValue<string>();
+        }
+    }
+
+    public static void CheckUpdate() {
+        var info = UpdateInfo.Parser.ParseFrom(GetBucketFileAsByteArray("schicksal/version"))!;
+        if (GlobalVars.AppVersionCode != info.VersionCode) {
+            Console.WriteLine($"有可用更新: {GlobalVars.AppVersionName} => {info.VersionName}");
+            Console.WriteLine($"更新内容: \n{info.Description}");
+            if (info.EnableAutoDownload) {
+                Console.WriteLine("正在下载更新包...");
+                var fullPath = Path.GetFullPath("update.7z");
+                File.WriteAllBytes(fullPath, GetBucketFileAsByteArray(info.PackageLink));
+                Console.WriteLine("下载完毕! 关闭程序后, 将压缩包解压至当前目录即可完成更新.");
+                new Process {
+                    StartInfo = {
+                        FileName = fullPath,
+                        UseShellExecute = true
+                    }
+                }.Start();
+                Environment.Exit(0);
+            }
+            Console.WriteLine($"下载地址: {info.PackageLink}");
+            if (info.ForceUpdate) {
+                Console.WriteLine("在完成此次更新前, 程序可能无法正常使用.");
+                Environment.Exit(0);
+            }
+        }
+        if (info.EnableLibDownload) {
+            File.WriteAllBytes("YaeLib.dll", GetBucketFileAsByteArray("schicksal/lib.dll"));
         }
     }
 
