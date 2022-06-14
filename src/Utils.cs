@@ -18,7 +18,8 @@ public static class Utils {
 
     private static readonly Lazy<HttpClient> CHttpClient = new (() => {
         var c = new HttpClient(new HttpClientHandler {
-            Proxy = new WebProxy("http://127.0.0.1:8888")
+            Proxy = new WebProxy("http://127.0.0.1:8888"),
+            AutomaticDecompression = DecompressionMethods.Brotli | DecompressionMethods.GZip
         }) {
             DefaultRequestHeaders = {
                 UserAgent = {
@@ -47,7 +48,6 @@ public static class Utils {
                 using var dInput = new GZipStream(input, CompressionMode.Decompress);
                 ci = CacheItem.Parser.ParseFrom(dInput);
                 msg.Headers.TryAddWithoutValidation("If-None-Match", $"{ci.Etag}");
-                
             }
         }
         using var response = CHttpClient.Value.Send(msg);
@@ -151,6 +151,12 @@ public static class Utils {
         Marshal.FreeHGlobal(fnPtr);
         return path;
     }
+
+    // ReSharper disable once UnusedMethodReturnValue.Global
+    public static bool TryDisableQuickEdit() {
+        var handle = Native.GetStdHandle();
+        return Native.GetConsoleMode(handle, out var mode) && Native.SetConsoleMode(handle, mode&~64);
+    }
     
     public static void CheckGenshinIsRunning() {
         Process.EnterDebugMode();
@@ -183,11 +189,19 @@ public static class Utils {
         if (!Injector.CreateProcess(exePath, out var hProcess, out var hThread, out var pid)) {
             Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("ICreateProcess fail"));
         }
-        if (Injector.LoadLibraryAndInject(hProcess, GlobalVars.LibName) != 0) {
+        if (Injector.LoadLibraryAndInject(hProcess, Path.GetFullPath(GlobalVars.LibName)) != 0) {
             if (!Native.TerminateProcess(hProcess, 0)) {
                 Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("TerminateProcess fail"));
             }
         }
+        var proc = Process.GetProcessById(Convert.ToInt32(pid));
+        proc.EnableRaisingEvents = true;
+        proc.Exited += (_, _) => {
+            if (GlobalVars.UnexpectedExit) {
+                Console.WriteLine("游戏进程异常退出");
+                Environment.Exit(114514);
+            }
+        };
         if (Native.ResumeThread(hThread) == 0xFFFFFFFF) {
             var e = new Win32Exception();
             if (!Native.TerminateProcess(hProcess, 0)) {
@@ -198,14 +212,6 @@ public static class Utils {
         if (!Native.CloseHandle(hProcess)) {
             Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("CloseHandle fail"));
         }
-        var proc = Process.GetProcessById(Convert.ToInt32(pid));
-        proc.EnableRaisingEvents = true;
-        proc.Exited += (_, _) => {
-            if (GlobalVars.UnexpectedExit) {
-                Console.WriteLine("游戏进程异常退出");
-                Environment.Exit(114514);
-            }
-        };
         var ts = new ThreadStart(() => {
             var server = new NamedPipeServerStream(GlobalVars.PipeName);
             server.WaitForConnection();

@@ -75,6 +75,18 @@ public static class Native {
     [DllImport("kernel32.dll")]
     public static extern IntPtr GetConsoleWindow();
     
+    // ReSharper disable once InconsistentNaming
+    private const int STD_INPUT_HANDLE = -10;
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern IntPtr GetStdHandle(int nStdHandle = STD_INPUT_HANDLE);
+    
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern bool GetConsoleMode(IntPtr handle, out int lpMode);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern bool SetConsoleMode(IntPtr handle, int ioMode);
+    
     [DllImport("comdlg32.dll", SetLastError = true)]
     public static extern int CommDlgExtendedError();
     

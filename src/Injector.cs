@@ -8,9 +8,10 @@ public static class Injector {
     public static unsafe bool CreateProcess(string path, out IntPtr hProc, out IntPtr hThread, out uint pid) {
         var si = new StartupInfo();
         SecurityAttributes* attr = null;
+        var dir = Path.GetDirectoryName(path)!;
         var result = Native.CreateProcess(
             path, null, ref *attr, ref *attr, false,
-            CreationFlags.CreateSuspended, IntPtr.Zero, null, ref si, out var pi
+            CreationFlags.CreateSuspended, IntPtr.Zero, dir, ref si, out var pi
         );
         pid = pi.dwProcessID;
         hProc = pi.hProcess;
