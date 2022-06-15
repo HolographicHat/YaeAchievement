@@ -16,7 +16,7 @@ namespace YaeAchievement;
 
 public static class Utils {
 
-    private static readonly Lazy<HttpClient> CHttpClient = new (() => {
+    public static readonly Lazy<HttpClient> CHttpClient = new (() => {
         var c = new HttpClient(new HttpClientHandler {
             Proxy = new WebProxy("http://127.0.0.1:8888"),
             AutomaticDecompression = DecompressionMethods.Brotli | DecompressionMethods.GZip
@@ -81,6 +81,21 @@ public static class Utils {
         var b = md5.ComputeHash(bytes);
         return Convert.ToHexString(b).ToLower();
     }
+
+    public static void CopyToClipboard(string text) {
+        if (Native.OpenClipboard(IntPtr.Zero)) {
+            Native.EmptyClipboard();
+            var hGlobal = Marshal.AllocHGlobal((text.Length + 1) * 2);
+            var hPtr = Native.GlobalLock(hGlobal);
+            Marshal.Copy(text.ToCharArray(), 0, hPtr, text.Length);
+            Native.GlobalUnlock(hPtr);
+            Native.SetClipboardData(13, hGlobal);
+            Marshal.FreeHGlobal(hGlobal);
+            Native.CloseClipboard();
+        } else {
+            throw new Win32Exception();
+        }
+    }
     
     public static void LoadConfig() {
         var conf = JsonNode.Parse(File.ReadAllText(GlobalVars.ConfigFileName))!;
@@ -104,12 +119,7 @@ public static class Utils {
                 var fullPath = Path.GetFullPath("update.7z");
                 File.WriteAllBytes(fullPath, GetBucketFileAsByteArray(info.PackageLink));
                 Console.WriteLine("下载完毕! 关闭程序后, 将压缩包解压至当前目录即可完成更新.");
-                new Process {
-                    StartInfo = {
-                        FileName = fullPath,
-                        UseShellExecute = true
-                    }
-                }.Start();
+                ShellOpen(fullPath);
                 Environment.Exit(0);
             }
             Console.WriteLine($"下载地址: {info.PackageLink}");
@@ -121,6 +131,15 @@ public static class Utils {
         if (info.EnableLibDownload) {
             File.WriteAllBytes("YaeLib.dll", GetBucketFileAsByteArray("schicksal/lib.dll"));
         }
+    }
+
+    public static bool ShellOpen(string path) {
+        return new Process {
+            StartInfo = {
+                FileName = path,
+                UseShellExecute = true
+            }
+        }.Start();
     }
 
     private static bool CheckGamePathValid(string path) {

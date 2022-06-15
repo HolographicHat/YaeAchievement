@@ -93,4 +93,24 @@ public static class Native {
     [DllImport("comdlg32.dll", SetLastError = true, CharSet = CharSet.Auto)]
     public static extern bool GetOpenFileName([In, Out] OpenFileName ofn);
     
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern IntPtr GlobalLock(IntPtr mem);
+
+    [return: MarshalAs(UnmanagedType.Bool)]
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern bool GlobalUnlock(IntPtr mem);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool OpenClipboard(IntPtr owner);
+
+    [return: MarshalAs(UnmanagedType.Bool)]
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern bool CloseClipboard();
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern IntPtr SetClipboardData(uint uFormat, IntPtr data);
+
+    [DllImport("user32.dll")]
+    public static extern bool EmptyClipboard();
 }
