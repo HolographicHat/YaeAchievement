@@ -1,7 +1,4 @@
-﻿using System.Net;
-using System.Net.Http.Headers;
-using Google.Protobuf;
-using YaeAchievement;
+﻿using YaeAchievement;
 using static YaeAchievement.Utils;
 
 Console.WriteLine("----------------------------------------------------");
@@ -14,11 +11,7 @@ CheckGenshinIsRunning();
 LoadConfig();
 CheckUpdate();
 TryDisableQuickEdit();
-//Console.WriteLine(c.Send(msg).StatusCode);
-//using var o = File.OpenWrite("ai");
-//AchievementInfo.Parser.ParseJson(File.ReadAllText(@"C:\Users\holog\Desktop\cc.json")).WriteTo(o);
-//CopyToClipboard("test");
-StartAndWaitResult(@"D:\Genshin Impact Dev\2.8\YuanShen.exe", str => {
+StartAndWaitResult(GlobalVars.GamePath, str => {
     GlobalVars.UnexpectedExit = false;
     var list = AchievementAllDataNotify.Parser.ParseFrom(Convert.FromBase64String(str));
     Export.Choose(list);
