@@ -149,6 +149,7 @@ public static class Utils {
     
     private static string SelectGameExecutable() {
         var fnPtr = Marshal.AllocHGlobal(32768);
+        Native.RtlZeroMemory(fnPtr, 32768);
         var ofn = new OpenFileName {
             file    = fnPtr,
             size    = Marshal.SizeOf<OpenFileName>(),
@@ -158,6 +159,19 @@ public static class Utils {
             filter  = "国服/国际服主程序 (YuanShen/GenshinImpact.exe)\0YuanShen.exe;GenshinImpact.exe\0",
             maxFile = 32768
         };
+        new Thread(() => {
+            var handle = Native.FindWindow("#32770", "选择主程序");
+            while (handle == IntPtr.Zero) {
+                handle = Native.FindWindow("#32770", "选择主程序");
+                Thread.Sleep(1);
+            }
+            var currentThreadId = Native.GetCurrentThreadId();
+            var foregroundThreadId = Native.GetWindowThreadProcessId(Native.GetForegroundWindow(), out _);
+            Native.AttachThreadInput(currentThreadId, foregroundThreadId, true);
+            Native.SetWindowPos(handle, new IntPtr(-1), 0, 0, 0, 0, 1 | 2);
+            Native.SetForegroundWindow(handle);
+            Native.AttachThreadInput(currentThreadId, foregroundThreadId, false);
+        }).Start();
         if(!Native.GetOpenFileName(ofn)) {
             var err = Native.CommDlgExtendedError();
             if (err != 0) {
