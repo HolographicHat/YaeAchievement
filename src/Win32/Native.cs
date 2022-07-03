@@ -138,4 +138,13 @@ public static class Native {
     [DllImport("user32.dll", SetLastError = true)]
     public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
 
+    [DllImport("gdi32.dll")]
+    public static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
+    
+    [DllImport("user32.dll")]
+    public static extern IntPtr GetDC(IntPtr hWnd);
+    
+    [DllImport("user32.dll")]
+    public static extern bool ReleaseDC(IntPtr hWnd, IntPtr hdc);
+
 }

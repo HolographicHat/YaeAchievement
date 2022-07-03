@@ -171,5 +171,4 @@ public static class Export {
         var b = Utils.GetBucketFileAsByteArray("schicksal/metadata");
         return AchievementInfo.Parser.ParseFrom(b);
     }
-    
 }

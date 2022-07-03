@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Nodes;
 using Google.Protobuf;
+using YaeAchievement.AppCenterSDK;
 using YaeAchievement.Win32;
 using static YaeAchievement.Win32.OpenFileFlags;
 
@@ -18,7 +19,7 @@ public static class Utils {
 
     public static readonly Lazy<HttpClient> CHttpClient = new (() => {
         var c = new HttpClient(new HttpClientHandler {
-            Proxy = new WebProxy("http://127.0.0.1:8888"),
+            Proxy = GlobalVars.DebugProxy ? new WebProxy("http://127.0.0.1:8888") : null,
             AutomaticDecompression = DecompressionMethods.Brotli | DecompressionMethods.GZip
         }) {
             DefaultRequestHeaders = {
@@ -99,10 +100,10 @@ public static class Utils {
     
     public static void LoadConfig() {
         var conf = JsonNode.Parse(File.ReadAllText(GlobalVars.ConfigFileName))!;
-        var path = conf["genshinPath"];
+        var path = conf["location"];
         if (path == null || CheckGamePathValid(path.GetValue<string>())) {
             GlobalVars.GamePath = SelectGameExecutable();
-            conf["genshinPath"] = GlobalVars.GamePath;
+            conf["location"] = GlobalVars.GamePath;
             File.WriteAllText(GlobalVars.ConfigFileName, conf.ToJsonString());
         } else {
             GlobalVars.GamePath = path.GetValue<string>();
@@ -116,15 +117,15 @@ public static class Utils {
             Console.WriteLine($"更新内容: \n{info.Description}");
             if (info.EnableAutoDownload) {
                 Console.WriteLine("正在下载更新包...");
-                var fullPath = Path.GetFullPath("update.7z");
+                var fullPath = Path.GetFullPath($"update.{Path.GetExtension(info.PackageLink)}");
                 File.WriteAllBytes(fullPath, GetBucketFileAsByteArray(info.PackageLink));
-                Console.WriteLine("下载完毕! 关闭程序后, 将压缩包解压至当前目录即可完成更新.");
+                Console.WriteLine("关闭程序后, 将压缩包解压至当前目录即可完成更新.");
                 ShellOpen(fullPath);
                 Environment.Exit(0);
             }
             Console.WriteLine($"下载地址: {info.PackageLink}");
             if (info.ForceUpdate) {
-                Console.WriteLine("在完成此次更新前, 程序可能无法正常使用.");
+                //Console.WriteLine("在完成此次更新前, 程序可能无法正常使用.");
                 Environment.Exit(0);
             }
         }
@@ -132,7 +133,19 @@ public static class Utils {
             File.WriteAllBytes("YaeLib.dll", GetBucketFileAsByteArray("schicksal/lib.dll"));
         }
     }
-
+    
+    public static void CheckSelfIsRunning() {
+        Process.EnterDebugMode(); 
+        var cur = Process.GetCurrentProcess();
+        foreach (var process in Process.GetProcesses().Where(process => process.Id != cur.Id)) {
+            if (process.ProcessName == cur.ProcessName) {
+                Logger.Error("另一个实例正在运行，请关闭后重试");
+                Environment.Exit(302);
+            }
+        }
+        Process.LeaveDebugMode();
+    }
+    
     public static bool ShellOpen(string path) {
         return new Process {
             StartInfo = {
@@ -144,7 +157,8 @@ public static class Utils {
 
     private static bool CheckGamePathValid(string path) {
         var dir = Path.GetDirectoryName(path)!;
-        return File.Exists($"{dir}/UnityPlayer.dll") && File.Exists($"{dir}/mhypbase.dll");
+        return !GlobalVars.CheckGamePath ||
+               File.Exists($"{dir}/UnityPlayer.dll") && File.Exists($"{dir}/mhypbase.dll");
     }
     
     private static string SelectGameExecutable() {
@@ -202,9 +216,13 @@ public static class Utils {
         Process.LeaveDebugMode();
     }
     
+    // ReSharper disable once InconsistentNaming
+    private static Process? proc;
+    
     public static void InstallExitHook() {
         AppDomain.CurrentDomain.ProcessExit += (_, _) => {
-            Console.WriteLine("按任意键退出");
+            proc?.Kill();
+            Logger.Info("按任意键退出");
             Console.ReadKey();
         };
     }
@@ -212,7 +230,9 @@ public static class Utils {
     public static void InstallExceptionHook() {
         AppDomain.CurrentDomain.UnhandledException += (_, e) => {
             Console.WriteLine(e.ExceptionObject.ToString());
-            Console.WriteLine("发生错误，请联系开发者以获取帮助");
+            Logger.Error("正在上报错误信息...");
+            AppCenter.TrackCrash((Exception) e.ExceptionObject);
+            AppCenter.Upload();
             Environment.Exit(-1);
         };
     }
@@ -227,10 +247,12 @@ public static class Utils {
                 Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("TerminateProcess fail"));
             }
         }
-        var proc = Process.GetProcessById(Convert.ToInt32(pid));
+        Logger.Info($"原神正在启动 ({pid})");
+        proc = Process.GetProcessById(Convert.ToInt32(pid));
         proc.EnableRaisingEvents = true;
         proc.Exited += (_, _) => {
             if (GlobalVars.UnexpectedExit) {
+                proc = null;
                 Console.WriteLine("游戏进程异常退出");
                 Environment.Exit(114514);
             }
