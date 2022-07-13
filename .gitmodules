@@ -1,3 +1,0 @@
-[submodule "native/src/wmi"]
-	path = native/src/wmi
-	url = https://github.com/HolographicHat/wmi
