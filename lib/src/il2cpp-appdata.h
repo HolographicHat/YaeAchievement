@@ -7,7 +7,7 @@
 #undef DO_API
 
 // Application-specific functions
-#define DO_APP_FUNC(a, r, n, p) extern r (*n) p
+#define DO_APP_FUNC(ca, oa, r, n, p) extern r (*n) p
 namespace Genshin {
 #include "il2cpp-functions.h"
 }

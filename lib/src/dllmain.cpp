@@ -8,7 +8,7 @@ using std::to_string;
 HWND unityWnd = 0;
 HANDLE hPipe  = 0;
 
-std::set<UINT16> PacketWhitelist = { 109, 131, 141, 2668, 32, 17 };
+std::set<UINT16> PacketWhitelist = { 172, 198, 112, 2676, 7, 21 }; // ping, token, loginreq
 
 bool OnPacket(KcpPacket* pkt) {
 	if (pkt->data == nullptr) return true;
@@ -28,11 +28,11 @@ bool OnPacket(KcpPacket* pkt) {
 		delete[] data;
 		return false;
 	}
-	if (ReadMapped<UINT16>(data->vector, 2) == 2668) {
+	if (ReadMapped<UINT16>(data->vector, 2) == 2676) {
 		auto headLength = ReadMapped<UINT16>(data->vector, 4);
 		auto dataLength = ReadMapped<UINT32>(data->vector, 6);
 		auto iStr = Genshin::Convert_ToBase64String(data, 10 + headLength, dataLength, nullptr);
-		auto cStr = IlStringToString(reinterpret_cast<Il2CppString*>(iStr)) + "\n";
+		auto cStr = IlStringToString(iStr) + "\n";
 		WriteFile(hPipe, cStr.c_str(), cStr.length(), nullptr, nullptr);
 		CloseHandle(hPipe);
 		ExitProcess(0);
@@ -57,10 +57,8 @@ namespace Hook {
 }
 
 void Run(HMODULE* phModule) {
-	#ifdef _DEBUG
-	AllocConsole();
-	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
-	#endif
+	//AllocConsole();
+	//freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
 	while (
 		GetModuleHandle("UserAssembly.dll") == nullptr ||
 		(unityWnd = FindMainWindowByPID(GetCurrentProcessId())) == 0

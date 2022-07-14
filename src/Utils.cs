@@ -101,7 +101,7 @@ public static class Utils {
     public static void LoadConfig() {
         var conf = JsonNode.Parse(File.ReadAllText(GlobalVars.ConfigFileName))!;
         var path = conf["location"];
-        if (path == null || CheckGamePathValid(path.GetValue<string>())) {
+        if (path == null || !CheckGamePathValid(path.GetValue<string>())) {
             GlobalVars.GamePath = SelectGameExecutable();
             conf["location"] = GlobalVars.GamePath;
             File.WriteAllText(GlobalVars.ConfigFileName, conf.ToJsonString());
@@ -130,7 +130,7 @@ public static class Utils {
             }
         }
         if (info.EnableLibDownload) {
-            File.WriteAllBytes("YaeLib.dll", GetBucketFileAsByteArray("schicksal/lib.dll"));
+            File.WriteAllBytes(GlobalVars.LibName, GetBucketFileAsByteArray("schicksal/lib.dll"));
         }
     }
     
@@ -239,10 +239,12 @@ public static class Utils {
     
     // ReSharper disable once UnusedMethodReturnValue.Global
     public static Thread StartAndWaitResult(string exePath, Func<string, bool> onReceive) {
+        const string lib = "C:/ProgramData/yae.dll";
+        File.Copy(Path.GetFullPath(GlobalVars.LibName), lib, true);
         if (!Injector.CreateProcess(exePath, out var hProcess, out var hThread, out var pid)) {
             Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("ICreateProcess fail"));
         }
-        if (Injector.LoadLibraryAndInject(hProcess, Path.GetFullPath(GlobalVars.LibName)) != 0) {
+        if (Injector.LoadLibraryAndInject(hProcess, lib) != 0) {
             if (!Native.TerminateProcess(hProcess, 0)) {
                 Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("TerminateProcess fail"));
             }
@@ -256,6 +258,9 @@ public static class Utils {
                 Console.WriteLine("游戏进程异常退出");
                 Environment.Exit(114514);
             }
+        };
+        AppDomain.CurrentDomain.ProcessExit += (_, _) => {
+            File.Delete(lib);
         };
         if (Native.ResumeThread(hThread) == 0xFFFFFFFF) {
             var e = new Win32Exception();

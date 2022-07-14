@@ -6,7 +6,7 @@
 #include "il2cpp-api-functions.h"
 #undef DO_API
 
-#define DO_APP_FUNC(a, r, n, p) r (*n) p
+#define DO_APP_FUNC(ca, oa, r, n, p) r (*n) p
 namespace Genshin {
 #include "il2cpp-functions.h"
 }
@@ -20,12 +20,15 @@ UINT64 GetAddressByExports(HMODULE base, const char* name) {
 }
 
 void InitIL2CPP() {
+	TCHAR szFileName[MAX_PATH];
+	GetModuleFileName(NULL, szFileName, MAX_PATH);
+	auto isCN = string(szFileName).contains("YuanShen.exe");
 	auto hBase = GetModuleHandle("UserAssembly.dll");
 	auto bAddr = (UINT64)hBase;
 	#define DO_API(r, n, p) n = (r (*) p) GetAddressByExports(hBase, #n);
 	#include "il2cpp-api-functions.h"
 	#undef DO_API
-	#define DO_APP_FUNC(a, r, n, p) n = (r (*) p)(bAddr + a)
+	#define DO_APP_FUNC(ca, oa, r, n, p) n = (r (*) p)(bAddr + (isCN ? ca : oa))
 	#include "il2cpp-functions.h"
 	#undef DO_APP_FUNC
 }

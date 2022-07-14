@@ -18,15 +18,14 @@ public static class Export {
         [4] 表格文件
         输入一个数字(0-4): ".Split("\n").Select(s => s.Trim()).JoinToString("\n") + " ");
         if (!int.TryParse(Console.ReadLine(), out var num)) num = 0;
-        Action<AchievementAllDataNotify> act = num switch {
+        ((Action<AchievementAllDataNotify>) (num switch {
             1 => ToSnapGenshin,
             2 => ToPaimon,
             3 => ToSeelie,
             4 => ToCSV,
             7 => ToRawJson,
             _ => ToCocogoat
-        };
-        act(data);
+        })).Invoke(data);
     }
 
     private static void ToCocogoat(AchievementAllDataNotify data) {

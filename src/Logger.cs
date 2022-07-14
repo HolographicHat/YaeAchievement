@@ -28,7 +28,7 @@ public static class Logger {
     
     private static void Log(string msg, Level level) {
         if (level >= GlobalVars.LogLevel) {
-            Console.WriteLine($"{DateTime.Now:MM/dd HH:mm:ss} {level.ToString().ToUpper().PadLeft(5)} : {msg}");
+            Console.WriteLine(msg);
         }
     }
 
