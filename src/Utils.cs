@@ -103,19 +103,17 @@ public static class Utils {
         var conf = JsonNode.Parse(File.ReadAllText(GlobalVars.ConfigFileName))!;
         var path = conf["location"];
         if (path == null || !CheckGamePathValid(path.GetValue<string>())) {
-            string? gameInstallPath = FindGamePathFromRegistry();
+            var gameInstallPath = FindGamePathFromRegistry();
             if (!string.IsNullOrEmpty(gameInstallPath)) {
                 Console.WriteLine($"自动读取到游戏路径: {gameInstallPath}");
-                Console.WriteLine($"如果确认路径无误，请输入 Y 并回车；如果想要自行选择游戏路径请输入 N 并回车");
-                string? s = Console.ReadLine();
-                if(string.Equals(s?.Trim().ToUpper(), "N")) {
-                    GlobalVars.GamePath = SelectGameExecutable();
-                } else {
-                    GlobalVars.GamePath = gameInstallPath;
-                }
-                conf["location"] = GlobalVars.GamePath;
-                File.WriteAllText(GlobalVars.ConfigFileName, conf.ToJsonString());
+                Console.WriteLine($"如果确认路径无误，请按 Y ；若有误或需要自行选择，请按 N ");
+                var key = Console.ReadKey().Key;
+                GlobalVars.GamePath = key == ConsoleKey.Y ? gameInstallPath : SelectGameExecutable();
+            } else {
+                GlobalVars.GamePath = SelectGameExecutable();
             }
+            conf["location"] = GlobalVars.GamePath;
+            File.WriteAllText(GlobalVars.ConfigFileName, conf.ToJsonString());
         } else {
             GlobalVars.GamePath = path.GetValue<string>();
         }
@@ -217,25 +215,22 @@ public static class Utils {
     /// <returns></returns>
     private static string? FindGamePathFromRegistry() {
         try {
-            using (var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64)) {
-                using (var key = hklm.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\原神")) {
-                    if (key == null) {
-                        return null;
-                    }
-                    object? installLocation = key.GetValue("InstallPath");
-                    if (installLocation != null && !string.IsNullOrEmpty(installLocation.ToString())) {
-                        string folder = Path.Combine(installLocation.ToString(), "Genshin Impact Game\\");
-                        string exePath = Path.Combine(folder, "YuanShen.exe");
-                        if (File.Exists(Path.Combine(folder, "UnityPlayer.dll")) 
-                            && File.Exists(Path.Combine(folder, "mhypbase.dll")) 
-                            && File.Exists(exePath)) {
-                            return exePath;
-                        }
-                    }
+            using var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+            using var key = hklm.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\原神");
+            if (key == null) {
+                return null;
+            }
+            var installLocation = key.GetValue("InstallPath")?.ToString();
+            if (!string.IsNullOrEmpty(installLocation)) {
+                var folder = Path.Combine(installLocation, "Genshin Impact Game\\");
+                var exePath = Path.Combine(folder, "YuanShen.exe");
+                if (File.Exists(Path.Combine(folder, "UnityPlayer.dll")) 
+                    && File.Exists(Path.Combine(folder, "mhypbase.dll")) 
+                    && File.Exists(exePath)) {
+                    return exePath;
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Logger.Warn(e.Message);
         }
         return null;
@@ -284,6 +279,9 @@ public static class Utils {
     public static Thread StartAndWaitResult(string exePath, Func<string, bool> onReceive) {
         const string lib = "C:/ProgramData/yae.dll";
         File.Copy(Path.GetFullPath(GlobalVars.LibName), lib, true);
+        AppDomain.CurrentDomain.ProcessExit += (_, _) => {
+            File.Delete(lib);
+        };
         if (!Injector.CreateProcess(exePath, out var hProcess, out var hThread, out var pid)) {
             Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("ICreateProcess fail"));
         }
@@ -301,9 +299,6 @@ public static class Utils {
                 Console.WriteLine("游戏进程异常退出");
                 Environment.Exit(114514);
             }
-        };
-        AppDomain.CurrentDomain.ProcessExit += (_, _) => {
-            File.Delete(lib);
         };
         if (Native.ResumeThread(hThread) == 0xFFFFFFFF) {
             var e = new Win32Exception();
