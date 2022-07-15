@@ -14,11 +14,13 @@ string IlStringToString(Il2CppString* str, UINT codePage) {
 #pragma endregion
 
 #pragma region ByteUtils
+
 bool IsLittleEndian() {
     UINT i = 1;
     char* c = (char*)&i;
     return (*c);
 }
+
 #pragma endregion
 
 #pragma region FindMainWindowByPID
