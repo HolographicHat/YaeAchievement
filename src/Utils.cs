@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Nodes;
 using Google.Protobuf;
+using Microsoft.Win32;
 using YaeAchievement.AppCenterSDK;
 using YaeAchievement.Win32;
 using static YaeAchievement.Win32.OpenFileFlags;
@@ -102,9 +103,19 @@ public static class Utils {
         var conf = JsonNode.Parse(File.ReadAllText(GlobalVars.ConfigFileName))!;
         var path = conf["location"];
         if (path == null || !CheckGamePathValid(path.GetValue<string>())) {
-            GlobalVars.GamePath = SelectGameExecutable();
-            conf["location"] = GlobalVars.GamePath;
-            File.WriteAllText(GlobalVars.ConfigFileName, conf.ToJsonString());
+            string? gameInstallPath = FindGamePathFromRegistry();
+            if (!string.IsNullOrEmpty(gameInstallPath)) {
+                Console.WriteLine($"自动读取到游戏路径: {gameInstallPath}");
+                Console.WriteLine($"如果确认路径无误，请输入 Y 并回车；如果想要自行选择游戏路径请输入 N 并回车");
+                string? s = Console.ReadLine();
+                if(string.Equals(s?.Trim().ToUpper(), "N")) {
+                    GlobalVars.GamePath = SelectGameExecutable();
+                } else {
+                    GlobalVars.GamePath = gameInstallPath;
+                }
+                conf["location"] = GlobalVars.GamePath;
+                File.WriteAllText(GlobalVars.ConfigFileName, conf.ToJsonString());
+            }
         } else {
             GlobalVars.GamePath = path.GetValue<string>();
         }
@@ -198,6 +209,38 @@ public static class Utils {
         Marshal.FreeHGlobal(fnPtr);
         return path;
     }
+
+    #pragma warning disable CA1416 // 验证平台兼容性
+    /// <summary>
+    /// 从注册表中寻找安装路径 暂时只支持国服
+    /// </summary>
+    /// <returns></returns>
+    private static string? FindGamePathFromRegistry() {
+        try {
+            using (var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64)) {
+                using (var key = hklm.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\原神")) {
+                    if (key == null) {
+                        return null;
+                    }
+                    object? installLocation = key.GetValue("InstallPath");
+                    if (installLocation != null && !string.IsNullOrEmpty(installLocation.ToString())) {
+                        string folder = Path.Combine(installLocation.ToString(), "Genshin Impact Game\\");
+                        string exePath = Path.Combine(folder, "YuanShen.exe");
+                        if (File.Exists(Path.Combine(folder, "UnityPlayer.dll")) 
+                            && File.Exists(Path.Combine(folder, "mhypbase.dll")) 
+                            && File.Exists(exePath)) {
+                            return exePath;
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception e) {
+            Logger.Warn(e.Message);
+        }
+        return null;
+    }
+    #pragma warning restore CA1416
 
     // ReSharper disable once UnusedMethodReturnValue.Global
     public static bool TryDisableQuickEdit() {
