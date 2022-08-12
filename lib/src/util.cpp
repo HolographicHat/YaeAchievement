@@ -13,6 +13,14 @@ string IlStringToString(Il2CppString* str, UINT codePage) {
 
 #pragma endregion
 
+#pragma region GC
+
+UINT32 GCHandle_New(void* object, bool pinned) {
+    return il2cpp_gchandle_new((Il2CppObject*)object, pinned);
+}
+
+#pragma endregion
+
 #pragma region ByteUtils
 
 bool IsLittleEndian() {

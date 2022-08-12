@@ -4,7 +4,11 @@ using std::string;
 
 bool IsLittleEndian();
 HWND FindMainWindowByPID(DWORD pid);
+UINT32 GCHandle_New(LPVOID object, bool pinned);
 string IlStringToString(Il2CppString* str, UINT codePage = CP_ACP);
+
+#define cstring_new(str) il2cpp_string_new(str)
+#define string_new(str) cstring_new((str).c_str())
 
 #define ErrorDialogT(title, msg) MessageBox(unityWnd, msg, title, MB_OK | MB_ICONERROR | MB_SYSTEMMODAL);
 #define ErrorDialog(msg) ErrorDialogT("YaeAchievement", msg)
@@ -21,4 +25,9 @@ static T ReadMapped(void* data, int offset, bool littleEndian = false) {
 	}
 	memcpy(&result, cData + offset, sizeof(result));
 	return result;
+}
+
+template<class T>
+static T* GCHandle_GetObject(UINT handle) {
+	return (T*) il2cpp_gchandle_get_target(handle);
 }

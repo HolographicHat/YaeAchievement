@@ -115,6 +115,7 @@
     <ClInclude Include="src\il2cpp-functions.h" />
     <ClInclude Include="src\il2cpp-types.h" />
     <ClInclude Include="src\il2cpp-init.h" />
+    <ClInclude Include="src\il2cpp-unity-functions.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="src\util.h" />
   </ItemGroup>

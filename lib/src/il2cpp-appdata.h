@@ -12,3 +12,9 @@ namespace Genshin {
 #include "il2cpp-functions.h"
 }
 #undef DO_APP_FUNC
+
+#define DO_UNI_FUNC(ca, oa, r, n, p) extern r (*n) p
+namespace Genshin {
+#include "il2cpp-unity-functions.h"
+}
+#undef DO_UNI_FUNC

@@ -8,7 +8,7 @@ using std::to_string;
 HWND unityWnd = 0;
 HANDLE hPipe  = 0;
 
-std::set<UINT16> PacketWhitelist = { 172, 198, 112, 2676, 7, 21 }; // ping, token, loginreq
+std::set<UINT16> PacketWhitelist = { 172, 198, 112, 2676, 7, 21, 135 }; // ping, token, loginreq
 
 bool OnPacket(KcpPacket* pkt) {
 	if (pkt->data == nullptr) return true;
@@ -22,12 +22,13 @@ bool OnPacket(KcpPacket* pkt) {
 		return true;
 	}
 	if (!PacketWhitelist.contains(ReadMapped<UINT16>(data->vector, 2))) {
-		#ifdef _DEBUG
+		//ifdef _DEBUG
 		printf("Blocked cmdid: %d\n", ReadMapped<UINT16>(data->vector, 2));
-		#endif
+		//endif
 		delete[] data;
 		return false;
 	}
+	printf("Passed cmdid: %d\n", ReadMapped<UINT16>(data->vector, 2));
 	if (ReadMapped<UINT16>(data->vector, 2) == 2676) {
 		auto headLength = ReadMapped<UINT16>(data->vector, 4);
 		auto dataLength = ReadMapped<UINT32>(data->vector, 6);
@@ -47,12 +48,29 @@ namespace Hook {
 		return OnPacket(pkt) ? CALL_ORIGIN(Kcp_Send, client, pkt, method) : 0;
 	}
 
+	void MonoLoginMainPage__set_version(void* obj, Il2CppString* value, void* method) {
+		auto version = IlStringToString(value);
+		value = string_new(version + " YaeAchievement");
+		CALL_ORIGIN(MonoLoginMainPage__set_version, obj, value, method);
+	}
+
 	bool Kcp_Recv(void* client, ClientKcpEvent* evt, void* method) {
 		auto result = CALL_ORIGIN(Kcp_Recv, client, evt, method);
 		if (result == 0 || evt->fields.type != KcpEventType::EventRecvMsg) {
 			return result;
 		}
 		return OnPacket(evt->fields.packet) ? result : false;
+	}
+
+	std::map<INT, UINT> signatures;
+
+	ByteArray* UnityEngine_RecordUserData(INT type) {
+		if (signatures.count(type)) {
+			return GCHandle_GetObject<ByteArray>(signatures[type]);
+		}
+		auto result = CALL_ORIGIN(UnityEngine_RecordUserData, type);
+		signatures[type] = GCHandle_New(result, true);
+		return result;
 	}
 }
 
@@ -66,8 +84,13 @@ void Run(HMODULE* phModule) {
 		Sleep(1000);
 	}
 	InitIL2CPP();
+	HookManager::install(Genshin::UnityEngine_RecordUserData, Hook::UnityEngine_RecordUserData);
+	for (int i = 0; i < 4; i++) {
+		Genshin::Application_RecordUserData(i, nullptr);
+	}
 	HookManager::install(Genshin::Kcp_Send, Hook::Kcp_Send);
 	HookManager::install(Genshin::Kcp_Recv, Hook::Kcp_Recv);
+	HookManager::install(Genshin::MonoLoginMainPage__set_version, Hook::MonoLoginMainPage__set_version);
 	hPipe = CreateFile(R"(\\.\pipe\YaeAchievementPipe)", GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
 	if (hPipe == INVALID_HANDLE_VALUE) {
 		Win32ErrorDialog(1001);
