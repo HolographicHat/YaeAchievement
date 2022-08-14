@@ -4,6 +4,8 @@ using YaeAchievement.AppCenterSDK.Models;
 using static YaeAchievement.Utils;
 
 InstallExitHook();
+
+CheckVcRuntime();
 CheckSelfIsRunning();
 TryDisableQuickEdit();
 InstallExceptionHook();

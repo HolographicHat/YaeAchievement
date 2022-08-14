@@ -243,6 +243,23 @@ public static class Utils {
         return Native.GetConsoleMode(handle, out var mode) && Native.SetConsoleMode(handle, mode&~64);
     }
     
+#pragma warning disable CA1416
+    public static void CheckVcRuntime() {
+        using var root = Registry.LocalMachine;
+        using var sub = root.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")!;
+        var installed = sub.GetSubKeyNames()
+            .Select(subKeyName => sub.OpenSubKey(subKeyName))
+            .Select(item => item?.GetValue("DisplayName") as string ?? string.Empty)
+            .Any(name => name.Contains("Microsoft Visual C++ 2022 X64 "));
+        if (!installed) {
+            Logger.Error("未安装 VcRuntime");
+            Logger.Error("下载地址: https://aka.ms/vs/17/release/vc_redist.x64.exe");
+            Logger.Error("安装完成后，重新打开 YaeAchievement");
+            Environment.Exit(303);
+        }
+    }
+#pragma warning restore CA1416
+
     public static void CheckGenshinIsRunning() {
         Process.EnterDebugMode();
         foreach (var process in Process.GetProcesses()) {
