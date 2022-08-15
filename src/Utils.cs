@@ -1,14 +1,10 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
-using System.IO.Compression;
 using System.IO.Pipes;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json.Nodes;
-using Google.Protobuf;
 using Microsoft.Win32;
 using YaeAchievement.AppCenterSDK;
 using YaeAchievement.Win32;
@@ -32,56 +28,26 @@ public static class Utils {
         return c;
     });
 
-    public static string GetBucketFileAsString(string path, bool cache = true) {
-        return Encoding.UTF8.GetString(GetBucketFileAsByteArray(path, cache));
-    }
-    
     public static byte[] GetBucketFileAsByteArray(string path, bool cache = true) {
         using var msg = new HttpRequestMessage {
             Method = HttpMethod.Get,
             RequestUri = new Uri($"{GlobalVars.BucketHost}/{path}")
         };
-        CacheItem? ci = null;
-        var cacheName = cache ? $"./cache/{CalculateMD5(path)[..16]}.miko" : "";
-        if (cache) {
-            Directory.CreateDirectory("cache");
-            if (File.Exists(cacheName)) {
-                using var input = File.OpenRead(cacheName);
-                using var dInput = new GZipStream(input, CompressionMode.Decompress);
-                ci = CacheItem.Parser.ParseFrom(dInput);
-                msg.Headers.TryAddWithoutValidation("If-None-Match", $"{ci.Etag}");
-            }
+        var cacheFile = new CacheFile(path);
+        if (cache && cacheFile.Exists()) {
+            msg.Headers.TryAddWithoutValidation("If-None-Match", $"{cacheFile.Read().Etag}");
         }
         using var response = CHttpClient.Value.Send(msg);
         if (cache && response.StatusCode == HttpStatusCode.NotModified) {
-            return ci!.Content.ToByteArray();
+            return cacheFile.Read().Content.ToByteArray();
         }
         response.EnsureSuccessStatusCode();
         var responseBytes = response.Content.ReadAsByteArrayAsync().Result;
         if (cache) {
             var etag = response.Headers.ETag!.Tag;
-            using var os = File.OpenWrite(cacheName);
-            using var cos = new GZipStream(os, CompressionLevel.SmallestSize);
-            new CacheItem {
-                Etag = etag,
-                Version = 3,
-                Checksum = CalculateMD5(responseBytes),
-                Content = ByteString.CopyFrom(responseBytes)
-            }.WriteTo(cos);
+            cacheFile.Write(responseBytes, etag);
         }
         return responseBytes;
-    }
-
-    // ReSharper disable once InconsistentNaming
-    private static string CalculateMD5(string text) {
-        return CalculateMD5(Encoding.UTF8.GetBytes(text));
-    }
-    
-    // ReSharper disable once InconsistentNaming
-    private static string CalculateMD5(byte[] bytes) {
-        using var md5 = MD5.Create();
-        var b = md5.ComputeHash(bytes);
-        return Convert.ToHexString(b).ToLower();
     }
 
     public static void CopyToClipboard(string text) {
@@ -134,7 +100,6 @@ public static class Utils {
             }
             Console.WriteLine($"下载地址: {info.PackageLink}");
             if (info.ForceUpdate) {
-                //Console.WriteLine("在完成此次更新前, 程序可能无法正常使用.");
                 Environment.Exit(0);
             }
         }
@@ -148,7 +113,7 @@ public static class Utils {
         var cur = Process.GetCurrentProcess();
         foreach (var process in Process.GetProcesses().Where(process => process.Id != cur.Id)) {
             if (process.ProcessName == cur.ProcessName) {
-                Logger.Error("另一个实例正在运行，请关闭后重试");
+                Console.WriteLine("另一个实例正在运行，请关闭后重试");
                 Environment.Exit(302);
             }
         }
@@ -166,8 +131,7 @@ public static class Utils {
 
     private static bool CheckGamePathValid(string path) {
         var dir = Path.GetDirectoryName(path)!;
-        return !GlobalVars.CheckGamePath ||
-               File.Exists($"{dir}/UnityPlayer.dll") && File.Exists($"{dir}/mhypbase.dll");
+        return !GlobalVars.CheckGamePath || File.Exists($"{dir}/UnityPlayer.dll");
     }
     
     private static string SelectGameExecutable() {
@@ -208,63 +172,17 @@ public static class Utils {
         return path;
     }
 
-    #pragma warning disable CA1416 // 验证平台兼容性
-    /// <summary>
-    /// 从注册表中寻找安装路径 暂时只支持国服
-    /// </summary>
-    /// <returns></returns>
-    private static string? FindGamePathFromRegistry() {
-        try {
-            using var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
-            using var key = hklm.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\原神");
-            if (key == null) {
-                return null;
-            }
-            var installLocation = key.GetValue("InstallPath")?.ToString();
-            if (!string.IsNullOrEmpty(installLocation)) {
-                var folder = Path.Combine(installLocation, "Genshin Impact Game\\");
-                var exePath = Path.Combine(folder, "YuanShen.exe");
-                if (File.Exists(Path.Combine(folder, "UnityPlayer.dll")) 
-                    && File.Exists(Path.Combine(folder, "mhypbase.dll")) 
-                    && File.Exists(exePath)) {
-                    return exePath;
-                }
-            }
-        } catch (Exception e) {
-            Logger.Warn(e.Message);
-        }
-        return null;
-    }
-    #pragma warning restore CA1416
-
     // ReSharper disable once UnusedMethodReturnValue.Global
     public static bool TryDisableQuickEdit() {
         var handle = Native.GetStdHandle();
         return Native.GetConsoleMode(handle, out var mode) && Native.SetConsoleMode(handle, mode&~64);
     }
-    
-#pragma warning disable CA1416
-    public static void CheckVcRuntime() {
-        using var root = Registry.LocalMachine;
-        using var sub = root.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")!;
-        var installed = sub.GetSubKeyNames()
-            .Select(subKeyName => sub.OpenSubKey(subKeyName))
-            .Select(item => item?.GetValue("DisplayName") as string ?? string.Empty)
-            .Any(name => name.Contains("Microsoft Visual C++ 2022 X64 "));
-        if (!installed) {
-            Logger.Error("未安装 VcRuntime");
-            Logger.Error("下载地址: https://aka.ms/vs/17/release/vc_redist.x64.exe");
-            Logger.Error("安装完成后，重新打开 YaeAchievement");
-            Environment.Exit(303);
-        }
-    }
-#pragma warning restore CA1416
 
     public static void CheckGenshinIsRunning() {
         Process.EnterDebugMode();
         foreach (var process in Process.GetProcesses()) {
             if (process.ProcessName is "GenshinImpact" or "YuanShen") {
-                Console.WriteLine("原神正在运行，请关闭后重试");
+                Console.WriteLine($"原神正在运行，请关闭后重试 ({process.Id})");
                 Environment.Exit(301);
             }
         }
@@ -277,7 +195,7 @@ public static class Utils {
     public static void InstallExitHook() {
         AppDomain.CurrentDomain.ProcessExit += (_, _) => {
             proc?.Kill();
-            Logger.Info("按任意键退出");
+            Console.WriteLine("按任意键退出");
             Console.ReadKey();
         };
     }
@@ -285,7 +203,7 @@ public static class Utils {
     public static void InstallExceptionHook() {
         AppDomain.CurrentDomain.UnhandledException += (_, e) => {
             Console.WriteLine(e.ExceptionObject.ToString());
-            Logger.Error("正在上报错误信息...");
+            Console.WriteLine("正在上报错误信息...");
             AppCenter.TrackCrash((Exception) e.ExceptionObject);
             AppCenter.Upload();
             Environment.Exit(-1);
@@ -307,7 +225,7 @@ public static class Utils {
                 Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("TerminateProcess fail"));
             }
         }
-        Logger.Info($"原神正在启动 ({pid})");
+        Console.WriteLine($"原神正在启动 ({pid})");
         proc = Process.GetProcessById(Convert.ToInt32(pid));
         proc.EnableRaisingEvents = true;
         proc.Exited += (_, _) => {
@@ -345,5 +263,49 @@ public static class Utils {
         var th = new Thread(ts);
         th.Start();
         return th;
+    }
+    
+    #pragma warning disable CA1416
+    /// <summary>
+    /// 从注册表中寻找安装路径 暂时只支持国服
+    /// </summary>
+    /// <returns></returns>
+    private static string? FindGamePathFromRegistry() {
+        try {
+            using var root = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+            using var key = root.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\原神");
+            if (key == null) {
+                return null;
+            }
+            var installLocation = key.GetValue("InstallPath")?.ToString();
+            if (!string.IsNullOrEmpty(installLocation)) {
+                var folder = Path.Combine(installLocation, "Genshin Impact Game\\");
+                var exePath = Path.Combine(folder, "YuanShen.exe");
+                if (File.Exists(Path.Combine(folder, "UnityPlayer.dll")) 
+                    && File.Exists(exePath)) {
+                    return exePath;
+                }
+            }
+        } catch (Exception e) {
+            Console.WriteLine(e.Message);
+        }
+        return null;
+    }
+
+    public static void CheckVcRuntime() {
+        using var root = Registry.LocalMachine;
+        using var sub = root.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")!;
+        var installed = sub.GetSubKeyNames()
+            .Select(subKeyName => sub.OpenSubKey(subKeyName))
+            .Select(item => item?.GetValue("DisplayName") as string ?? string.Empty)
+            .Any(name => name.Contains("Microsoft Visual C++ 2022 X64 "));
+        if (!installed) {
+            const string vcDownloadUrl = "https://aka.ms/vs/17/release/vc_redist.x64.exe";
+            Console.WriteLine("未安装 VcRuntime");
+            Console.WriteLine($"下载地址: {vcDownloadUrl}");
+            Console.WriteLine("安装完成后，重新打开 YaeAchievement");
+            ShellOpen(vcDownloadUrl);
+            Environment.Exit(303);
+        }
     }
 }
