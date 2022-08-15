@@ -1,13 +1,13 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Security;
 
 namespace YaeAchievement.Win32;
 
-[SuppressMessage("Interoperability", "CA1401:P/Invokes 应该是不可见的")]
+#pragma warning disable CA1401, CA2101
 public static class Native {
 
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+
     public static extern bool CreateProcess(
         string lpApplicationName,
         string? lpCommandLine,
@@ -38,7 +38,6 @@ public static class Native {
     public static extern IntPtr GetModuleHandle(string lpModuleName);
     
     [DllImport("kernel32.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-    [SuppressMessage("Globalization", "CA2101:指定对 P/Invoke 字符串参数进行封送处理")]
     public static extern IntPtr GetProcAddress(IntPtr hModule, string lpProcName);
     
     [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]

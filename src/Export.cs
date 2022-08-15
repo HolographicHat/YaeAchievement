@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿
 using System.Net;
 using System.Text;
 using Microsoft.Win32;
@@ -145,10 +145,11 @@ public static class Export {
         };
     }
 
-    [SuppressMessage("Interoperability", "CA1416:验证平台兼容性")]
+    #pragma warning disable CA1416
     private static bool CheckSnapScheme() {
         return (string?)Registry.ClassesRoot.OpenSubKey("snapgenshin")?.GetValue("") == "URL:snapgenshin";
     }
+    #pragma warning restore CA1416
     
     private static string JoinToString(this IEnumerable<object> list, string separator) {
         return string.Join(separator, list);
