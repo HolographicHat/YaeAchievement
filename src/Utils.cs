@@ -4,7 +4,6 @@ using System.IO.Pipes;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
-using System.Text.Json.Nodes;
 using Microsoft.Win32;
 using YaeAchievement.AppCenterSDK;
 using YaeAchievement.Win32;
@@ -65,26 +64,6 @@ public static class Utils {
         }
     }
     
-    public static void LoadConfig() {
-        var conf = JsonNode.Parse(File.ReadAllText(GlobalVars.ConfigFileName))!;
-        var path = conf["location"];
-        if (path == null || !CheckGamePathValid(path.GetValue<string>())) {
-            var gameInstallPath = FindGamePathFromRegistry();
-            if (!string.IsNullOrEmpty(gameInstallPath)) {
-                Console.WriteLine($"自动读取到游戏路径: {gameInstallPath}");
-                Console.WriteLine($"如果确认路径无误，请按 Y ；若有误或需要自行选择，请按 N ");
-                var key = Console.ReadKey().Key;
-                GlobalVars.GamePath = key == ConsoleKey.Y ? gameInstallPath : SelectGameExecutable();
-            } else {
-                GlobalVars.GamePath = SelectGameExecutable();
-            }
-            conf["location"] = GlobalVars.GamePath;
-            File.WriteAllText(GlobalVars.ConfigFileName, conf.ToJsonString());
-        } else {
-            GlobalVars.GamePath = path.GetValue<string>();
-        }
-    }
-
     public static void CheckUpdate() {
         var info = UpdateInfo.Parser.ParseFrom(GetBucketFileAsByteArray("schicksal/version"))!;
         if (GlobalVars.AppVersionCode != info.VersionCode) {
@@ -120,6 +99,13 @@ public static class Utils {
         Process.LeaveDebugMode();
     }
     
+    public static void CheckIsTempDir() {
+        if (GlobalVars.AppPath.Contains(Path.GetTempPath())) {
+            Console.WriteLine("请将程序完整解压后再运行");
+            Environment.Exit(303);
+        }
+    }
+    
     public static bool ShellOpen(string path) {
         return new Process {
             StartInfo = {
@@ -129,12 +115,13 @@ public static class Utils {
         }.Start();
     }
 
-    private static bool CheckGamePathValid(string path) {
+    public static bool CheckGamePathValid(string? path) {
+        if (path == null) return false;
         var dir = Path.GetDirectoryName(path)!;
-        return !GlobalVars.CheckGamePath || File.Exists($"{dir}/UnityPlayer.dll");
+        return !GlobalVars.CheckGamePath || File.Exists(Path.Combine(dir, "UnityPlayer.dll"));
     }
     
-    private static string SelectGameExecutable() {
+    public static string SelectGameExecutable() {
         var fnPtr = Marshal.AllocHGlobal(32768);
         Native.RtlZeroMemory(fnPtr, 32768);
         var ofn = new OpenFileName {
@@ -270,19 +257,18 @@ public static class Utils {
     /// 从注册表中寻找安装路径 暂时只支持国服
     /// </summary>
     /// <returns></returns>
-    private static string? FindGamePathFromRegistry() {
+    public static string? FindGamePathFromRegistry() {
         try {
-            using var root = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
-            using var key = root.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\原神");
-            if (key == null) {
+            using var root = Registry.LocalMachine;
+            using var sub = root.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\原神");
+            if (sub == null) {
                 return null;
             }
-            var installLocation = key.GetValue("InstallPath")?.ToString();
+            var installLocation = sub.GetValue("InstallPath")?.ToString();
             if (!string.IsNullOrEmpty(installLocation)) {
                 var folder = Path.Combine(installLocation, "Genshin Impact Game\\");
                 var exePath = Path.Combine(folder, "YuanShen.exe");
-                if (File.Exists(Path.Combine(folder, "UnityPlayer.dll")) 
-                    && File.Exists(exePath)) {
+                if (File.Exists(Path.Combine(folder, "UnityPlayer.dll")) && File.Exists(exePath)) {
                     return exePath;
                 }
             }

@@ -6,6 +6,7 @@ using static YaeAchievement.Utils;
 InstallExitHook();
 
 CheckVcRuntime();
+CheckIsTempDir();
 CheckSelfIsRunning();
 TryDisableQuickEdit();
 InstallExceptionHook();
@@ -16,7 +17,7 @@ Console.WriteLine($"YaeAchievement - 原神成就导出工具 ({GlobalVars.AppVe
 Console.WriteLine("https://github.com/HolographicHat/YaeAchievement");
 Console.WriteLine("----------------------------------------------------");
 
-LoadConfig();
+AppConfig.Load();
 CheckUpdate();
 AppCenter.Init();
 new EventLog("AppInit") {
@@ -31,7 +32,7 @@ if (historyCache.LastWriteTime.AddMinutes(10) > DateTime.UtcNow) {
     Console.WriteLine("要重新获取数据，手动删除 cache\\d1a8ef40a67a5929.miko 后重新启动 YaeAchievement");
     Export.Choose(AchievementAllDataNotify.Parser.ParseFrom(historyCache.Read().Content));
 } else {
-    StartAndWaitResult(GlobalVars.GamePath, str => {
+    StartAndWaitResult(AppConfig.GamePath, str => {
         GlobalVars.UnexpectedExit = false;
         var data = Convert.FromBase64String(str);
         var list = AchievementAllDataNotify.Parser.ParseFrom(data);
