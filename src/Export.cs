@@ -149,14 +149,19 @@ public static class Export {
     private static Dictionary<string, object> ExportToUIAFApp(AchievementAllDataNotify data) {
         var output = data.List
             .Where(a => a.Status is Status.Finished or Status.RewardTaken)
-            .Select(ach => new Dictionary<string, uint> { ["id"] = ach.Id, ["current"] = ach.Current, ["timestamp"] = ach.Timestamp })
+            .Select(ach => new Dictionary<string, uint> {
+                ["id"] = ach.Id,
+                ["status"] = (uint) ach.Status,
+                ["current"] = ach.Current,
+                ["timestamp"] = ach.Timestamp,
+            })
             .ToList();
         return new Dictionary<string, object> {
             ["info"] = new Dictionary<string, object> {
                 ["export_app"] = "YaeAchievement",
                 ["export_timestamp"] = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
                 ["export_app_version"] = GlobalVars.AppVersionName,
-                ["uiaf_version"] = "v1.0"
+                ["uiaf_version"] = "v1.1"
             },
             ["list"] = output
         };
