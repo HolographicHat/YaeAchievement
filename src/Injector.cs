@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using YaeAchievement.Win32;
+using static YaeAchievement.Win32.Native;
 
 namespace YaeAchievement; 
 
@@ -19,31 +20,33 @@ public static class Injector {
         return result;
     }
     
-    public static int LoadLibraryAndInject(IntPtr handle, string libPath) {
-        var hKernel = Native.GetModuleHandle("kernel32.dll");
+    // todo: refactor
+    public static int LoadLibraryAndInject(IntPtr hProc, string libPath) {
+        var hKernel = GetModuleHandle("kernel32.dll");
         if (hKernel == IntPtr.Zero) {
             return new Win32Exception().PrintMsgAndReturnErrCode("GetModuleHandle fail");
         }
-        var pLoadLibrary = Native.GetProcAddress(hKernel, "LoadLibraryA");
+        var pLoadLibrary = GetProcAddress(hKernel, "LoadLibraryA");
         if (pLoadLibrary == IntPtr.Zero) {
             return new Win32Exception().PrintMsgAndReturnErrCode("GetProcAddress fail");
         }
-        var pBase = Native.VirtualAllocEx(handle, IntPtr.Zero, libPath.Length + 1, AllocationType.Reserve | AllocationType.Commit, MemoryProtection.ReadWrite);
+        var pBase = VirtualAllocEx(hProc, IntPtr.Zero, libPath.Length + 1, AllocationType.Reserve | AllocationType.Commit, MemoryProtection.ReadWrite);
         if (pBase == IntPtr.Zero) {
             return new Win32Exception().PrintMsgAndReturnErrCode("VirtualAllocEx fail");
         }
-        if (!Native.WriteProcessMemory(handle, pBase, libPath.ToCharArray(), libPath.Length, out _)) {
+        if (!WriteProcessMemory(hProc, pBase, libPath.ToCharArray(), libPath.Length, out _)) {
             return new Win32Exception().PrintMsgAndReturnErrCode("WriteProcessMemory fail");
         }
-        var hThread = Native.CreateRemoteThread(handle, IntPtr.Zero, 0, pLoadLibrary, pBase, 0, out _);
+        var hThread = CreateRemoteThread(hProc, IntPtr.Zero, 0, pLoadLibrary, pBase, 0, out _);
         if (hThread == IntPtr.Zero) {
             var e = new Win32Exception();
-            if (!Native.VirtualFreeEx(handle, pBase, 0, AllocationType.Release)) {
-                new Win32Exception().PrintMsgAndReturnErrCode("VirtualFreeEx fail");
-            }
+            VirtualFreeEx(hProc, pBase, 0, AllocationType.Release);
             return e.PrintMsgAndReturnErrCode("CreateRemoteThread fail");
         }
-        return !Native.CloseHandle(hThread) ? new Win32Exception().PrintMsgAndReturnErrCode("CloseHandle fail") : 0;
+        if (WaitForSingleObject(hThread, 2000) == 0) {
+            VirtualFreeEx(hProc, pBase, 0, AllocationType.Release);
+        }
+        return !CloseHandle(hThread) ? new Win32Exception().PrintMsgAndReturnErrCode("CloseHandle fail") : 0;
     }
     
 }

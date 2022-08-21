@@ -146,4 +146,7 @@ public static class Native {
     [DllImport("user32.dll")]
     public static extern bool ReleaseDC(IntPtr hWnd, IntPtr hdc);
 
+    [DllImport("kernel32.dll")]
+    public static extern uint WaitForSingleObject(IntPtr handle, ulong dwMilliseconds);
+
 }

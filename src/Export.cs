@@ -16,6 +16,7 @@ public static class Export {
         [2] Paimon.moe
         [3] Seelie.me
         [4] 表格文件
+        [5] 原魔工具箱
         输入一个数字(0-4): ".Split("\n").Select(s => s.Trim()).JoinToString("\n") + " ");
         if (!int.TryParse(Console.ReadLine(), out var num)) num = 0;
         ((Action<AchievementAllDataNotify>) (num switch {
@@ -23,6 +24,7 @@ public static class Export {
             2 => ToPaimon,
             3 => ToSeelie,
             4 => ToCSV,
+            5 => ToWxApp1,
             7 => ToRawJson,
             _ => ToCocogoat
         })).Invoke(data);
@@ -46,6 +48,21 @@ public static class Export {
             : $"https://cocogoat.work/achievement?memo={memo.key}");
     }
     
+    private static void ToWxApp1(AchievementAllDataNotify data) {
+        var id = Guid.NewGuid().ToString("N").Substring(20, 8);
+        var result = JsonConvert.SerializeObject(new Dictionary<string, object> {
+            { "key", id },
+            { "data", ExportToUIAFApp(data) }
+        });
+        using var request = new HttpRequestMessage {
+            Method = HttpMethod.Post,
+            RequestUri = new Uri("https://api.qyinter.com/achievementRedis"),
+            Content = new StringContent(result, Encoding.UTF8, "application/json")
+        };
+        using var response = Utils.CHttpClient.Value.Send(request);
+        Console.WriteLine($"在小程序导入页面输入以下代码: {id}");
+    }
+
     private static void ToSnapGenshin(AchievementAllDataNotify data) {
         if (CheckSnapScheme()) {
             Utils.CopyToClipboard(JsonConvert.SerializeObject(ExportToUIAFApp(data)));

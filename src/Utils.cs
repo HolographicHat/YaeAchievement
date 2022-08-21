@@ -168,7 +168,7 @@ public static class Utils {
     public static void CheckGenshinIsRunning() {
         Process.EnterDebugMode();
         foreach (var process in Process.GetProcesses()) {
-            if (process.ProcessName is "GenshinImpact" or "YuanShen") {
+            if (process.ProcessName is "GenshinImpact" or "YuanShen" && !process.HasExited) {
                 Console.WriteLine($"原神正在运行，请关闭后重试 ({process.Id})");
                 Environment.Exit(301);
             }
