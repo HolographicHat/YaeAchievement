@@ -10,14 +10,17 @@ namespace YaeAchievement;
 public static class Export {
     
     public static void Choose(AchievementAllDataNotify data) {
-        Console.Write(@"导出至: 
-        [0] 椰羊 (https://cocogoat.work/achievement, 默认)
-        [1] SnapGenshin
-        [2] Paimon.moe
-        [3] Seelie.me
-        [4] 表格文件
-        [5] 原魔工具箱
-        输入一个数字(0-4): ".Split("\n").Select(s => s.Trim()).JoinToString("\n") + " ");
+        Console.Write("""
+            导出至: 
+            [0] 椰羊 (https://cocogoat.work/achievement, 默认)
+            [1] SnapGenshin
+            [2] Paimon.moe
+            [3] Seelie.me
+            [4] 表格文件
+            [5] 原魔工具箱
+            [6] 寻空
+            输入一个数字(0-6): 
+            """);
         if (!int.TryParse(Console.ReadLine(), out var num)) num = 0;
         ((Action<AchievementAllDataNotify>) (num switch {
             1 => ToSnapGenshin,
@@ -25,6 +28,7 @@ public static class Export {
             3 => ToSeelie,
             4 => ToCSV,
             5 => ToWxApp1,
+            6 => ToXunkong,
             7 => ToRawJson,
             _ => ToCocogoat
         })).Invoke(data);
@@ -139,6 +143,17 @@ public static class Export {
         Console.WriteLine($"成就数据已导出至 {path}");
     }
 
+    private static void ToXunkong(AchievementAllDataNotify data) {
+        if (CheckXunkongScheme()) {
+            Utils.CopyToClipboard(JsonConvert.SerializeObject(ExportToUIAFApp(data)));
+            Utils.ShellOpen("xunkong://import-achievement?caller=YaeAchievement&from=clipboard");
+            Console.WriteLine("在寻空中进行下一步操作");
+        } else {
+            Console.WriteLine("更新寻空至最新版本后重试");
+            Utils.ShellOpen("ms-windows-store://pdp/?productid=9N2SVG0JMT12");
+        }
+    }
+
     private static void ToRawJson(AchievementAllDataNotify data) {
         var path = Path.GetFullPath($"export-{DateTime.Now:yyyyMMddHHmmss}-raw.json");
         File.WriteAllText(path, JsonConvert.SerializeObject(data, Formatting.Indented));
@@ -148,7 +163,7 @@ public static class Export {
     // ReSharper disable once InconsistentNaming
     private static Dictionary<string, object> ExportToUIAFApp(AchievementAllDataNotify data) {
         var output = data.List
-            .Where(a => a.Status is Status.Finished or Status.RewardTaken)
+            .Where(a => (uint)a.Status > 1 || a.Current > 0)
             .Select(ach => new Dictionary<string, uint> {
                 ["id"] = ach.Id,
                 ["status"] = (uint) ach.Status,
@@ -171,8 +186,12 @@ public static class Export {
     private static bool CheckSnapScheme() {
         return (string?)Registry.ClassesRoot.OpenSubKey("snapgenshin")?.GetValue("") == "URL:snapgenshin";
     }
+
+    private static bool CheckXunkongScheme() {
+        return (string?)Registry.ClassesRoot.OpenSubKey("xunkong")?.GetValue("") == "URL:xunkong";
+    }
     #pragma warning restore CA1416
-    
+
     private static string JoinToString(this IEnumerable<object> list, string separator) {
         return string.Join(separator, list);
     }
