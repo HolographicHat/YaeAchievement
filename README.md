@@ -8,7 +8,7 @@
 
 - 支持导出所有类别的成就
 - 支持官服，渠道服与国际服
-- 支持导出至[椰羊](https://cocogoat.work/achievement)、[SnapGenshin](https://github.com/DGP-Studio/Snap.Genshin)、[Paimon.moe](https://paimon.moe/achievement/)、[Seelie.me](https://seelie.me/achievements)、[寻空](https://github.com/xunkong/xunkong)[^1]和表格文件(csv)
+- 支持导出至[椰羊](https://cocogoat.work/achievement)、[SnapGenshin](https://github.com/DGP-Studio/Snap.Genshin)、[Paimon.moe](https://paimon.moe/achievement/)、[Seelie.me](https://seelie.me/achievements)、[寻空](https://github.com/xunkong/xunkong)和表格文件(csv)
 - 没有窗口大小、游戏语言等要求
 
 ## 使用说明
@@ -28,5 +28,3 @@
 
 1. Q: 原神启动时报错: 数据异常(31-4302)   
    A: 不要把软件和原神主程序放一起   
-
-[^1]: 由寻空开发者维护，仓库地址: [YaeAchievement](https://github.com/xunkong/YaeAchievement)
