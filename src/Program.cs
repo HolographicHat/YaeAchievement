@@ -1,21 +1,21 @@
 ﻿using YaeAchievement;
 using YaeAchievement.AppCenterSDK;
 using YaeAchievement.AppCenterSDK.Models;
+using YaeAchievement.res;
 using static YaeAchievement.Utils;
 
 InstallExitHook();
 
 CheckVcRuntime();
-CheckIsTempDir();
 CheckSelfIsRunning();
 TryDisableQuickEdit();
 InstallExceptionHook();
 CheckGenshinIsRunning();
 
-Console.WriteLine("----------------------------------------------------");
-Console.WriteLine($"YaeAchievement - 原神成就导出工具 ({GlobalVars.AppVersionName})");
-Console.WriteLine("https://github.com/HolographicHat/YaeAchievement");
-Console.WriteLine("----------------------------------------------------");
+Console.WriteLine(@"----------------------------------------------------");
+Console.WriteLine(App.AppBanner, GlobalVars.AppVersionName);
+Console.WriteLine(@"https://github.com/HolographicHat/YaeAchievement");
+Console.WriteLine(@"----------------------------------------------------");
 
 AppConfig.Load();
 CheckUpdate();
@@ -28,8 +28,8 @@ new EventLog("AppInit") {
 }.Enqueue();
 var historyCache = new CacheFile("ExportData");
 if (historyCache.LastWriteTime.AddMinutes(10) > DateTime.UtcNow) {
-    Console.WriteLine("使用上一次获取到的成就数据");
-    Console.WriteLine("要重新获取数据，手动删除 cache\\d1a8ef40a67a5929.miko 后重新启动 YaeAchievement");
+    Console.WriteLine(App.UsePreviousData);
+    Console.WriteLine(App.RefreshData);
     Export.Choose(AchievementAllDataNotify.Parser.ParseFrom(historyCache.Read().Content));
 } else {
     StartAndWaitResult(AppConfig.GamePath, str => {

@@ -1,0 +1,127 @@
+﻿<root>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="ExportToCocogoatFail" xml:space="preserve">
+        <value>Fail, please contact developer to get help information</value>
+    </data>
+    <data name="AllAchievement" xml:space="preserve">
+        <value>all achievement</value>
+    </data>
+    <data name="ExportChoose" xml:space="preserve">
+        <value>Export to: 
+[0] Cocogoat (https://cocogoat.work/achievement, Default)
+[1] SnapGenshin
+[2] Paimon.moe
+[3] Seelie.me
+[4] Csv file
+[5] Xunkong
+Input a number (0-5): </value>
+    </data>
+    <data name="ExportToCocogoatSuccess" xml:space="preserve">
+        <value>Successfully exported to cocogoat.</value>
+    </data>
+    <data name="ExportToWxApp1Success" xml:space="preserve">
+        <value>{0}</value>
+    </data>
+    <data name="ExportToSnapGenshinSuccess" xml:space="preserve">
+        <value>Successfully exported to snap genshin.</value>
+    </data>
+    <data name="ExportToSnapGenshinNeedUpdate" xml:space="preserve">
+        <value>Please update SnapGenshin and retry.</value>
+    </data>
+    <data name="ExportToFileSuccess" xml:space="preserve">
+        <value>Successfully exported to {0}</value>
+    </data>
+    <data name="ExportToXunkongSuccess" xml:space="preserve">
+        <value>Successfully exported to xunkong.</value>
+    </data>
+    <data name="ExportToXunkongNeedUpdate" xml:space="preserve">
+        <value>Please update xunkong and retry.</value>
+    </data>
+    <data name="StatusInvalid" xml:space="preserve">
+        <value>Invalid</value>
+    </data>
+    <data name="StatusRewardTaken" xml:space="preserve">
+        <value>Finished</value>
+    </data>
+    <data name="StatusUnfinished" xml:space="preserve">
+        <value>Unfinished</value>
+    </data>
+    <data name="StatusFinished" xml:space="preserve">
+        <value>Reward not taken</value>
+    </data>
+    <data name="ConfigInitGotPath" xml:space="preserve">
+        <value>Detected game location: {0}</value>
+    </data>
+    <data name="ConfigInitPathConfirm" xml:space="preserve">
+        <value>If correct, input Y; otherwise input N</value>
+    </data>
+    <data name="VcRuntimeNotInstalled" xml:space="preserve">
+        <value>You need install Visual C++ Redistributable 2015-2022(latest) before run this application.</value>
+    </data>
+    <data name="DownloadLink" xml:space="preserve">
+        <value>Download: {0}</value>
+    </data>
+    <data name="VcRuntimeAfterInstall" xml:space="preserve">
+        <value>-</value>
+    </data>
+    <data name="GameProcessExit" xml:space="preserve">
+        <value>Game exited.</value>
+    </data>
+    <data name="GameLoading" xml:space="preserve">
+        <value>Game process start ({0})</value>
+    </data>
+    <data name="UploadError" xml:space="preserve">
+        <value>Upload error to appcenter...</value>
+    </data>
+    <data name="PressKeyToExit" xml:space="preserve">
+        <value>Press any key to exit.</value>
+    </data>
+    <data name="GenshinIsRunning" xml:space="preserve">
+        <value>Please close game before run this application. ({0})</value>
+    </data>
+    <data name="SelectCanceled" xml:space="preserve">
+        <value>Operation canceled by user.</value>
+    </data>
+    <data name="SelectTitle" xml:space="preserve">
+        <value>GenshinPath</value>
+    </data>
+    <data name="SelectFilterName" xml:space="preserve">
+        <value>Executable</value>
+    </data>
+    <data name="AnotherInstance" xml:space="preserve">
+        <value>Please close another instance.</value>
+    </data>
+    <data name="UpdateNewVersion" xml:space="preserve">
+        <value>Has update: {0} =&gt; {1}</value>
+    </data>
+    <data name="UpdateDescription" xml:space="preserve">
+        <value>Description: 
+{0}</value>
+    </data>
+    <data name="UpdateDownloading" xml:space="preserve">
+        <value>Downloading update package...</value>
+    </data>
+    <data name="UpdateDownloadFinish" xml:space="preserve">
+        <value>Unzip the package to update application.</value>
+    </data>
+    <data name="AppBanner" xml:space="preserve">
+        <value>YaeAchievement ({0})</value>
+    </data>
+    <data name="UsePreviousData" xml:space="preserve">
+        <value>Use previous fetched data.</value>
+    </data>
+    <data name="RefreshData" xml:space="preserve">
+        <value>To fetch new data, Restart the application after delete cache\d1a8ef40a67a5929.miko.</value>
+    </data>
+</root>

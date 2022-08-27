@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using YaeAchievement.AppCenterSDK;
+using YaeAchievement.res;
 using YaeAchievement.Win32;
 using static YaeAchievement.Win32.OpenFileFlags;
 
@@ -67,17 +68,17 @@ public static class Utils {
     public static void CheckUpdate() {
         var info = UpdateInfo.Parser.ParseFrom(GetBucketFileAsByteArray("schicksal/version"))!;
         if (GlobalVars.AppVersionCode != info.VersionCode) {
-            Console.WriteLine($"有可用更新: {GlobalVars.AppVersionName} => {info.VersionName}");
-            Console.WriteLine($"更新内容: \n{info.Description}");
+            Console.WriteLine(App.UpdateNewVersion, GlobalVars.AppVersionName, info.VersionName);
+            Console.WriteLine(App.UpdateDescription, info.Description);
             if (info.EnableAutoDownload) {
-                Console.WriteLine("正在下载更新包...");
+                Console.WriteLine(App.UpdateDownloading);
                 var fullPath = Path.GetFullPath($"update.{Path.GetExtension(info.PackageLink)}");
                 File.WriteAllBytes(fullPath, GetBucketFileAsByteArray(info.PackageLink));
-                Console.WriteLine("关闭程序后, 将压缩包解压至当前目录即可完成更新.");
+                Console.WriteLine(App.UpdateDownloadFinish);
                 ShellOpen(fullPath);
                 Environment.Exit(0);
             }
-            Console.WriteLine($"下载地址: {info.PackageLink}");
+            Console.WriteLine(App.DownloadLink, info.PackageLink);
             if (info.ForceUpdate) {
                 Environment.Exit(0);
             }
@@ -92,20 +93,13 @@ public static class Utils {
         var cur = Process.GetCurrentProcess();
         foreach (var process in Process.GetProcesses().Where(process => process.Id != cur.Id)) {
             if (process.ProcessName == cur.ProcessName) {
-                Console.WriteLine("另一个实例正在运行，请关闭后重试");
+                Console.WriteLine(App.AnotherInstance);
                 Environment.Exit(302);
             }
         }
         Process.LeaveDebugMode();
     }
-    
-    public static void CheckIsTempDir() {
-        if (GlobalVars.AppPath.Contains(Path.GetTempPath())) {
-            Console.WriteLine("请将程序完整解压后再运行");
-            Environment.Exit(303);
-        }
-    }
-    
+
     public static bool ShellOpen(string path) {
         return new Process {
             StartInfo = {
@@ -129,14 +123,14 @@ public static class Utils {
             size    = Marshal.SizeOf<OpenFileName>(),
             owner   = Native.GetConsoleWindow(),
             flags   = Explorer | NoNetworkButton | FileMustExist | NoChangeDir,
-            title   = "选择主程序",
-            filter  = "国服/国际服主程序 (YuanShen/GenshinImpact.exe)\0YuanShen.exe;GenshinImpact.exe\0",
+            title   = App.SelectTitle,
+            filter  = $"{App.SelectFilterName} (YuanShen/GenshinImpact.exe)\0YuanShen.exe;GenshinImpact.exe\0",
             maxFile = 32768
         };
         new Thread(() => {
-            var handle = Native.FindWindow("#32770", "选择主程序");
+            var handle = Native.FindWindow("#32770", App.SelectTitle);
             while (handle == IntPtr.Zero) {
-                handle = Native.FindWindow("#32770", "选择主程序");
+                handle = Native.FindWindow("#32770", App.SelectTitle);
                 Thread.Sleep(1);
             }
             var currentThreadId = Native.GetCurrentThreadId();
@@ -151,7 +145,7 @@ public static class Utils {
             if (err != 0) {
                 throw new SystemException($"Dialog error: {err}");
             }
-            Console.WriteLine("操作被取消");
+            Console.WriteLine(App.SelectCanceled);
             Environment.Exit(0);
         }
         var path = Marshal.PtrToStringAuto(fnPtr)!;
@@ -169,7 +163,7 @@ public static class Utils {
         Process.EnterDebugMode();
         foreach (var process in Process.GetProcesses()) {
             if (process.ProcessName is "GenshinImpact" or "YuanShen" && !process.HasExited) {
-                Console.WriteLine($"原神正在运行，请关闭后重试 ({process.Id})");
+                Console.WriteLine(App.GenshinIsRunning, process.Id);
                 Environment.Exit(301);
             }
         }
@@ -182,7 +176,7 @@ public static class Utils {
     public static void InstallExitHook() {
         AppDomain.CurrentDomain.ProcessExit += (_, _) => {
             proc?.Kill();
-            Console.WriteLine("按任意键退出");
+            Console.WriteLine(App.PressKeyToExit);
             Console.ReadKey();
         };
     }
@@ -190,7 +184,7 @@ public static class Utils {
     public static void InstallExceptionHook() {
         AppDomain.CurrentDomain.UnhandledException += (_, e) => {
             Console.WriteLine(e.ExceptionObject.ToString());
-            Console.WriteLine("正在上报错误信息...");
+            Console.WriteLine(App.UploadError);
             AppCenter.TrackCrash((Exception) e.ExceptionObject);
             AppCenter.Upload();
             Environment.Exit(-1);
@@ -212,13 +206,13 @@ public static class Utils {
                 Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("TerminateProcess fail"));
             }
         }
-        Console.WriteLine($"原神正在启动 ({pid})");
+        Console.WriteLine(App.GameLoading, pid);
         proc = Process.GetProcessById(Convert.ToInt32(pid));
         proc.EnableRaisingEvents = true;
         proc.Exited += (_, _) => {
             if (GlobalVars.UnexpectedExit) {
                 proc = null;
-                Console.WriteLine("游戏进程异常退出");
+                Console.WriteLine(App.GameProcessExit);
                 Environment.Exit(114514);
             }
         };
@@ -287,9 +281,9 @@ public static class Utils {
             .Any(name => name.Contains("Microsoft Visual C++ 2022 X64 "));
         if (!installed) {
             const string vcDownloadUrl = "https://aka.ms/vs/17/release/vc_redist.x64.exe";
-            Console.WriteLine("未安装 VcRuntime");
-            Console.WriteLine($"下载地址: {vcDownloadUrl}");
-            Console.WriteLine("安装完成后，重新打开 YaeAchievement");
+            Console.WriteLine(App.VcRuntimeNotInstalled);
+            Console.WriteLine(App.DownloadLink, vcDownloadUrl);
+            Console.WriteLine(App.VcRuntimeAfterInstall);
             ShellOpen(vcDownloadUrl);
             Environment.Exit(303);
         }

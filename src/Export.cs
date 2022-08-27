@@ -1,8 +1,8 @@
-﻿
-using System.Net;
+﻿using System.Net;
 using System.Text;
 using Microsoft.Win32;
 using Newtonsoft.Json;
+using YaeAchievement.res;
 using static AchievementAllDataNotify.Types.Achievement.Types;
 
 namespace YaeAchievement; 
@@ -10,25 +10,15 @@ namespace YaeAchievement;
 public static class Export {
     
     public static void Choose(AchievementAllDataNotify data) {
-        Console.Write("""
-            导出至: 
-            [0] 椰羊 (https://cocogoat.work/achievement, 默认)
-            [1] SnapGenshin
-            [2] Paimon.moe
-            [3] Seelie.me
-            [4] 表格文件
-            [5] 原魔工具箱
-            [6] 寻空
-            输入一个数字(0-6): 
-            """);
+        Console.Write(App.ExportChoose);
         if (!int.TryParse(Console.ReadLine(), out var num)) num = 0;
         ((Action<AchievementAllDataNotify>) (num switch {
             1 => ToSnapGenshin,
             2 => ToPaimon,
             3 => ToSeelie,
             4 => ToCSV,
-            5 => ToWxApp1,
-            6 => ToXunkong,
+            5 => ToXunkong,
+            6 => ToWxApp1,
             7 => ToRawJson,
             _ => ToCocogoat
         })).Invoke(data);
@@ -38,17 +28,17 @@ public static class Export {
         var result = JsonConvert.SerializeObject(ExportToUIAFApp(data));
         using var request = new HttpRequestMessage {
             Method = HttpMethod.Post,
-            RequestUri = new Uri("https://77.cocogoat.work/v1/memo?source=全部成就"),
+            RequestUri = new Uri($"https://77.cocogoat.work/v1/memo?source={App.AllAchievement}"),
             Content = new StringContent(result, Encoding.UTF8, "application/json")
         };
         using var response = Utils.CHttpClient.Value.Send(request);
         if (response.StatusCode != HttpStatusCode.Created) {
-            Console.WriteLine("导出失败, 请联系开发者以获取帮助");
+            Console.WriteLine(App.ExportToCocogoatFail);
             return;
         }
         dynamic memo = JsonConvert.DeserializeObject(response.Content.ReadAsStringAsync().Result)!;
         Console.WriteLine(Utils.ShellOpen($"https://cocogoat.work/achievement?memo={memo.key}")
-            ? "在浏览器内进行下一步操作"
+            ? App.ExportToCocogoatSuccess
             : $"https://cocogoat.work/achievement?memo={memo.key}");
     }
     
@@ -64,16 +54,16 @@ public static class Export {
             Content = new StringContent(result, Encoding.UTF8, "application/json")
         };
         using var response = Utils.CHttpClient.Value.Send(request);
-        Console.WriteLine($"在小程序导入页面输入以下代码: {id}");
+        Console.WriteLine(App.ExportToWxApp1Success, id);
     }
 
     private static void ToSnapGenshin(AchievementAllDataNotify data) {
         if (CheckSnapScheme()) {
             Utils.CopyToClipboard(JsonConvert.SerializeObject(ExportToUIAFApp(data)));
             Utils.ShellOpen("snapgenshin://achievement/import/uiaf");
-            Console.WriteLine("在 SnapGenshin 进行下一步操作");
+            Console.WriteLine(App.ExportToSnapGenshinSuccess);
         } else {
-            Console.WriteLine("更新 SnapGenshin 至最新版本后重试");
+            Console.WriteLine(App.ExportToSnapGenshinNeedUpdate);
         }
     }
     
@@ -82,7 +72,7 @@ public static class Export {
         var output = new Dictionary<uint, Dictionary<uint, bool>>();
         foreach (var ach in data.List.Where(a => a.Status is Status.Finished or Status.RewardTaken)) {
             if (!info.Items.TryGetValue(ach.Id, out var achInfo) || achInfo == null) {
-                Console.WriteLine($"Unable to find {ach.Id} in metadata.");
+                Console.WriteLine($@"Unable to find {ach.Id} in metadata.");
                 continue;
             }
             var map = output.GetValueOrDefault(achInfo.Group, new Dictionary<uint, bool>());
@@ -94,7 +84,7 @@ public static class Export {
         };
         var path = Path.GetFullPath($"export-{DateTime.Now:yyyyMMddHHmmss}-paimon.json");
         File.WriteAllText(path, JsonConvert.SerializeObject(final));
-        Console.WriteLine($"成就数据已导出至 {path}");
+        Console.WriteLine(App.ExportToFileSuccess, path);
     }
     
     private static void ToSeelie(AchievementAllDataNotify data) {
@@ -109,7 +99,7 @@ public static class Export {
         };
         var path = Path.GetFullPath($"export-{DateTime.Now:yyyyMMddHHmmss}-seelie.json");
         File.WriteAllText(path, JsonConvert.SerializeObject(final));
-        Console.WriteLine($"成就数据已导出至 {path}");
+        Console.WriteLine(App.ExportToFileSuccess, path);
     }
 
     // ReSharper disable once InconsistentNaming
@@ -119,7 +109,7 @@ public static class Export {
         foreach (var ach in data.List.OrderBy(a => a.Id)) {
             if (UnusedAchievement.Contains(ach.Id)) continue;
             if (!info.Items.TryGetValue(ach.Id, out var achInfo) || achInfo == null) {
-                Console.WriteLine($"Unable to find {ach.Id} in metadata.");
+                Console.WriteLine($@"Unable to find {ach.Id} in metadata.");
                 continue;
             }
             var finishAt = "";
@@ -140,16 +130,16 @@ public static class Export {
         }));
         var path = Path.GetFullPath($"achievement-{DateTime.Now:yyyyMMddHHmmss}.csv");
         File.WriteAllText(path, $"\uFEFF{string.Join("\n", output)}");
-        Console.WriteLine($"成就数据已导出至 {path}");
+        Console.WriteLine(App.ExportToFileSuccess, path);
     }
 
     private static void ToXunkong(AchievementAllDataNotify data) {
         if (CheckXunkongScheme()) {
             Utils.CopyToClipboard(JsonConvert.SerializeObject(ExportToUIAFApp(data)));
             Utils.ShellOpen("xunkong://import-achievement?caller=YaeAchievement&from=clipboard");
-            Console.WriteLine("在寻空中进行下一步操作");
+            Console.WriteLine(App.ExportToXunkongSuccess);
         } else {
-            Console.WriteLine("更新寻空至最新版本后重试");
+            Console.WriteLine(App.ExportToXunkongNeedUpdate);
             Utils.ShellOpen("ms-windows-store://pdp/?productid=9N2SVG0JMT12");
         }
     }
@@ -157,7 +147,7 @@ public static class Export {
     private static void ToRawJson(AchievementAllDataNotify data) {
         var path = Path.GetFullPath($"export-{DateTime.Now:yyyyMMddHHmmss}-raw.json");
         File.WriteAllText(path, JsonConvert.SerializeObject(data, Formatting.Indented));
-        Console.WriteLine($"成就数据已导出至 {path}");
+        Console.WriteLine(App.ExportToFileSuccess, path);
     }
 
     // ReSharper disable once InconsistentNaming
@@ -200,10 +190,10 @@ public static class Export {
 
     private static string ToDesc(this Status status) {
         return status switch {
-            Status.Invalid => "未知",
-            Status.Finished => "已完成但未领取奖励",
-            Status.Unfinished => "未完成",
-            Status.RewardTaken => "已完成",
+            Status.Invalid => App.StatusInvalid,
+            Status.Finished => App.StatusFinished,
+            Status.Unfinished => App.StatusUnfinished,
+            Status.RewardTaken => App.StatusRewardTaken,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, null)
         };
     }

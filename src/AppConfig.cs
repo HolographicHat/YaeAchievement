@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using YaeAchievement.res;
 
 namespace YaeAchievement; 
 
@@ -21,8 +22,8 @@ public class AppConfig {
         if (_instance?.Location == null || !Utils.CheckGamePathValid(_instance.Location)) {
             var gameInstallPath = Utils.FindGamePathFromRegistry();
             if (!string.IsNullOrEmpty(gameInstallPath)) {
-                Console.WriteLine($"自动读取到游戏路径: {gameInstallPath}");
-                Console.WriteLine($"如果确认路径无误，请按 Y ；若有误或需要自行选择，请按 N ");
+                Console.WriteLine(App.ConfigInitGotPath, gameInstallPath);
+                Console.WriteLine(App.ConfigInitPathConfirm);
                 var key = Console.ReadKey().Key;
                 gameInstallPath = key == ConsoleKey.Y ? gameInstallPath : Utils.SelectGameExecutable();
             } else {

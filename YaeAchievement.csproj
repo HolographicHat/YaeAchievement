@@ -18,4 +18,19 @@
         <PackageReference Include="Newtonsoft.Json" Version="13.0.2-beta1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <EmbeddedResource Update="res\App.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>App.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="res\App.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>App.resx</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
 </Project>
