@@ -1,4 +1,4 @@
-﻿<div align="center">
+﻿<div align="center"><img width="100" src="https://github.com/HolographicHat/YaeAchievement/blob/master/icon.ico">
 
 # YaeAchievement
 
