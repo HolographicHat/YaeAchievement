@@ -4,7 +4,10 @@
 
 ![GitHub](https://img.shields.io/badge/License-GPL--3.0-brightgreen?style=flat-square) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/HolographicHat/YaeAchievement?color=brightgreen&label=Release&style=flat-square) ![GitHub issues](https://img.shields.io/github/issues/HolographicHat/YaeAchievement?label=Issues&style=flat-square) ![Downloads](https://img.shields.io/github/downloads/HolographicHat/YaeAchievement/total?color=brightgreen&label=Downloads&style=flat-square) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
 
+[English](https://github.com/HolographicHat/YaeAchievement/blob/master/README_EN.md)
 </div>
+
+
 
 - 支持导出所有类别的成就
 - 支持官服，渠道服与国际服
