@@ -158,13 +158,13 @@ public static class Export {
                 ["id"] = ach.Id,
                 ["status"] = (uint) ach.Status,
                 ["current"] = ach.Current,
-                ["timestamp"] = ach.Timestamp,
+                ["timestamp"] = ach.Timestamp
             })
             .ToList();
         return new Dictionary<string, object> {
             ["info"] = new Dictionary<string, object> {
                 ["export_app"] = "YaeAchievement",
-                ["export_timestamp"] = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                ["export_timestamp"] = DateTimeOffset.Now.ToUnixTimeSeconds(),
                 ["export_app_version"] = GlobalVars.AppVersionName,
                 ["uiaf_version"] = "v1.1"
             },
