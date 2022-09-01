@@ -58,13 +58,8 @@ public static class Export {
     }
 
     private static void ToSnapGenshin(AchievementAllDataNotify data) {
-        if (CheckSnapScheme()) {
-            Utils.CopyToClipboard(JsonConvert.SerializeObject(ExportToUIAFApp(data)));
-            Utils.ShellOpen("snapgenshin://achievement/import/uiaf");
-            Console.WriteLine(App.ExportToSnapGenshinSuccess);
-        } else {
-            Console.WriteLine(App.ExportToSnapGenshinNeedUpdate);
-        }
+        Utils.CopyToClipboard(JsonConvert.SerializeObject(ExportToUIAFApp(data)));
+        Console.WriteLine(App.ExportToSnapGenshinSuccess);
     }
     
     private static void ToPaimon(AchievementAllDataNotify data) {
@@ -173,10 +168,6 @@ public static class Export {
     }
 
     #pragma warning disable CA1416
-    private static bool CheckSnapScheme() {
-        return (string?)Registry.ClassesRoot.OpenSubKey("snapgenshin")?.GetValue("") == "URL:snapgenshin";
-    }
-
     private static bool CheckXunkongScheme() {
         return (string?)Registry.ClassesRoot.OpenSubKey("xunkong")?.GetValue("") == "URL:xunkong";
     }

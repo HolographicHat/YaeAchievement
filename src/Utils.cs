@@ -193,7 +193,8 @@ public static class Utils {
     
     // ReSharper disable once UnusedMethodReturnValue.Global
     public static Thread StartAndWaitResult(string exePath, Func<string, bool> onReceive) {
-        const string lib = "C:/ProgramData/yae.dll";
+        var dataDir = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+        var lib = Path.Combine(dataDir, "yae.dll");
         File.Copy(Path.GetFullPath(GlobalVars.LibName), lib, true);
         AppDomain.CurrentDomain.ProcessExit += (_, _) => {
             File.Delete(lib);
