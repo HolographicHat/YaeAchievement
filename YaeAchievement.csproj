@@ -11,6 +11,13 @@
         <AssemblyVersion>2.0.0</AssemblyVersion>
         <FileVersion>2.0.0</FileVersion>
         <ApplicationIcon>icon.ico</ApplicationIcon>
+
+        <DebugType>embedded</DebugType>
+        <SelfContained>false</SelfContained>
+        <PublishSingleFile>true</PublishSingleFile>
+        <PublishReadyToRun>true</PublishReadyToRun>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+
     </PropertyGroup>
 
     <ItemGroup>
