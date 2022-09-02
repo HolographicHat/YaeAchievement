@@ -29,25 +29,31 @@ public static class Utils {
     });
 
     public static byte[] GetBucketFileAsByteArray(string path, bool cache = true) {
-        using var msg = new HttpRequestMessage {
-            Method = HttpMethod.Get,
-            RequestUri = new Uri($"{GlobalVars.BucketHost}/{path}")
-        };
-        var cacheFile = new CacheFile(path);
-        if (cache && cacheFile.Exists()) {
-            msg.Headers.TryAddWithoutValidation("If-None-Match", $"{cacheFile.Read().Etag}");
+        try {
+            using var msg = new HttpRequestMessage {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri($"{GlobalVars.BucketHost}/{path}")
+            };
+            var cacheFile = new CacheFile(path);
+            if (cache && cacheFile.Exists()) {
+                msg.Headers.TryAddWithoutValidation("If-None-Match", $"{cacheFile.Read().Etag}");
+            }
+            using var response = CHttpClient.Value.Send(msg);
+            if (cache && response.StatusCode == HttpStatusCode.NotModified) {
+                return cacheFile.Read().Content.ToByteArray();
+            }
+            response.EnsureSuccessStatusCode();
+            var responseBytes = response.Content.ReadAsByteArrayAsync().Result;
+            if (cache) {
+                var etag = response.Headers.ETag!.Tag;
+                cacheFile.Write(responseBytes, etag);
+            }
+            return responseBytes;
+        } catch (Exception e) {
+            Console.WriteLine(App.NetworkError, e.Message);
+            Environment.Exit(-1);
+            return null!;
         }
-        using var response = CHttpClient.Value.Send(msg);
-        if (cache && response.StatusCode == HttpStatusCode.NotModified) {
-            return cacheFile.Read().Content.ToByteArray();
-        }
-        response.EnsureSuccessStatusCode();
-        var responseBytes = response.Content.ReadAsByteArrayAsync().Result;
-        if (cache) {
-            var etag = response.Headers.ETag!.Tag;
-            cacheFile.Write(responseBytes, etag);
-        }
-        return responseBytes;
     }
 
     public static void CopyToClipboard(string text) {
@@ -101,12 +107,16 @@ public static class Utils {
     }
 
     public static bool ShellOpen(string path) {
-        return new Process {
-            StartInfo = {
-                FileName = path,
-                UseShellExecute = true
-            }
-        }.Start();
+        try {
+            return new Process {
+                StartInfo = {
+                    FileName = path,
+                    UseShellExecute = true
+                }
+            }.Start();
+        } catch (Exception) {
+            return false;
+        }
     }
 
     public static bool CheckGamePathValid(string? path) {
@@ -197,7 +207,9 @@ public static class Utils {
         var lib = Path.Combine(dataDir, "yae.dll");
         File.Copy(Path.GetFullPath(GlobalVars.LibName), lib, true);
         AppDomain.CurrentDomain.ProcessExit += (_, _) => {
-            File.Delete(lib);
+            try { 
+                File.Delete(lib);
+            } catch (Exception) { /* ignored */ }
         };
         if (!Injector.CreateProcess(exePath, out var hProcess, out var hThread, out var pid)) {
             Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("ICreateProcess fail"));

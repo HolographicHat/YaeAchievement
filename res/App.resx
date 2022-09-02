@@ -132,4 +132,7 @@
     <data name="RefreshData" xml:space="preserve">
         <value>要重新获取数据，手动删除 cache\d1a8ef40a67a5929.miko 后重新启动 YaeAchievement</value>
     </data>
+    <data name="NetworkError" xml:space="preserve">
+        <value>网络错误: {0}</value>
+    </data>
 </root>

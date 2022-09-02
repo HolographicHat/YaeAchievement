@@ -124,4 +124,7 @@ Input a number (0-5): </value>
     <data name="RefreshData" xml:space="preserve">
         <value>To fetch new data, Restart the application after delete cache\d1a8ef40a67a5929.miko.</value>
     </data>
+    <data name="NetworkError" xml:space="preserve">
+        <value>Network error:</value>
+    </data>
 </root>
