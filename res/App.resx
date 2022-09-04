@@ -19,120 +19,119 @@
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
     <data name="ExportToCocogoatFail" xml:space="preserve">
-        <value>导出失败, 请联系开发者以获取帮助</value>
+        <value>Fail, please contact developer to get help information</value>
     </data>
     <data name="AllAchievement" xml:space="preserve">
-        <value>全部成就</value>
+        <value>all achievement</value>
     </data>
     <data name="ExportChoose" xml:space="preserve">
-        <value>导出至: 
-[0] 椰羊 (https://cocogoat.work/achievement, 默认)
+        <value>Export to: 
+[0] Cocogoat (https://cocogoat.work/achievement, Default)
 [1] SnapGenshin
 [2] Paimon.moe
 [3] Seelie.me
-[4] 表格文件
-[5] 寻空
-[6] 原魔工具箱
-输入一个数字 (0-6): </value>
+[4] Csv file
+[5] Xunkong
+Input a number (0-5): </value>
     </data>
     <data name="ExportToCocogoatSuccess" xml:space="preserve">
-        <value>在浏览器内进行下一步操作</value>
+        <value>Successfully exported to cocogoat.</value>
     </data>
     <data name="ExportToWxApp1Success" xml:space="preserve">
-        <value>在小程序导入页面输入以下代码: {0}</value>
+        <value>{0}</value>
     </data>
     <data name="ExportToSnapGenshinSuccess" xml:space="preserve">
-        <value>在 SnapGenshin 进行下一步操作</value>
+        <value>Successfully exported to snap genshin.</value>
     </data>
     <data name="ExportToSnapGenshinNeedUpdate" xml:space="preserve">
-        <value>更新 SnapGenshin 至最新版本后重试</value>
+        <value>Please update SnapGenshin and retry.</value>
     </data>
     <data name="ExportToFileSuccess" xml:space="preserve">
-        <value>成就数据已导出至 {0}</value>
+        <value>Successfully exported to {0}</value>
     </data>
     <data name="ExportToXunkongSuccess" xml:space="preserve">
-        <value>在寻空中进行下一步操作</value>
+        <value>Successfully exported to xunkong.</value>
     </data>
     <data name="ExportToXunkongNeedUpdate" xml:space="preserve">
-        <value>更新寻空至最新版本后重试</value>
+        <value>Please update xunkong and retry.</value>
     </data>
     <data name="StatusInvalid" xml:space="preserve">
-        <value>未知</value>
-    </data>
-    <data name="StatusFinished" xml:space="preserve">
-        <value>已完成但未领取奖励</value>
-    </data>
-    <data name="StatusUnfinished" xml:space="preserve">
-        <value>未完成</value>
+        <value>Invalid</value>
     </data>
     <data name="StatusRewardTaken" xml:space="preserve">
-        <value>已完成</value>
+        <value>Finished</value>
+    </data>
+    <data name="StatusUnfinished" xml:space="preserve">
+        <value>Unfinished</value>
+    </data>
+    <data name="StatusFinished" xml:space="preserve">
+        <value>Reward not taken</value>
     </data>
     <data name="ConfigInitGotPath" xml:space="preserve">
-        <value>自动读取到游戏路径: {0}</value>
+        <value>Detected game location: {0}</value>
     </data>
     <data name="ConfigInitPathConfirm" xml:space="preserve">
-        <value>如果确认路径无误，请按 Y ；若有误或需要自行选择，请按 N </value>
+        <value>If correct, input Y; otherwise input N</value>
     </data>
     <data name="VcRuntimeNotInstalled" xml:space="preserve">
-        <value>未安装 VcRuntime</value>
+        <value>You need install Visual C++ Redistributable 2015-2022(latest) before run this application.</value>
     </data>
     <data name="DownloadLink" xml:space="preserve">
-        <value>下载地址: {0}</value>
+        <value>Download: {0}</value>
     </data>
     <data name="VcRuntimeAfterInstall" xml:space="preserve">
-        <value>安装完成后，重新打开 YaeAchievement</value>
+        <value>-</value>
     </data>
     <data name="GameProcessExit" xml:space="preserve">
-        <value>游戏进程异常退出</value>
+        <value>Game exited.</value>
     </data>
     <data name="GameLoading" xml:space="preserve">
-        <value>原神正在启动 ({0})</value>
+        <value>Game process start ({0})</value>
     </data>
     <data name="UploadError" xml:space="preserve">
-        <value>正在上报错误信息...</value>
+        <value>Upload error to appcenter...</value>
     </data>
     <data name="PressKeyToExit" xml:space="preserve">
-        <value>按任意键退出</value>
+        <value>Press any key to exit.</value>
     </data>
     <data name="GenshinIsRunning" xml:space="preserve">
-        <value>原神正在运行，请关闭后重试 ({0})</value>
+        <value>Please close game before run this application. ({0})</value>
     </data>
     <data name="SelectCanceled" xml:space="preserve">
-        <value>操作被取消</value>
+        <value>Operation canceled by user.</value>
     </data>
     <data name="SelectTitle" xml:space="preserve">
-        <value>选择主程序</value>
+        <value>GenshinPath</value>
     </data>
     <data name="SelectFilterName" xml:space="preserve">
-        <value>国服/国际服主程序</value>
+        <value>Executable</value>
     </data>
     <data name="AnotherInstance" xml:space="preserve">
-        <value>另一个实例正在运行，请关闭后重试</value>
+        <value>Please close another instance.</value>
     </data>
     <data name="UpdateNewVersion" xml:space="preserve">
-        <value>有可用更新: {0} =&gt; {1}</value>
+        <value>Has update: {0} =&gt; {1}</value>
     </data>
     <data name="UpdateDescription" xml:space="preserve">
-        <value>更新内容: 
+        <value>Description: 
 {0}</value>
     </data>
     <data name="UpdateDownloading" xml:space="preserve">
-        <value>正在下载更新包...</value>
+        <value>Downloading update package...</value>
     </data>
     <data name="UpdateDownloadFinish" xml:space="preserve">
-        <value>关闭程序后, 将压缩包解压至当前目录即可完成更新.</value>
+        <value>Unzip the package to update application.</value>
     </data>
     <data name="AppBanner" xml:space="preserve">
-        <value>YaeAchievement - 原神成就导出工具 ({0})</value>
+        <value>YaeAchievement ({0})</value>
     </data>
     <data name="UsePreviousData" xml:space="preserve">
-        <value>使用上一次获取到的成就数据</value>
+        <value>Use previous fetched data.</value>
     </data>
     <data name="RefreshData" xml:space="preserve">
-        <value>要重新获取数据，手动删除 cache\d1a8ef40a67a5929.miko 后重新启动 YaeAchievement</value>
+        <value>To fetch new data, Restart the application after delete cache\d1a8ef40a67a5929.miko.</value>
     </data>
     <data name="NetworkError" xml:space="preserve">
-        <value>网络错误: {0}</value>
+        <value>Network error:</value>
     </data>
 </root>

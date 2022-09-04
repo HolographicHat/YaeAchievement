@@ -60,7 +60,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 全部成就.
+        ///   Looks up a localized string similar to all achievement.
         /// </summary>
         internal static string AllAchievement {
             get {
@@ -69,7 +69,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 另一个实例正在运行，请关闭后重试.
+        ///   Looks up a localized string similar to Please close another instance..
         /// </summary>
         internal static string AnotherInstance {
             get {
@@ -78,7 +78,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to YaeAchievement - 原神成就导出工具 ({0}).
+        ///   Looks up a localized string similar to YaeAchievement ({0}).
         /// </summary>
         internal static string AppBanner {
             get {
@@ -87,7 +87,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 自动读取到游戏路径: {0}.
+        ///   Looks up a localized string similar to Detected game location: {0}.
         /// </summary>
         internal static string ConfigInitGotPath {
             get {
@@ -96,7 +96,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 如果确认路径无误，请按 Y ；若有误或需要自行选择，请按 N .
+        ///   Looks up a localized string similar to If correct, input Y; otherwise input N.
         /// </summary>
         internal static string ConfigInitPathConfirm {
             get {
@@ -105,7 +105,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 下载地址: {0}.
+        ///   Looks up a localized string similar to Download: {0}.
         /// </summary>
         internal static string DownloadLink {
             get {
@@ -114,15 +114,14 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 导出至: 
-        ///[0] 椰羊 (https://cocogoat.work/achievement, 默认)
+        ///   Looks up a localized string similar to Export to: 
+        ///[0] Cocogoat (https://cocogoat.work/achievement, Default)
         ///[1] SnapGenshin
         ///[2] Paimon.moe
         ///[3] Seelie.me
-        ///[4] 表格文件
-        ///[5] 寻空
-        ///[6] 原魔工具箱
-        ///输入一个数字 (0-6): .
+        ///[4] Csv file
+        ///[5] Xunkong
+        ///Input a number (0-5): .
         /// </summary>
         internal static string ExportChoose {
             get {
@@ -131,7 +130,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 导出失败, 请联系开发者以获取帮助.
+        ///   Looks up a localized string similar to Fail, please contact developer to get help information.
         /// </summary>
         internal static string ExportToCocogoatFail {
             get {
@@ -140,7 +139,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 在浏览器内进行下一步操作.
+        ///   Looks up a localized string similar to Successfully exported to cocogoat..
         /// </summary>
         internal static string ExportToCocogoatSuccess {
             get {
@@ -149,7 +148,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 成就数据已导出至 {0}.
+        ///   Looks up a localized string similar to Successfully exported to {0}.
         /// </summary>
         internal static string ExportToFileSuccess {
             get {
@@ -158,7 +157,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 更新 SnapGenshin 至最新版本后重试.
+        ///   Looks up a localized string similar to Please update SnapGenshin and retry..
         /// </summary>
         internal static string ExportToSnapGenshinNeedUpdate {
             get {
@@ -167,7 +166,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 在 SnapGenshin 进行下一步操作.
+        ///   Looks up a localized string similar to Successfully exported to snap genshin..
         /// </summary>
         internal static string ExportToSnapGenshinSuccess {
             get {
@@ -176,7 +175,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 在小程序导入页面输入以下代码: {0}.
+        ///   Looks up a localized string similar to {0}.
         /// </summary>
         internal static string ExportToWxApp1Success {
             get {
@@ -185,7 +184,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 更新寻空至最新版本后重试.
+        ///   Looks up a localized string similar to Please update xunkong and retry..
         /// </summary>
         internal static string ExportToXunkongNeedUpdate {
             get {
@@ -194,7 +193,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 在寻空中进行下一步操作.
+        ///   Looks up a localized string similar to Successfully exported to xunkong..
         /// </summary>
         internal static string ExportToXunkongSuccess {
             get {
@@ -203,7 +202,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 原神正在启动 ({0}).
+        ///   Looks up a localized string similar to Game process start ({0}).
         /// </summary>
         internal static string GameLoading {
             get {
@@ -212,7 +211,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 游戏进程异常退出.
+        ///   Looks up a localized string similar to Game exited..
         /// </summary>
         internal static string GameProcessExit {
             get {
@@ -221,7 +220,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 原神正在运行，请关闭后重试 ({0}).
+        ///   Looks up a localized string similar to Please close game before run this application. ({0}).
         /// </summary>
         internal static string GenshinIsRunning {
             get {
@@ -230,7 +229,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 网络错误: {0}.
+        ///   Looks up a localized string similar to Network error:.
         /// </summary>
         internal static string NetworkError {
             get {
@@ -239,7 +238,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 按任意键退出.
+        ///   Looks up a localized string similar to Press any key to exit..
         /// </summary>
         internal static string PressKeyToExit {
             get {
@@ -248,7 +247,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 要重新获取数据，手动删除 cache\d1a8ef40a67a5929.miko 后重新启动 YaeAchievement.
+        ///   Looks up a localized string similar to To fetch new data, Restart the application after delete cache\d1a8ef40a67a5929.miko..
         /// </summary>
         internal static string RefreshData {
             get {
@@ -257,7 +256,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 操作被取消.
+        ///   Looks up a localized string similar to Operation canceled by user..
         /// </summary>
         internal static string SelectCanceled {
             get {
@@ -266,7 +265,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 国服/国际服主程序.
+        ///   Looks up a localized string similar to Executable.
         /// </summary>
         internal static string SelectFilterName {
             get {
@@ -275,7 +274,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 选择主程序.
+        ///   Looks up a localized string similar to GenshinPath.
         /// </summary>
         internal static string SelectTitle {
             get {
@@ -284,7 +283,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 已完成但未领取奖励.
+        ///   Looks up a localized string similar to Reward not taken.
         /// </summary>
         internal static string StatusFinished {
             get {
@@ -293,7 +292,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 未知.
+        ///   Looks up a localized string similar to Invalid.
         /// </summary>
         internal static string StatusInvalid {
             get {
@@ -302,7 +301,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 已完成.
+        ///   Looks up a localized string similar to Finished.
         /// </summary>
         internal static string StatusRewardTaken {
             get {
@@ -311,7 +310,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 未完成.
+        ///   Looks up a localized string similar to Unfinished.
         /// </summary>
         internal static string StatusUnfinished {
             get {
@@ -320,7 +319,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 更新内容: 
+        ///   Looks up a localized string similar to Description: 
         ///{0}.
         /// </summary>
         internal static string UpdateDescription {
@@ -330,7 +329,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 关闭程序后, 将压缩包解压至当前目录即可完成更新..
+        ///   Looks up a localized string similar to Unzip the package to update application..
         /// </summary>
         internal static string UpdateDownloadFinish {
             get {
@@ -339,7 +338,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 正在下载更新包....
+        ///   Looks up a localized string similar to Downloading update package....
         /// </summary>
         internal static string UpdateDownloading {
             get {
@@ -348,7 +347,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 有可用更新: {0} =&gt; {1}.
+        ///   Looks up a localized string similar to Has update: {0} =&gt; {1}.
         /// </summary>
         internal static string UpdateNewVersion {
             get {
@@ -357,7 +356,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 正在上报错误信息....
+        ///   Looks up a localized string similar to Upload error to appcenter....
         /// </summary>
         internal static string UploadError {
             get {
@@ -366,7 +365,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 使用上一次获取到的成就数据.
+        ///   Looks up a localized string similar to Use previous fetched data..
         /// </summary>
         internal static string UsePreviousData {
             get {
@@ -375,7 +374,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 安装完成后，重新打开 YaeAchievement.
+        ///   Looks up a localized string similar to -.
         /// </summary>
         internal static string VcRuntimeAfterInstall {
             get {
@@ -384,7 +383,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 未安装 VcRuntime.
+        ///   Looks up a localized string similar to You need install Visual C++ Redistributable 2015-2022(latest) before run this application..
         /// </summary>
         internal static string VcRuntimeNotInstalled {
             get {
