@@ -110,7 +110,7 @@ public static class Export {
             var finishAt = "";
             if (ach.Timestamp != 0) {
                 var ts = Convert.ToInt64(ach.Timestamp);
-                finishAt = DateTimeOffset.FromUnixTimeSeconds(ts).ToString("yyyy/MM/dd HH:mm:ss");
+                finishAt = DateTimeOffset.FromUnixTimeSeconds(ts).ToLocalTime().ToString("yyyy/MM/dd HH:mm:ss");
             }
             var current = ach.Status != Status.Unfinished ? ach.Current == 0 ? ach.Total : ach.Current : ach.Current;
             outList.Add(new List<object> {
