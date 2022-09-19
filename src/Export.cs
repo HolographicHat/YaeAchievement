@@ -11,6 +11,9 @@ public static class Export {
     
     public static void Choose(AchievementAllDataNotify data) {
         Console.Write(App.ExportChoose);
+        while (Console.KeyAvailable) {
+            Console.ReadKey(false);
+        }
         if (!int.TryParse(Console.ReadLine(), out var num)) num = 0;
         ((Action<AchievementAllDataNotify>) (num switch {
             1 => ToSnapGenshin,
