@@ -87,20 +87,20 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Detected game location: {0}.
-        /// </summary>
-        internal static string ConfigInitGotPath {
-            get {
-                return ResourceManager.GetString("ConfigInitGotPath", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to If correct, input Y; otherwise input N.
         /// </summary>
         internal static string ConfigInitPathConfirm {
             get {
                 return ResourceManager.GetString("ConfigInitPathConfirm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You need start genshin once before  exporting..
+        /// </summary>
+        internal static string ConfigNeedStartGenshin {
+            get {
+                return ResourceManager.GetString("ConfigNeedStartGenshin", resourceCulture);
             }
         }
         

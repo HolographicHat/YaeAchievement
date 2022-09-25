@@ -1,42 +1,31 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.RegularExpressions;
 using YaeAchievement.res;
 
 namespace YaeAchievement; 
 
-public class AppConfig {
+public static class AppConfig {
     
-    [JsonProperty(PropertyName = "location")]
-    public string? Location { get; set; }
+    public static string GamePath { get; private set; } = null!;
 
-    private static AppConfig? _instance;
-    
-    private static readonly string FileName = Path.Combine(GlobalVars.AppPath, "conf.json");
-
-    public static string GamePath => _instance!.Location!;
-    
     internal static void Load() {
-        if (File.Exists(FileName)) {
-            var text = File.ReadAllText(FileName);
-            _instance = JsonConvert.DeserializeObject<AppConfig>(text)!;
+        var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var cnLogPath = Path.Combine(appDataPath, @"..\LocalLow\miHoYo\原神\output_log.txt");
+        var osLogPath = Path.Combine(appDataPath, @"..\LocalLow\miHoYo\Genshin Impact\output_log.txt");
+        if (!File.Exists(cnLogPath) && !File.Exists(osLogPath)) {
+            throw new ApplicationException(App.ConfigNeedStartGenshin);
         }
-        if (_instance?.Location == null || !Utils.CheckGamePathValid(_instance.Location)) {
-            var gameInstallPath = Utils.FindGamePathFromRegistry();
-            if (!string.IsNullOrEmpty(gameInstallPath)) {
-                Console.WriteLine(App.ConfigInitGotPath, gameInstallPath);
-                Console.WriteLine(App.ConfigInitPathConfirm);
-                var key = Console.ReadKey().Key;
-                gameInstallPath = key == ConsoleKey.Y ? gameInstallPath : Utils.SelectGameExecutable();
-            } else {
-                gameInstallPath = Utils.SelectGameExecutable();
-            }
-            _instance = new AppConfig {
-                Location = gameInstallPath
-            };
-            Save();
+        string latestLogPath;
+        if (!File.Exists(osLogPath)) {
+            latestLogPath = cnLogPath;
+        } else if (!File.Exists(cnLogPath)) {
+            latestLogPath = osLogPath;
+        } else {
+            var cnLastWriteTime = File.GetLastWriteTime(cnLogPath);
+            var osLastWriteTime = File.GetLastWriteTime(cnLogPath);
+            latestLogPath = cnLastWriteTime > osLastWriteTime ? cnLogPath : osLogPath;
         }
-    }
-    
-    public static void Save() {
-        File.WriteAllText(FileName, JsonConvert.SerializeObject(_instance!, Formatting.Indented));
+        var content = File.ReadAllText(latestLogPath);
+        var matchResult = Regex.Match(content, @"(?m).:/.+(GenshinImpact_Data|YuanShen_Data)");
+        GamePath = matchResult.Value;
     }
 }

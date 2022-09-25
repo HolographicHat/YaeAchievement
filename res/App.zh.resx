@@ -61,8 +61,8 @@
     <data name="StatusRewardTaken" xml:space="preserve">
         <value>已完成</value>
     </data>
-    <data name="ConfigInitGotPath" xml:space="preserve">
-        <value>自动读取到游戏路径: {0}</value>
+    <data name="ConfigNeedStartGenshin" xml:space="preserve">
+        <value>在导出前你需要先启动一次原神.</value>
     </data>
     <data name="ConfigInitPathConfirm" xml:space="preserve">
         <value>如果确认路径无误，请按 Y ；若有误或需要自行选择，请按 N </value>

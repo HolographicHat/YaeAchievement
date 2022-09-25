@@ -8,7 +8,6 @@ using Microsoft.Win32;
 using YaeAchievement.AppCenterSDK;
 using YaeAchievement.res;
 using YaeAchievement.Win32;
-using static YaeAchievement.Win32.OpenFileFlags;
 
 namespace YaeAchievement;
 
@@ -119,50 +118,6 @@ public static class Utils {
         }
     }
 
-    public static bool CheckGamePathValid(string? path) {
-        if (path == null) return false;
-        var dir = Path.GetDirectoryName(path)!;
-        return !GlobalVars.CheckGamePath || File.Exists(Path.Combine(dir, "UnityPlayer.dll"));
-    }
-    
-    public static string SelectGameExecutable() {
-        var fnPtr = Marshal.AllocHGlobal(32768);
-        Native.RtlZeroMemory(fnPtr, 32768);
-        var ofn = new OpenFileName {
-            file    = fnPtr,
-            size    = Marshal.SizeOf<OpenFileName>(),
-            owner   = Native.GetConsoleWindow(),
-            flags   = Explorer | NoNetworkButton | FileMustExist | NoChangeDir,
-            title   = App.SelectTitle,
-            filter  = $"{App.SelectFilterName} (YuanShen/GenshinImpact.exe)\0YuanShen.exe;GenshinImpact.exe\0",
-            maxFile = 32768
-        };
-        new Thread(() => {
-            var handle = Native.FindWindow("#32770", App.SelectTitle);
-            while (handle == IntPtr.Zero) {
-                handle = Native.FindWindow("#32770", App.SelectTitle);
-                Thread.Sleep(1);
-            }
-            var currentThreadId = Native.GetCurrentThreadId();
-            var foregroundThreadId = Native.GetWindowThreadProcessId(Native.GetForegroundWindow(), out _);
-            Native.AttachThreadInput(currentThreadId, foregroundThreadId, true);
-            Native.SetWindowPos(handle, new IntPtr(-1), 0, 0, 0, 0, 1 | 2);
-            Native.SetForegroundWindow(handle);
-            Native.AttachThreadInput(currentThreadId, foregroundThreadId, false);
-        }).Start();
-        if(!Native.GetOpenFileName(ofn)) {
-            var err = Native.CommDlgExtendedError();
-            if (err != 0) {
-                throw new SystemException($"Dialog error: {err}");
-            }
-            Console.WriteLine(App.SelectCanceled);
-            Environment.Exit(0);
-        }
-        var path = Marshal.PtrToStringAuto(fnPtr)!;
-        Marshal.FreeHGlobal(fnPtr);
-        return path;
-    }
-
     // ReSharper disable once UnusedMethodReturnValue.Global
     public static bool TryDisableQuickEdit() {
         var handle = Native.GetStdHandle();
@@ -193,11 +148,16 @@ public static class Utils {
 
     public static void InstallExceptionHook() {
         AppDomain.CurrentDomain.UnhandledException += (_, e) => {
-            Console.WriteLine(e.ExceptionObject.ToString());
-            Console.WriteLine(App.UploadError);
-            AppCenter.TrackCrash((Exception) e.ExceptionObject);
-            AppCenter.Upload();
-            Environment.Exit(-1);
+            var ex = e.ExceptionObject;
+            if (ex is ApplicationException exception) {
+                Console.WriteLine(exception.Message);
+            } else {
+                Console.WriteLine(ex.ToString());
+                Console.WriteLine(App.UploadError);
+                AppCenter.TrackCrash((Exception) e.ExceptionObject);
+                AppCenter.Upload();
+                Environment.Exit(-1);
+            }
         };
     }
     
@@ -260,30 +220,6 @@ public static class Utils {
     }
     
     #pragma warning disable CA1416
-    /// <summary>
-    /// 从注册表中寻找安装路径 暂时只支持国服
-    /// </summary>
-    /// <returns></returns>
-    public static string? FindGamePathFromRegistry() {
-        try {
-            using var root = Registry.LocalMachine;
-            using var sub = root.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\原神");
-            if (sub == null) {
-                return null;
-            }
-            var installLocation = sub.GetValue("InstallPath")?.ToString();
-            if (!string.IsNullOrEmpty(installLocation)) {
-                var folder = Path.Combine(installLocation, "Genshin Impact Game\\");
-                var exePath = Path.Combine(folder, "YuanShen.exe");
-                if (File.Exists(Path.Combine(folder, "UnityPlayer.dll")) && File.Exists(exePath)) {
-                    return exePath;
-                }
-            }
-        } catch (Exception e) {
-            Console.WriteLine(e.Message);
-        }
-        return null;
-    }
 
     public static async Task CheckVcRuntime() {
         using var root = Registry.LocalMachine;

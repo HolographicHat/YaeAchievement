@@ -5,15 +5,13 @@ using YaeAchievement.AppCenterSDK.Models.Serialization;
 
 namespace YaeAchievement.AppCenterSDK; 
 
-#pragma warning disable CA1416, CA2211
 public static class AppCenter {
 
-    private const string LogCache = "./cache/bf18159fb833715i.miko";
     private const string AppSecret = "648b83bf-d439-49bd-97f4-e1e506bdfe39";
     private const string ApiUrl = "https://in.appcenter.ms/logs?api-version=1.0.0";
 
     // ReSharper disable InconsistentNaming
-    public static Guid? SessionID;
+    public static Guid? SessionID { get; private set; }
     public static readonly string DeviceID;
     public static readonly Device DeviceInfo;
     private static List<Log> Queue;
@@ -40,10 +38,6 @@ public static class AppCenter {
         });
         AppDomain.CurrentDomain.ProcessExit += (_, _) => {
             running = false;
-            if (Queue.Count > 0) {
-                Directory.CreateDirectory("cache");
-                File.WriteAllText(LogCache, Queue.ToJson());
-            }
         };
         LogSerializer.AddLogType(PageLog.JsonIdentifier, typeof(PageLog));
         LogSerializer.AddLogType(EventLog.JsonIdentifier, typeof(EventLog));
@@ -51,13 +45,6 @@ public static class AppCenter {
         LogSerializer.AddLogType(ManagedErrorLog.JsonIdentifier, typeof(ManagedErrorLog));
         LogSerializer.AddLogType(StartServiceLog.JsonIdentifier, typeof(StartServiceLog));
         LogSerializer.AddLogType(StartSessionLog.JsonIdentifier, typeof(StartSessionLog));
-        if (Directory.Exists("./cache") && File.Exists(LogCache)) {
-            var list = File.ReadAllText(LogCache).FromJson()?.Logs;
-            if (list != null) {
-                Queue.AddRange(list);
-            }
-            File.Delete(LogCache);
-        }
     }
     
     // ReSharper restore InconsistentNaming
@@ -98,9 +85,4 @@ public static class AppCenter {
     private static string ToJson(this IEnumerable<Log> queue) {
         return LogSerializer.Serialize(new LogContainer(queue));
     }
-    
-    private static LogContainer? FromJson(this string text) {
-        return LogSerializer.DeserializeLogs(text);
-    }
 }
-#pragma warning restore CA1416, CA2211

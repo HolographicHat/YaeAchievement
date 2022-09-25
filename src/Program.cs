@@ -5,11 +5,11 @@ using YaeAchievement.res;
 using static YaeAchievement.Utils;
 
 InstallExitHook();
+InstallExceptionHook();
 
 await CheckVcRuntime();
 CheckSelfIsRunning();
 TryDisableQuickEdit();
-InstallExceptionHook();
 CheckGenshinIsRunning();
 
 Console.WriteLine(@"----------------------------------------------------");

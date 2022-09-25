@@ -67,8 +67,8 @@ Input a number (0-5): </value>
     <data name="StatusFinished" xml:space="preserve">
         <value>Reward not taken</value>
     </data>
-    <data name="ConfigInitGotPath" xml:space="preserve">
-        <value>Detected game location: {0}</value>
+    <data name="ConfigNeedStartGenshin" xml:space="preserve">
+        <value>You need start genshin once before  exporting.</value>
     </data>
     <data name="ConfigInitPathConfirm" xml:space="preserve">
         <value>If correct, input Y; otherwise input N</value>
