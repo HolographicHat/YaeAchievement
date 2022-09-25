@@ -21,11 +21,12 @@ public static class AppConfig {
             latestLogPath = osLogPath;
         } else {
             var cnLastWriteTime = File.GetLastWriteTime(cnLogPath);
-            var osLastWriteTime = File.GetLastWriteTime(cnLogPath);
+            var osLastWriteTime = File.GetLastWriteTime(osLogPath);
             latestLogPath = cnLastWriteTime > osLastWriteTime ? cnLogPath : osLogPath;
         }
         var content = File.ReadAllText(latestLogPath);
         var matchResult = Regex.Match(content, @"(?m).:/.+(GenshinImpact_Data|YuanShen_Data)");
-        GamePath = matchResult.Value;
+        var entryName = $"{matchResult.Groups["1"].Value.Replace("_Data", null)}.exe";
+        GamePath = Path.GetFullPath(entryName, $"{matchResult.Value}/../");
     }
 }
