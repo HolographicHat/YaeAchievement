@@ -134,4 +134,7 @@ Input a number (0-5): </value>
     <data name="VcRuntimeInstalling" xml:space="preserve">
         <value>Installing Visual C++ Redistributable...</value>
     </data>
+    <data name="ExceptionNetwork" xml:space="preserve">
+        <value>Network error ({0}: {1})</value>
+    </data>
 </root>

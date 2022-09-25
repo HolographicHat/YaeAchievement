@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO.Pipes;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using YaeAchievement.AppCenterSDK;
@@ -149,14 +150,23 @@ public static class Utils {
     public static void InstallExceptionHook() {
         AppDomain.CurrentDomain.UnhandledException += (_, e) => {
             var ex = e.ExceptionObject;
-            if (ex is ApplicationException exception) {
-                Console.WriteLine(exception.Message);
-            } else {
-                Console.WriteLine(ex.ToString());
-                Console.WriteLine(App.UploadError);
-                AppCenter.TrackCrash((Exception) e.ExceptionObject);
-                AppCenter.Upload();
-                Environment.Exit(-1);
+            switch (ex) {
+                case ApplicationException ex1:
+                    Console.WriteLine(ex1.Message);
+                    break;
+                case SocketException ex2:
+                    Console.WriteLine(App.ExceptionNetwork, nameof(SocketException), ex2.Message);
+                    break;
+                case HttpRequestException ex3:
+                    Console.WriteLine(App.ExceptionNetwork, nameof(HttpRequestException), ex3.Message);
+                    break;
+                default:
+                    Console.WriteLine(ex.ToString());
+                    Console.WriteLine(App.UploadError);
+                    AppCenter.TrackCrash((Exception) e.ExceptionObject);
+                    AppCenter.Upload();
+                    Environment.Exit(-1);
+                    break;
             }
         };
     }

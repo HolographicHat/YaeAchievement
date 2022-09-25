@@ -128,4 +128,7 @@
     <data name="VcRuntimeInstalling" xml:space="preserve">
         <value>正在安装 Visual C++ Redistributable...</value>
     </data>
+    <data name="ExceptionNetwork" xml:space="preserve">
+        <value>网络错误，请检查网络后重试 ({0}: {1})</value>
+    </data>
 </root>

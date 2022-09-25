@@ -114,6 +114,15 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Network error ({0}: {1}).
+        /// </summary>
+        internal static string ExceptionNetwork {
+            get {
+                return ResourceManager.GetString("ExceptionNetwork", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Export to: 
         ///[0] Cocogoat (https://cocogoat.work/achievement, Default)
         ///[1] SnapGenshin
