@@ -67,14 +67,8 @@
     <data name="ConfigInitPathConfirm" xml:space="preserve">
         <value>如果确认路径无误，请按 Y ；若有误或需要自行选择，请按 N </value>
     </data>
-    <data name="VcRuntimeNotInstalled" xml:space="preserve">
-        <value>未安装 VcRuntime</value>
-    </data>
     <data name="DownloadLink" xml:space="preserve">
         <value>下载地址: {0}</value>
-    </data>
-    <data name="VcRuntimeAfterInstall" xml:space="preserve">
-        <value>安装完成后，重新打开 YaeAchievement</value>
     </data>
     <data name="GameProcessExit" xml:space="preserve">
         <value>游戏进程异常退出</value>
@@ -127,5 +121,11 @@
     </data>
     <data name="NetworkError" xml:space="preserve">
         <value>网络错误: {0}</value>
+    </data>
+    <data name="VcRuntimeDownload" xml:space="preserve">
+        <value>正在下载 Visual C++ Redistributable...</value>
+    </data>
+    <data name="VcRuntimeInstalling" xml:space="preserve">
+        <value>正在安装 Visual C++ Redistributable...</value>
     </data>
 </root>

@@ -73,14 +73,8 @@ Input a number (0-5): </value>
     <data name="ConfigInitPathConfirm" xml:space="preserve">
         <value>If correct, input Y; otherwise input N</value>
     </data>
-    <data name="VcRuntimeNotInstalled" xml:space="preserve">
-        <value>You need install Visual C++ Redistributable 2015-2022(latest) before run this application.</value>
-    </data>
     <data name="DownloadLink" xml:space="preserve">
         <value>Download: {0}</value>
-    </data>
-    <data name="VcRuntimeAfterInstall" xml:space="preserve">
-        <value>-</value>
     </data>
     <data name="GameProcessExit" xml:space="preserve">
         <value>Game exited.</value>
@@ -133,5 +127,11 @@ Input a number (0-5): </value>
     </data>
     <data name="NetworkError" xml:space="preserve">
         <value>Network error:</value>
+    </data>
+    <data name="VcRuntimeDownload" xml:space="preserve">
+        <value>Downloading Visual C++ Redistributable...</value>
+    </data>
+    <data name="VcRuntimeInstalling" xml:space="preserve">
+        <value>Installing Visual C++ Redistributable...</value>
     </data>
 </root>

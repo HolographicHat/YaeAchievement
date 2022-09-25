@@ -285,7 +285,7 @@ public static class Utils {
         return null;
     }
 
-    public static void CheckVcRuntime() {
+    public static async Task CheckVcRuntime() {
         using var root = Registry.LocalMachine;
         using var sub = root.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")!;
         var installed = sub.GetSubKeyNames()
@@ -293,12 +293,18 @@ public static class Utils {
             .Select(item => item?.GetValue("DisplayName") as string ?? string.Empty)
             .Any(name => name.Contains("Microsoft Visual C++ 2022 X64 "));
         if (!installed) {
-            const string vcDownloadUrl = "https://aka.ms/vs/17/release/vc_redist.x64.exe";
-            Console.WriteLine(App.VcRuntimeNotInstalled);
-            Console.WriteLine(App.DownloadLink, vcDownloadUrl);
-            Console.WriteLine(App.VcRuntimeAfterInstall);
-            ShellOpen(vcDownloadUrl);
-            Environment.Exit(303);
+            Console.WriteLine(App.VcRuntimeDownload);
+            var pkgPath = Path.Combine(GlobalVars.AppPath, "vc_redist.x64.exe");
+            await using var stream = await CHttpClient.Value.GetStreamAsync("https://aka.ms/vs/17/release/vc_redist.x64.exe");
+            await using var output = File.OpenWrite(pkgPath);
+            await stream.CopyToAsync(output);
+            Console.WriteLine(App.VcRuntimeInstalling);
+            _ = new Process {
+                StartInfo = {
+                    FileName = pkgPath,
+                    Arguments = "/install /passive /norestart"
+                }
+            }.Start();
         }
     }
 }

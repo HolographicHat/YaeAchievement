@@ -374,20 +374,20 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to -.
+        ///   Looks up a localized string similar to Downloading Visual C++ Redistributable....
         /// </summary>
-        internal static string VcRuntimeAfterInstall {
+        internal static string VcRuntimeDownload {
             get {
-                return ResourceManager.GetString("VcRuntimeAfterInstall", resourceCulture);
+                return ResourceManager.GetString("VcRuntimeDownload", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You need install Visual C++ Redistributable 2015-2022(latest) before run this application..
+        ///   Looks up a localized string similar to Installing Visual C++ Redistributable....
         /// </summary>
-        internal static string VcRuntimeNotInstalled {
+        internal static string VcRuntimeInstalling {
             get {
-                return ResourceManager.GetString("VcRuntimeNotInstalled", resourceCulture);
+                return ResourceManager.GetString("VcRuntimeInstalling", resourceCulture);
             }
         }
     }

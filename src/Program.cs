@@ -6,7 +6,7 @@ using static YaeAchievement.Utils;
 
 InstallExitHook();
 
-CheckVcRuntime();
+await CheckVcRuntime();
 CheckSelfIsRunning();
 TryDisableQuickEdit();
 InstallExceptionHook();
