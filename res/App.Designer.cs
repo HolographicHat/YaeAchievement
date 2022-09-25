@@ -87,16 +87,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to If correct, input Y; otherwise input N.
-        /// </summary>
-        internal static string ConfigInitPathConfirm {
-            get {
-                return ResourceManager.GetString("ConfigInitPathConfirm", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to You need start genshin once before  exporting..
+        ///   Looks up a localized string similar to You need to login genshin impact before exporting..
         /// </summary>
         internal static string ConfigNeedStartGenshin {
             get {
@@ -261,33 +252,6 @@ namespace YaeAchievement.res {
         internal static string RefreshData {
             get {
                 return ResourceManager.GetString("RefreshData", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Operation canceled by user..
-        /// </summary>
-        internal static string SelectCanceled {
-            get {
-                return ResourceManager.GetString("SelectCanceled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Executable.
-        /// </summary>
-        internal static string SelectFilterName {
-            get {
-                return ResourceManager.GetString("SelectFilterName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to GenshinPath.
-        /// </summary>
-        internal static string SelectTitle {
-            get {
-                return ResourceManager.GetString("SelectTitle", resourceCulture);
             }
         }
         

@@ -62,10 +62,7 @@
         <value>已完成</value>
     </data>
     <data name="ConfigNeedStartGenshin" xml:space="preserve">
-        <value>在导出前你需要先启动一次原神.</value>
-    </data>
-    <data name="ConfigInitPathConfirm" xml:space="preserve">
-        <value>如果确认路径无误，请按 Y ；若有误或需要自行选择，请按 N </value>
+        <value>在导出前你需要先完成一次登入流程.</value>
     </data>
     <data name="DownloadLink" xml:space="preserve">
         <value>下载地址: {0}</value>
@@ -84,15 +81,6 @@
     </data>
     <data name="GenshinIsRunning" xml:space="preserve">
         <value>原神正在运行，请关闭后重试 ({0})</value>
-    </data>
-    <data name="SelectCanceled" xml:space="preserve">
-        <value>操作被取消</value>
-    </data>
-    <data name="SelectTitle" xml:space="preserve">
-        <value>选择主程序</value>
-    </data>
-    <data name="SelectFilterName" xml:space="preserve">
-        <value>国服/国际服主程序</value>
     </data>
     <data name="AnotherInstance" xml:space="preserve">
         <value>另一个实例正在运行，请关闭后重试</value>

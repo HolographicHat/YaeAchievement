@@ -26,14 +26,18 @@ public class CacheFile {
         return _content;
     }
 
-    public void Write(byte[] data, string? etag = null) {
+    public void Write(string data, string? etag = null) => Write(ByteString.CopyFromUtf8(data), data.MD5Hash(), etag);
+
+    public void Write(byte[] data, string? etag = null) => Write(ByteString.CopyFrom(data), data.MD5Hash(), etag);
+    
+    private void Write(ByteString data, string hash, string? etag = null) {
         using var fOut = File.OpenWrite(_cacheName);
         using var cOut = new GZipStream(fOut, CompressionLevel.SmallestSize);
         new CacheItem {
             Etag = etag ?? string.Empty,
             Version = 3,
-            Checksum = data.MD5Hash(),
-            Content = ByteString.CopyFrom(data)
+            Checksum = hash,
+            Content = data
         }.WriteTo(cOut);
     }
 }

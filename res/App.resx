@@ -68,10 +68,7 @@ Input a number (0-5): </value>
         <value>Reward not taken</value>
     </data>
     <data name="ConfigNeedStartGenshin" xml:space="preserve">
-        <value>You need start genshin once before  exporting.</value>
-    </data>
-    <data name="ConfigInitPathConfirm" xml:space="preserve">
-        <value>If correct, input Y; otherwise input N</value>
+        <value>You need to login genshin impact before exporting.</value>
     </data>
     <data name="DownloadLink" xml:space="preserve">
         <value>Download: {0}</value>
@@ -90,15 +87,6 @@ Input a number (0-5): </value>
     </data>
     <data name="GenshinIsRunning" xml:space="preserve">
         <value>Please close game before run this application. ({0})</value>
-    </data>
-    <data name="SelectCanceled" xml:space="preserve">
-        <value>Operation canceled by user.</value>
-    </data>
-    <data name="SelectTitle" xml:space="preserve">
-        <value>GenshinPath</value>
-    </data>
-    <data name="SelectFilterName" xml:space="preserve">
-        <value>Executable</value>
     </data>
     <data name="AnotherInstance" xml:space="preserve">
         <value>Please close another instance.</value>

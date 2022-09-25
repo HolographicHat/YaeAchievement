@@ -90,7 +90,7 @@ public static class Utils {
             }
         }
         if (info.EnableLibDownload) {
-            File.WriteAllBytes(GlobalVars.LibName, GetBucketFileAsByteArray("schicksal/lib.dll"));
+            File.WriteAllBytes(GlobalVars.LibPath, GetBucketFileAsByteArray("schicksal/lib.dll"));
         }
     }
     
@@ -106,6 +106,7 @@ public static class Utils {
         Process.LeaveDebugMode();
     }
 
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public static bool ShellOpen(string path) {
         try {
             return new Process {
@@ -128,7 +129,10 @@ public static class Utils {
     public static void CheckGenshinIsRunning() {
         Process.EnterDebugMode();
         foreach (var process in Process.GetProcesses()) {
-            if (process.ProcessName is "GenshinImpact" or "YuanShen" && !process.HasExited) {
+            if (process.ProcessName is "GenshinImpact" or "YuanShen" 
+                && !process.HasExited 
+                && process.MainWindowHandle != IntPtr.Zero
+            ) {
                 Console.WriteLine(App.GenshinIsRunning, process.Id);
                 Environment.Exit(301);
             }
@@ -165,26 +169,23 @@ public static class Utils {
                     Console.WriteLine(App.UploadError);
                     AppCenter.TrackCrash((Exception) e.ExceptionObject);
                     AppCenter.Upload();
-                    Environment.Exit(-1);
                     break;
             }
+            Environment.Exit(-1);
         };
     }
     
     // ReSharper disable once UnusedMethodReturnValue.Global
     public static Thread StartAndWaitResult(string exePath, Func<string, bool> onReceive) {
-        var dataDir = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
-        var lib = Path.Combine(dataDir, "yae.dll");
-        File.Copy(Path.GetFullPath(GlobalVars.LibName), lib, true);
         AppDomain.CurrentDomain.ProcessExit += (_, _) => {
             try { 
-                File.Delete(lib);
+                File.Delete(GlobalVars.LibPath);
             } catch (Exception) { /* ignored */ }
         };
         if (!Injector.CreateProcess(exePath, out var hProcess, out var hThread, out var pid)) {
             Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("ICreateProcess fail"));
         }
-        if (Injector.LoadLibraryAndInject(hProcess, lib) != 0) {
+        if (Injector.LoadLibraryAndInject(hProcess, GlobalVars.LibPath) != 0) {
             if (!Native.TerminateProcess(hProcess, 0)) {
                 Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("TerminateProcess fail"));
             }
