@@ -1,7 +1,8 @@
 ﻿using System.Net;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Win32;
-using Newtonsoft.Json;
 using YaeAchievement.res;
 using static AchievementAllDataNotify.Types.Achievement.Types;
 
@@ -27,8 +28,12 @@ public static class Export {
         })).Invoke(data);
     }
 
+    private class CocogoatResponse {
+        [JsonPropertyName("key")] public string Code { get; set; } = null!;
+    }
+    
     private static void ToCocogoat(AchievementAllDataNotify data) {
-        var result = JsonConvert.SerializeObject(ExportToUIAFApp(data));
+        var result = JsonSerializer.Serialize(ExportToUIAFApp(data));
         using var request = new HttpRequestMessage {
             Method = HttpMethod.Post,
             RequestUri = new Uri($"https://77.cocogoat.work/v1/memo?source={App.AllAchievement}"),
@@ -39,15 +44,16 @@ public static class Export {
             Console.WriteLine(App.ExportToCocogoatFail);
             return;
         }
-        dynamic memo = JsonConvert.DeserializeObject(response.Content.ReadAsStringAsync().Result)!;
-        Console.WriteLine(Utils.ShellOpen($"https://cocogoat.work/achievement?memo={memo.key}")
+        var responseText = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+        var responseJson = JsonSerializer.Deserialize<CocogoatResponse>(responseText)!;
+        Console.WriteLine(Utils.ShellOpen($"https://cocogoat.work/achievement?memo={responseJson.Code}")
             ? App.ExportToCocogoatSuccess
-            : $"https://cocogoat.work/achievement?memo={memo.key}");
+            : $"https://cocogoat.work/achievement?memo={responseJson.Code}");
     }
     
     private static void ToWxApp1(AchievementAllDataNotify data) {
         var id = Guid.NewGuid().ToString("N").Substring(20, 8);
-        var result = JsonConvert.SerializeObject(new Dictionary<string, object> {
+        var result = JsonSerializer.Serialize(new Dictionary<string, object> {
             { "key", id },
             { "data", ExportToUIAFApp(data) }
         });
@@ -61,7 +67,7 @@ public static class Export {
     }
 
     private static void ToSnapGenshin(AchievementAllDataNotify data) {
-        Utils.CopyToClipboard(JsonConvert.SerializeObject(ExportToUIAFApp(data)));
+        Utils.CopyToClipboard(JsonSerializer.Serialize(ExportToUIAFApp(data)));
         Console.WriteLine(App.ExportToSnapGenshinSuccess);
     }
     
@@ -81,7 +87,7 @@ public static class Export {
             ["achievement"] = output.OrderBy(pair => pair.Key).ToDictionary(pair => pair.Key, pair => pair.Value)
         };
         var path = Path.GetFullPath($"export-{DateTime.Now:yyyyMMddHHmmss}-paimon.json");
-        File.WriteAllText(path, JsonConvert.SerializeObject(final));
+        File.WriteAllText(path, JsonSerializer.Serialize(final));
         Console.WriteLine(App.ExportToFileSuccess, path);
     }
     
@@ -96,7 +102,7 @@ public static class Export {
             ["achievements"] = output.OrderBy(pair => pair.Key).ToDictionary(pair => pair.Key, pair => pair.Value)
         };
         var path = Path.GetFullPath($"export-{DateTime.Now:yyyyMMddHHmmss}-seelie.json");
-        File.WriteAllText(path, JsonConvert.SerializeObject(final));
+        File.WriteAllText(path, JsonSerializer.Serialize(final));
         Console.WriteLine(App.ExportToFileSuccess, path);
     }
 
@@ -133,7 +139,7 @@ public static class Export {
 
     private static void ToXunkong(AchievementAllDataNotify data) {
         if (CheckXunkongScheme()) {
-            Utils.CopyToClipboard(JsonConvert.SerializeObject(ExportToUIAFApp(data)));
+            Utils.CopyToClipboard(JsonSerializer.Serialize(ExportToUIAFApp(data)));
             Utils.ShellOpen("xunkong://import-achievement?caller=YaeAchievement&from=clipboard");
             Console.WriteLine(App.ExportToXunkongSuccess);
         } else {
@@ -144,7 +150,9 @@ public static class Export {
 
     private static void ToRawJson(AchievementAllDataNotify data) {
         var path = Path.GetFullPath($"export-{DateTime.Now:yyyyMMddHHmmss}-raw.json");
-        File.WriteAllText(path, JsonConvert.SerializeObject(data, Formatting.Indented));
+        File.WriteAllText(path, JsonSerializer.Serialize(data, new JsonSerializerOptions {
+            WriteIndented = true
+        }));
         Console.WriteLine(App.ExportToFileSuccess, path);
     }
 
