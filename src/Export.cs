@@ -9,14 +9,19 @@ using static AchievementAllDataNotify.Types.Achievement.Types;
 namespace YaeAchievement; 
 
 public static class Export {
-    
+
+    public static uint ExportTo { get; set; } = uint.MaxValue;
+
     public static void Choose(AchievementAllDataNotify data) {
-        Console.Write(App.ExportChoose);
-        while (Console.KeyAvailable) {
-            Console.ReadKey(false);
+        if (ExportTo == uint.MaxValue) {
+            Console.Write(App.ExportChoose);
+            while (Console.KeyAvailable) {
+                Console.ReadKey(false);
+            }
+            if (!uint.TryParse(Console.ReadLine(), out var num)) num = 0;
+            ExportTo = num;
         }
-        if (!int.TryParse(Console.ReadLine(), out var num)) num = 0;
-        ((Action<AchievementAllDataNotify>) (num switch {
+        ((Action<AchievementAllDataNotify>) (ExportTo switch {
             1 => ToHuTao,
             2 => ToPaimon,
             3 => ToSeelie,

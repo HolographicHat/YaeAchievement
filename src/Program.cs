@@ -17,8 +17,10 @@ Console.WriteLine(App.AppBanner, GlobalVars.AppVersionName);
 Console.WriteLine(@"https://github.com/HolographicHat/YaeAchievement");
 Console.WriteLine(@"----------------------------------------------------");
 
-AppConfig.Load();
-CheckUpdate();
+AppConfig.Load(args.GetOrNull(0) ?? "auto");
+Export.ExportTo = ToUIntOrNull(args.GetOrNull(1)) ?? uint.MaxValue;
+
+CheckUpdate(ToBooleanOrFalse(args.GetOrNull(2)));
 AppCenter.Init();
 new EventLog("AppInit") {
     Properties = {

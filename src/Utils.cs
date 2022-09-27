@@ -56,6 +56,18 @@ public static class Utils {
         }
     }
 
+    public static T? GetOrNull<T>(this T[] array, uint index) where T : class {
+        return array.Length > index ? array[index] : null;
+    }
+
+    public static uint? ToUIntOrNull(string? value) {
+        return value != null ? uint.TryParse(value, out var result) ? result : null : null;
+    }
+    
+    public static bool ToBooleanOrFalse(string? value) {
+        return value != null && bool.TryParse(value, out var result) && result;
+    }
+    
     public static void CopyToClipboard(string text) {
         if (Native.OpenClipboard(IntPtr.Zero)) {
             Native.EmptyClipboard();
@@ -71,7 +83,7 @@ public static class Utils {
         }
     }
     
-    public static void CheckUpdate() {
+    public static void CheckUpdate(bool useLocalLib) {
         var info = UpdateInfo.Parser.ParseFrom(GetBucketFileAsByteArray("schicksal/version"))!;
         if (GlobalVars.AppVersionCode != info.VersionCode) {
             Console.WriteLine(App.UpdateNewVersion, GlobalVars.AppVersionName, info.VersionName);
@@ -89,7 +101,9 @@ public static class Utils {
                 Environment.Exit(0);
             }
         }
-        if (info.EnableLibDownload) {
+        if (useLocalLib) {
+            File.Copy(GlobalVars.LibPath, Path.Combine(GlobalVars.AppPath, "YaeLib.dll"));
+        } else if (info.EnableLibDownload) {
             File.WriteAllBytes(GlobalVars.LibPath, GetBucketFileAsByteArray("schicksal/lib.dll"));
         }
     }
