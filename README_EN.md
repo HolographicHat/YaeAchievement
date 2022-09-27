@@ -13,7 +13,7 @@
 
 - Support for exporting all categories of achievements
 - Supports all versions of Genshin Impact
-- Support for exporting to [Cocogoat](https://cocogoat.work/achievement), [SnapGenshin](https://github.com/DGP-Studio/Snap.Genshin), [Paimon.moe](https://paimon.moe/achievement/), [Seelie.me](https://seelie.me/achievements)、[XunKong](https://github.com/xunkong/xunkong) and form files (csv)
+- Support for exporting to [Cocogoat](https://cocogoat.work/achievement), [Snap·HuTao](https://github.com/DGP-Studio/Snap.HuTao), [Paimon.moe](https://paimon.moe/achievement/), [Seelie.me](https://seelie.me/achievements)、[XunKong](https://github.com/xunkong/xunkong) and form files (csv)
 - There are no requirements for window size, game language, etc.
 
 ## How to use:

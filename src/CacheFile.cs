@@ -30,7 +30,7 @@ public class CacheFile {
 
     public void Write(byte[] data, string? etag = null) => Write(ByteString.CopyFrom(data), data.MD5Hash(), etag);
     
-    private void Write(ByteString data, string hash, string? etag = null) {
+    private void Write(ByteString data, string hash, string? etag) {
         using var fOut = File.OpenWrite(_cacheName);
         using var cOut = new GZipStream(fOut, CompressionLevel.SmallestSize);
         new CacheItem {

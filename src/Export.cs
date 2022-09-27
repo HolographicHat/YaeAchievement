@@ -17,7 +17,7 @@ public static class Export {
         }
         if (!int.TryParse(Console.ReadLine(), out var num)) num = 0;
         ((Action<AchievementAllDataNotify>) (num switch {
-            1 => ToSnapGenshin,
+            1 => ToHuTao,
             2 => ToPaimon,
             3 => ToSeelie,
             4 => ToCSV,
@@ -66,8 +66,9 @@ public static class Export {
         Console.WriteLine(App.ExportToWxApp1Success, id);
     }
 
-    private static void ToSnapGenshin(AchievementAllDataNotify data) {
+    private static void ToHuTao(AchievementAllDataNotify data) {
         Utils.CopyToClipboard(JsonSerializer.Serialize(ExportToUIAFApp(data)));
+        Utils.ShellOpen("hutao://achievement/import");
         Console.WriteLine(App.ExportToSnapGenshinSuccess);
     }
     

@@ -116,7 +116,7 @@ namespace YaeAchievement.res {
         /// <summary>
         ///   Looks up a localized string similar to Export to: 
         ///[0] Cocogoat (https://cocogoat.work/achievement, Default)
-        ///[1] SnapGenshin
+        ///[1] Snap.HuTao
         ///[2] Paimon.moe
         ///[3] Seelie.me
         ///[4] Csv file

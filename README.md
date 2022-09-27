@@ -9,7 +9,7 @@
 
 - 支持导出所有类别的成就
 - 支持官服，渠道服与国际服
-- 支持导出至[椰羊](https://cocogoat.work/achievement)、[SnapGenshin](https://github.com/DGP-Studio/Snap.Genshin)、[Paimon.moe](https://paimon.moe/achievement/)、[Seelie.me](https://seelie.me/achievements)、[寻空](https://github.com/xunkong/xunkong)和表格文件(csv)
+- 支持导出至[椰羊](https://cocogoat.work/achievement)、[Snap·HuTao](https://github.com/DGP-Studio/Snap.HuTao)、[Paimon.moe](https://paimon.moe/achievement/)、[Seelie.me](https://seelie.me/achievements)、[寻空](https://github.com/xunkong/xunkong)和表格文件(csv)
 - 没有窗口大小、游戏语言等要求
 
 ## 使用说明
