@@ -105,7 +105,7 @@
       <AdditionalDependencies>detours-x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(TargetPath) $(ProjectDir)..\bin\Debug\net6.0</Command>
+      <Command>copy $(TargetPath) $(ProjectDir)..\bin\Debug\net6.0\win-x64</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

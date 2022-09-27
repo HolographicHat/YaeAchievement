@@ -16,7 +16,7 @@ bool OnPacket(KcpPacket* pkt) {
 	auto data = (ByteArray*)new BYTE[len + 32];
 	data->max_length = len;
 	memcpy(data->vector, pkt->data, len);
-	Genshin::Packet_Xor(&data, len, nullptr);
+	Genshin::XorEncrypt(&data, len, nullptr);
 	if (ReadMapped<UINT16>(data->vector, 0) != 0x4567) {
 		delete[] data;
 		return true;
@@ -32,7 +32,7 @@ bool OnPacket(KcpPacket* pkt) {
 	if (ReadMapped<UINT16>(data->vector, 2) == 2676) {
 		auto headLength = ReadMapped<UINT16>(data->vector, 4);
 		auto dataLength = ReadMapped<UINT32>(data->vector, 6);
-		auto iStr = Genshin::Convert_ToBase64String(data, 10 + headLength, dataLength, nullptr);
+		auto iStr = Genshin::ToBase64String(data, 10 + headLength, dataLength, nullptr);
 		auto cStr = IlStringToString(iStr) + "\n";
 		WriteFile(hPipe, cStr.c_str(), cStr.length(), nullptr, nullptr);
 		CloseHandle(hPipe);
@@ -44,18 +44,18 @@ bool OnPacket(KcpPacket* pkt) {
 
 namespace Hook {
 
-	int Kcp_Send(void* client, KcpPacket* pkt, void* method) {
-		return OnPacket(pkt) ? CALL_ORIGIN(Kcp_Send, client, pkt, method) : 0;
+	int KcpSend(void* client, KcpPacket* pkt, void* method) {
+		return OnPacket(pkt) ? CALL_ORIGIN(KcpSend, client, pkt, method) : 0;
 	}
 
-	void MonoLoginMainPage__set_version(void* obj, Il2CppString* value, void* method) {
+	void SetVersion(void* obj, Il2CppString* value, void* method) {
 		auto version = IlStringToString(value);
 		value = string_new(version + " YaeAchievement");
-		CALL_ORIGIN(MonoLoginMainPage__set_version, obj, value, method);
+		CALL_ORIGIN(SetVersion, obj, value, method);
 	}
 
-	bool Kcp_Recv(void* client, ClientKcpEvent* evt, void* method) {
-		auto result = CALL_ORIGIN(Kcp_Recv, client, evt, method);
+	bool KcpRecv(void* client, ClientKcpEvent* evt, void* method) {
+		auto result = CALL_ORIGIN(KcpRecv, client, evt, method);
 		if (result == 0 || evt->fields.type != KcpEventType::EventRecvMsg) {
 			return result;
 		}
@@ -68,29 +68,33 @@ namespace Hook {
 		if (signatures.count(type)) {
 			return GCHandle_GetObject<ByteArray>(signatures[type]);
 		}
+		auto encoder = Genshin::Encoding_GetDefault(nullptr);
 		auto result = CALL_ORIGIN(UnityEngine_RecordUserData, type);
+		auto str = Genshin::Encoding_GetString(encoder, result, nullptr);
+		printf("RecordUserData%d: %s\n", type, IlStringToString(str).c_str());
 		signatures[type] = GCHandle_New(result, true);
 		return result;
 	}
 }
 
 void Run(HMODULE* phModule) {
-	//AllocConsole();
-	//freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
+	AllocConsole();
+	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
 	while (
 		GetModuleHandle("UserAssembly.dll") == nullptr ||
 		(unityWnd = FindMainWindowByPID(GetCurrentProcessId())) == 0
 	) {
 		Sleep(1000);
 	}
+	Sleep(5000);
 	InitIL2CPP();
 	HookManager::install(Genshin::UnityEngine_RecordUserData, Hook::UnityEngine_RecordUserData);
 	for (int i = 0; i < 4; i++) {
-		Genshin::Application_RecordUserData(i, nullptr);
+		Genshin::RecordUserData(i, nullptr);
 	}
-	HookManager::install(Genshin::Kcp_Send, Hook::Kcp_Send);
-	HookManager::install(Genshin::Kcp_Recv, Hook::Kcp_Recv);
-	HookManager::install(Genshin::MonoLoginMainPage__set_version, Hook::MonoLoginMainPage__set_version);
+	HookManager::install(Genshin::KcpSend, Hook::KcpSend);
+	HookManager::install(Genshin::KcpRecv, Hook::KcpRecv);
+	HookManager::install(Genshin::SetVersion, Hook::SetVersion);
 	hPipe = CreateFile(R"(\\.\pipe\YaeAchievementPipe)", GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
 	if (hPipe == INVALID_HANDLE_VALUE) {
 		Win32ErrorDialog(1001);

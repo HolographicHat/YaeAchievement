@@ -102,7 +102,8 @@ public static class Utils {
             }
         }
         if (useLocalLib) {
-            File.Copy(GlobalVars.LibPath, Path.Combine(GlobalVars.AppPath, "YaeLib.dll"));
+            Console.WriteLine(@"Use local native lib.");
+            File.Copy(Path.Combine(GlobalVars.AppPath, "YaeAchievementLib.dll"), GlobalVars.LibPath, true);
         } else if (info.EnableLibDownload) {
             File.WriteAllBytes(GlobalVars.LibPath, GetBucketFileAsByteArray("schicksal/lib.dll"));
         }
