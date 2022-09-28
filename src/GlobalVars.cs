@@ -16,8 +16,8 @@ public static class GlobalVars {
     public static readonly string LibPath = Path.Combine(DataDir, "YaeAchievement.dll");
     public static readonly string AppPath = AppDomain.CurrentDomain.BaseDirectory;
     
-    public const uint   AppVersionCode = 29;
-    public const string AppVersionName = "2.1";
+    public const uint   AppVersionCode = 30;
+    public const string AppVersionName = "2.2";
     
     public const string PipeName = "YaeAchievementPipe";
     public const string BucketHost = "https://cn-cd-1259389942.file.myqcloud.com";
