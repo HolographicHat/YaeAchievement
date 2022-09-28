@@ -68,10 +68,7 @@ namespace Hook {
 		if (signatures.count(type)) {
 			return GCHandle_GetObject<ByteArray>(signatures[type]);
 		}
-		auto encoder = Genshin::Encoding_GetDefault(nullptr);
 		auto result = CALL_ORIGIN(UnityEngine_RecordUserData, type);
-		auto str = Genshin::Encoding_GetString(encoder, result, nullptr);
-		printf("RecordUserData%d: %s\n", type, IlStringToString(str).c_str());
 		signatures[type] = GCHandle_New(result, true);
 		return result;
 	}

@@ -25,9 +25,3 @@ DO_APP_FUNC(0x0094FBD0, 0x0094FCF0, int, KcpSend, (void* client, KcpPacket* pkt,
 // N: MoleMole.KcpClient$TryDequeueEvent [Obfuscated]
 // L: Assembly-CSharp
 DO_APP_FUNC(0x026C8690, 0x026C9030, bool, KcpRecv, (void* client, ClientKcpEvent* evt, void* method));
-
-DO_APP_FUNC(0x054AC8A0, 0x054AC8A0, void*, Encoding_GetDefault, (void* method));
-
-// N: System.Text.Encoding$GetBytes
-// L: mscorlib
-DO_APP_FUNC(0x054AB010, 0x054AB010, Il2CppString*, Encoding_GetString, (void* obj, ByteArray* s, void* method));
