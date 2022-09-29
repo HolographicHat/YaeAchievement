@@ -35,10 +35,10 @@
         <value>在小程序导入页面输入以下代码: {0}</value>
     </data>
     <data name="ExportToSnapGenshinSuccess" xml:space="preserve">
-        <value>在 SnapGenshin 进行下一步操作</value>
+        <value>在 SnapHutao 进行下一步操作</value>
     </data>
     <data name="ExportToSnapGenshinNeedUpdate" xml:space="preserve">
-        <value>更新 SnapGenshin 至最新版本后重试</value>
+        <value>更新 SnapHutao 至最新版本后重试</value>
     </data>
     <data name="ExportToFileSuccess" xml:space="preserve">
         <value>成就数据已导出至 {0}</value>
