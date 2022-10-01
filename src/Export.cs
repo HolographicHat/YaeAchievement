@@ -60,7 +60,7 @@ public static class Export {
         var id = Guid.NewGuid().ToString("N").Substring(20, 8);
         var result = JsonSerializer.Serialize(new Dictionary<string, object> {
             { "key", id },
-            { "data", ExportToUIAFApp(data) }
+            { "data", data.List.Where(a => a.Status is Status.Finished or Status.RewardTaken) }
         });
         using var request = new HttpRequestMessage {
             Method = HttpMethod.Post,
