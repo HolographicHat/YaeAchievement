@@ -102,12 +102,13 @@ public static class Utils {
             }
         }
         if (useLocalLib) {
-            Console.WriteLine(@"Use local native lib.");
-            File.Copy(Path.Combine(GlobalVars.AppPath, "YaeAchievementLib.dll"), GlobalVars.LibPath, true);
+            Console.WriteLine(@"[DEBUG] Use local native lib.");
+            File.Copy(Path.Combine(GlobalVars.AppPath, "YaeAchievementLib.dll"), GlobalVars.LibFilePath, true);
         } else if (info.EnableLibDownload) {
-            File.WriteAllBytes(GlobalVars.LibPath, GetBucketFileAsByteArray("schicksal/lib.dll"));
+            File.WriteAllBytes(GlobalVars.LibFilePath, GetBucketFileAsByteArray("schicksal/lib.dll"));
         }
     }
+
     
     public static void CheckSelfIsRunning() {
         Process.EnterDebugMode(); 
@@ -194,13 +195,13 @@ public static class Utils {
     public static Thread StartAndWaitResult(string exePath, Func<string, bool> onReceive) {
         AppDomain.CurrentDomain.ProcessExit += (_, _) => {
             try { 
-                File.Delete(GlobalVars.LibPath);
+                File.Delete(GlobalVars.LibFilePath);
             } catch (Exception) { /* ignored */ }
         };
         if (!Injector.CreateProcess(exePath, out var hProcess, out var hThread, out var pid)) {
             Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("ICreateProcess fail"));
         }
-        if (Injector.LoadLibraryAndInject(hProcess, GlobalVars.LibPath) != 0) {
+        if (Injector.LoadLibraryAndInject(hProcess, GlobalVars.LibFilePath) != 0) {
             if (!Native.TerminateProcess(hProcess, 0)) {
                 Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("TerminateProcess fail"));
             }
@@ -256,17 +257,22 @@ public static class Utils {
             .Any(name => name.Contains("Microsoft Visual C++ 2022 X64 "));
         if (!installed) {
             Console.WriteLine(App.VcRuntimeDownload);
-            var pkgPath = Path.Combine(GlobalVars.AppPath, "vc_redist.x64.exe");
-            await using var stream = await CHttpClient.Value.GetStreamAsync("https://aka.ms/vs/17/release/vc_redist.x64.exe");
-            await using var output = File.OpenWrite(pkgPath);
+            var pkgPath = Path.Combine(GlobalVars.DataPath, "vc_redist.x64.exe");
+            var stream = await CHttpClient.Value.GetStreamAsync("https://aka.ms/vs/17/release/vc_redist.x64.exe");
+            var output = File.OpenWrite(pkgPath);
             await stream.CopyToAsync(output);
+            stream.Close();
+            output.Close();
             Console.WriteLine(App.VcRuntimeInstalling);
-            _ = new Process {
+            using var process = new Process {
                 StartInfo = {
                     FileName = pkgPath,
                     Arguments = "/install /passive /norestart"
                 }
-            }.Start();
+            };
+            process.Start();
+            await process.WaitForExitAsync();
+            File.Delete(pkgPath);
         }
     }
 }

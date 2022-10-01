@@ -60,7 +60,7 @@ public static class Native {
     [DllImport("kernel32.dll", SetLastError = true)]
     public static extern bool CloseHandle(IntPtr hObject);
 
-    [DllImport("kernel32.dll")]
+    [DllImport("kernel32.dll", SetLastError = true)]
     public static extern IntPtr CreateRemoteThread(
         IntPtr hProcess,
         IntPtr lpThreadAttributes,
@@ -101,19 +101,19 @@ public static class Native {
     [DllImport("user32.dll", SetLastError = true)]
     public static extern IntPtr SetClipboardData(uint uFormat, IntPtr data);
 
-    [DllImport("user32.dll")]
+    [DllImport("user32.dll", SetLastError = true)]
     public static extern bool EmptyClipboard();
     
-    [DllImport("gdi32.dll")]
+    [DllImport("gdi32.dll", SetLastError = true)]
     public static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
     
-    [DllImport("user32.dll")]
+    [DllImport("user32.dll", SetLastError = true)]
     public static extern IntPtr GetDC(IntPtr hWnd);
     
-    [DllImport("user32.dll")]
+    [DllImport("user32.dll", SetLastError = true)]
     public static extern bool ReleaseDC(IntPtr hWnd, IntPtr hdc);
 
-    [DllImport("kernel32.dll")]
+    [DllImport("kernel32.dll", SetLastError = true)]
     public static extern uint WaitForSingleObject(IntPtr handle, ulong dwMilliseconds);
 
 }

@@ -46,7 +46,10 @@ public static class AppConfig {
         if (!File.Exists(path)) {
             return null;
         }
-        var content = File.ReadAllText(path);
+        var copiedLogFilePath = Path.GetTempFileName();
+        File.Copy(path, copiedLogFilePath, true);
+        var content = File.ReadAllText(copiedLogFilePath);
+        File.Delete(copiedLogFilePath);
         var matchResult = Regex.Match(content, @"(?m).:/.+(GenshinImpact_Data|YuanShen_Data)");
         if (!matchResult.Success) {
             return null;

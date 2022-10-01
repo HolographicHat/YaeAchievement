@@ -11,8 +11,7 @@ public class CacheFile {
     public DateTime LastWriteTime => Exists() ? File.GetLastWriteTimeUtc(_cacheName) : DateTime.UnixEpoch;
 
     public CacheFile(string identifier) {
-        Directory.CreateDirectory(Path.Combine(GlobalVars.AppPath, "cache"));
-        _cacheName = Path.Combine(GlobalVars.AppPath, $"cache/{identifier.MD5Hash()[..16]}.miko");
+        _cacheName = Path.Combine(GlobalVars.CachePath, $"{identifier.MD5Hash()[..16]}.miko");
     }
 
     public bool Exists() => File.Exists(_cacheName);
