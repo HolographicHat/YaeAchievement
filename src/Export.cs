@@ -44,7 +44,7 @@ public static class Export {
             RequestUri = new Uri($"https://77.cocogoat.work/v1/memo?source={App.AllAchievement}"),
             Content = new StringContent(result, Encoding.UTF8, "application/json")
         };
-        using var response = Utils.CHttpClient.Value.Send(request);
+        using var response = Utils.CHttpClient.Send(request);
         if (response.StatusCode != HttpStatusCode.Created) {
             Console.WriteLine(App.ExportToCocogoatFail);
             return;
@@ -60,14 +60,14 @@ public static class Export {
         var id = Guid.NewGuid().ToString("N").Substring(20, 8);
         var result = JsonSerializer.Serialize(new Dictionary<string, object> {
             { "key", id },
-            { "data", data.List.Where(a => a.Status is Status.Finished or Status.RewardTaken) }
+            { "data", ExportToUIAFApp(data) }
         });
         using var request = new HttpRequestMessage {
             Method = HttpMethod.Post,
             RequestUri = new Uri("https://api.qyinter.com/achievementRedis"),
             Content = new StringContent(result, Encoding.UTF8, "application/json")
         };
-        using var response = Utils.CHttpClient.Value.Send(request);
+        using var response = Utils.CHttpClient.Send(request);
         Console.WriteLine(App.ExportToWxApp1Success, id);
     }
 

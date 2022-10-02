@@ -18,7 +18,7 @@ namespace YaeAchievement.res {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class App {
@@ -302,15 +302,6 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unzip the package to update application..
-        /// </summary>
-        internal static string UpdateDownloadFinish {
-            get {
-                return ResourceManager.GetString("UpdateDownloadFinish", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Downloading update package....
         /// </summary>
         internal static string UpdateDownloading {
@@ -325,6 +316,16 @@ namespace YaeAchievement.res {
         internal static string UpdateNewVersion {
             get {
                 return ResourceManager.GetString("UpdateNewVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Updater {
+            get {
+                object obj = ResourceManager.GetObject("Updater", resourceCulture);
+                return ((byte[])(obj));
             }
         }
         

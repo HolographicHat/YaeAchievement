@@ -95,9 +95,6 @@
     <data name="UpdateDownloading" xml:space="preserve">
         <value>正在下载更新包...</value>
     </data>
-    <data name="UpdateDownloadFinish" xml:space="preserve">
-        <value>关闭程序后, 将压缩包解压至当前目录即可完成更新.</value>
-    </data>
     <data name="AppBanner" xml:space="preserve">
         <value>YaeAchievement - 原神成就导出工具 ({0})</value>
     </data>

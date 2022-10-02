@@ -101,9 +101,6 @@ Input a number (0-5): </value>
     <data name="UpdateDownloading" xml:space="preserve">
         <value>Downloading update package...</value>
     </data>
-    <data name="UpdateDownloadFinish" xml:space="preserve">
-        <value>Unzip the package to update application.</value>
-    </data>
     <data name="AppBanner" xml:space="preserve">
         <value>YaeAchievement ({0})</value>
     </data>
@@ -124,5 +121,9 @@ Input a number (0-5): </value>
     </data>
     <data name="ExceptionNetwork" xml:space="preserve">
         <value>Network error ({0}: {1})</value>
+    </data>
+    <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+    <data name="Updater" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>Updater.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
 </root>

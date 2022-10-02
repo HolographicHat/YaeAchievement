@@ -30,6 +30,10 @@
         <Generator>ResXFileCodeGenerator</Generator>
         <LastGenOutput>App.Designer.cs</LastGenOutput>
       </EmbeddedResource>
+      <None Remove="res\Updater.exe" />
+      <EmbeddedResource Include="res\Updater.exe">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </EmbeddedResource>
     </ItemGroup>
 
     <ItemGroup>

@@ -14,19 +14,16 @@ namespace YaeAchievement;
 
 public static class Utils {
 
-    public static readonly Lazy<HttpClient> CHttpClient = new (() => {
-        var c = new HttpClient(new HttpClientHandler {
-            Proxy = GlobalVars.DebugProxy ? new WebProxy("http://127.0.0.1:8888") : null,
-            AutomaticDecompression = DecompressionMethods.Brotli | DecompressionMethods.GZip
-        }) {
-            DefaultRequestHeaders = {
-                UserAgent = {
-                    new ProductInfoHeaderValue("YaeAchievement", GlobalVars.AppVersion.ToString(2))
-                }
+    public static readonly HttpClient CHttpClient = new (new HttpClientHandler {
+        Proxy = GlobalVars.DebugProxy ? new WebProxy("http://127.0.0.1:8888") : null,
+        AutomaticDecompression = DecompressionMethods.Brotli | DecompressionMethods.GZip
+    }) {
+        DefaultRequestHeaders = {
+            UserAgent = {
+                new ProductInfoHeaderValue("YaeAchievement", GlobalVars.AppVersion.ToString(2))
             }
-        };
-        return c;
-    });
+        }
+    };
 
     public static byte[] GetBucketFileAsByteArray(string path, bool cache = true) {
         try {
@@ -38,7 +35,7 @@ public static class Utils {
             if (cache && cacheFile.Exists()) {
                 msg.Headers.TryAddWithoutValidation("If-None-Match", $"{cacheFile.Read().Etag}");
             }
-            using var response = CHttpClient.Value.Send(msg);
+            using var response = CHttpClient.Send(msg);
             if (cache && response.StatusCode == HttpStatusCode.NotModified) {
                 return cacheFile.Read().Content.ToByteArray();
             }
@@ -90,10 +87,16 @@ public static class Utils {
             Console.WriteLine(App.UpdateDescription, info.Description);
             if (info.EnableAutoDownload) {
                 Console.WriteLine(App.UpdateDownloading);
-                var fullPath = Path.GetFullPath($"update.{Path.GetExtension(info.PackageLink)}");
-                File.WriteAllBytes(fullPath, GetBucketFileAsByteArray(info.PackageLink));
-                Console.WriteLine(App.UpdateDownloadFinish);
-                ShellOpen(fullPath);
+                var tmpPath = Path.GetTempFileName();
+                File.WriteAllBytes(tmpPath, GetBucketFileAsByteArray(info.PackageLink));
+                var updaterArgs = $"{Environment.ProcessId}|{Environment.ProcessPath}|{tmpPath}";
+                var updaterPath = Path.Combine(GlobalVars.DataPath, "update.exe");
+                var updaterHash = App.Updater.MD5Hash();
+                if (!File.Exists(updaterPath) || File.ReadAllBytes(updaterPath).MD5Hash() != updaterHash) {
+                    File.WriteAllBytes(updaterPath, App.Updater);
+                }
+                ShellOpen(updaterPath, updaterArgs.ToBytes().ToBase64());
+                GlobalVars.PauseOnExit = false;
                 Environment.Exit(0);
             }
             Console.WriteLine(App.DownloadLink, info.PackageLink);
@@ -109,7 +112,6 @@ public static class Utils {
         }
     }
 
-    
     public static void CheckSelfIsRunning() {
         Process.EnterDebugMode(); 
         var cur = Process.GetCurrentProcess();
@@ -123,13 +125,17 @@ public static class Utils {
     }
 
     // ReSharper disable once UnusedMethodReturnValue.Global
-    public static bool ShellOpen(string path) {
+    public static bool ShellOpen(string path, string? args = null) {
         try {
+            var startInfo = new ProcessStartInfo {
+                FileName = path,
+                UseShellExecute = true
+            };
+            if (args != null) {
+                startInfo.Arguments = args;
+            }
             return new Process {
-                StartInfo = {
-                    FileName = path,
-                    UseShellExecute = true
-                }
+                StartInfo = startInfo
             }.Start();
         } catch (Exception) {
             return false;
@@ -162,8 +168,10 @@ public static class Utils {
     public static void InstallExitHook() {
         AppDomain.CurrentDomain.ProcessExit += (_, _) => {
             proc?.Kill();
-            Console.WriteLine(App.PressKeyToExit);
-            Console.ReadKey();
+            if (GlobalVars.PauseOnExit) {
+                Console.WriteLine(App.PressKeyToExit);
+                Console.ReadKey();
+            }
         };
     }
 
@@ -258,11 +266,8 @@ public static class Utils {
         if (!installed) {
             Console.WriteLine(App.VcRuntimeDownload);
             var pkgPath = Path.Combine(GlobalVars.DataPath, "vc_redist.x64.exe");
-            var stream = await CHttpClient.Value.GetStreamAsync("https://aka.ms/vs/17/release/vc_redist.x64.exe");
-            var output = File.OpenWrite(pkgPath);
-            await stream.CopyToAsync(output);
-            stream.Close();
-            output.Close();
+            var bytes = await CHttpClient.GetByteArrayAsync("https://aka.ms/vs/17/release/vc_redist.x64.exe");
+            await File.WriteAllBytesAsync(pkgPath, bytes);
             Console.WriteLine(App.VcRuntimeInstalling);
             using var process = new Process {
                 StartInfo = {
