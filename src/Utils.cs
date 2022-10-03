@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using YaeAchievement.AppCenterSDK;
 using YaeAchievement.res;
+using YaeAchievement.res;
 using YaeAchievement.Win32;
 
 namespace YaeAchievement;
@@ -198,9 +199,19 @@ public static class Utils {
             Environment.Exit(-1);
         };
     }
+
+    private static bool CheckGenshinIsLatestVersion(string path) {
+        return File.Exists(path) && File.ReadAllBytes(path).MD5Hash() 
+            is "b162c802d986d8b76e12a68d204d79a3"
+            or "dd07216f0c5aae8dfd388dbb61dd16a7";
+    }
     
     // ReSharper disable once UnusedMethodReturnValue.Global
     public static Thread StartAndWaitResult(string exePath, Func<string, bool> onReceive) {
+        if (!CheckGenshinIsLatestVersion(exePath)) {
+            Console.WriteLine(App.GenshinHashError);
+            Environment.Exit(0);
+        }
         AppDomain.CurrentDomain.ProcessExit += (_, _) => {
             try { 
                 File.Delete(GlobalVars.LibFilePath);

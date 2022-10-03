@@ -116,4 +116,7 @@
     <data name="ExceptionNetwork" xml:space="preserve">
         <value>网络错误，请检查网络后重试 ({0}: {1})</value>
     </data>
+    <data name="GenshinHashError" xml:space="preserve">
+        <value>请将原神更新至最新版本后重试</value>
+    </data>
 </root>

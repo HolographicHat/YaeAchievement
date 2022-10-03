@@ -220,6 +220,15 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please update genshin and retry..
+        /// </summary>
+        internal static string GenshinHashError {
+            get {
+                return ResourceManager.GetString("GenshinHashError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please close game before run this application. ({0}).
         /// </summary>
         internal static string GenshinIsRunning {
