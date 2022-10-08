@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using YaeAchievement.AppCenterSDK;
 using YaeAchievement.res;
-using YaeAchievement.res;
 using YaeAchievement.Win32;
 
 namespace YaeAchievement;
