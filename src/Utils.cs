@@ -270,7 +270,13 @@ public static class Utils {
         using var root = Registry.LocalMachine;
         using var sub = root.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")!;
         var installed = sub.GetSubKeyNames()
-            .Select(subKeyName => sub.OpenSubKey(subKeyName))
+            .Select(subKeyName => {
+                try {
+                    return sub.OpenSubKey(subKeyName);
+                } catch (Exception) {
+                    return null;
+                }
+            })
             .Select(item => item?.GetValue("DisplayName") as string ?? string.Empty)
             .Any(name => name.Contains("Microsoft Visual C++ 2022 X64 "));
         if (!installed) {
