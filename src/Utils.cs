@@ -200,9 +200,13 @@ public static class Utils {
     }
 
     private static bool CheckGenshinIsLatestVersion(string path) {
+        #if DEBUG
+        return true;
+        #else
         return File.Exists(path) && File.ReadAllBytes(path).MD5Hash() 
             is "b162c802d986d8b76e12a68d204d79a3"
             or "dd07216f0c5aae8dfd388dbb61dd16a7";
+        #endif
     }
     
     // ReSharper disable once UnusedMethodReturnValue.Global

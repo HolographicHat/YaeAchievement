@@ -1,3 +1,3 @@
 using namespace Genshin;
 
-DO_UNI_FUNC(0x00BAB2B0, 0x00BAB2B0, ByteArray*, UnityEngine_RecordUserData, (int32_t nType));
+DO_UNI_FUNC(0x00BA4D80, 0x00BA4D80, ByteArray*, UnityEngine_RecordUserData, (int32_t nType));
