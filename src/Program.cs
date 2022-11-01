@@ -28,11 +28,22 @@ new EventLog("AppInit") {
         { "SystemVersion", DeviceHelper.GetSystemVersion() }
     }
 }.Enqueue();
+var usePreviousData = false;
 var historyCache = new CacheFile("ExportData");
 if (historyCache.LastWriteTime.AddMinutes(10) > DateTime.UtcNow) {
     Console.WriteLine(App.UsePreviousData);
-    Console.WriteLine(App.RefreshData);
-    Export.Choose(AchievementAllDataNotify.Parser.ParseFrom(historyCache.Read().Content));
+    usePreviousData = Console.ReadLine() == "yes";
+}
+Export:
+if(usePreviousData) {
+    AchievementAllDataNotify data;
+    try {
+        data = AchievementAllDataNotify.Parser.ParseFrom(historyCache.Read().Content);
+    } catch (Exception) {
+        usePreviousData = false;
+        goto Export;
+    }
+    Export.Choose(data);
 } else {
     StartAndWaitResult(AppConfig.GamePath, str => {
         GlobalVars.UnexpectedExit = false;
