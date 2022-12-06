@@ -256,15 +256,6 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To fetch new data, Restart the application after delete cache\d1a8ef40a67a5929.miko..
-        /// </summary>
-        internal static string RefreshData {
-            get {
-                return ResourceManager.GetString("RefreshData", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Reward not taken.
         /// </summary>
         internal static string StatusFinished {
@@ -348,7 +339,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Use previous fetched data..
+        ///   Looks up a localized string similar to Use previous fetched data? (yes|no).
         /// </summary>
         internal static string UsePreviousData {
             get {

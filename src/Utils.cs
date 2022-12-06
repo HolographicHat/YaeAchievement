@@ -200,9 +200,13 @@ public static class Utils {
     }
 
     private static bool CheckGenshinIsLatestVersion(string path) {
+        #if DEBUG
+        return true;
+        #else
         return File.Exists(path) && File.ReadAllBytes(path).MD5Hash() 
-            is "b162c802d986d8b76e12a68d204d79a3"
-            or "dd07216f0c5aae8dfd388dbb61dd16a7";
+            is "0a5477fd6f8011a66c59f66cdfb48a49"
+            or "6f9edf761606561c36898a3a2d21dc20";
+        #endif
     }
     
     // ReSharper disable once UnusedMethodReturnValue.Global
@@ -270,7 +274,13 @@ public static class Utils {
         using var root = Registry.LocalMachine;
         using var sub = root.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")!;
         var installed = sub.GetSubKeyNames()
-            .Select(subKeyName => sub.OpenSubKey(subKeyName))
+            .Select(subKeyName => {
+                try {
+                    return sub.OpenSubKey(subKeyName);
+                } catch (Exception) {
+                    return null;
+                }
+            })
             .Select(item => item?.GetValue("DisplayName") as string ?? string.Empty)
             .Any(name => name.Contains("Microsoft Visual C++ 2022 X64 "));
         if (!installed) {
