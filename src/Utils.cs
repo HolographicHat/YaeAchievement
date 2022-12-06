@@ -264,7 +264,7 @@ public static class Utils {
         return th;
     }
     
-    #pragma warning disable CA1416
+#pragma warning disable CA1416
 
     public static async Task CheckVcRuntime() {
         using var root = Registry.LocalMachine;
@@ -289,5 +289,12 @@ public static class Utils {
             await process.WaitForExitAsync();
             File.Delete(pkgPath);
         }
+    }
+
+#pragma warning restore CA1416
+
+    public static string? GetResourceString(string name)
+    {
+        return App.ResourceManager.GetString(name);
     }
 }

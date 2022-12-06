@@ -7,7 +7,7 @@ public static class AppConfig {
     
     public static string GamePath { get; private set; } = null!;
 
-    internal static void Load(string argumentPath) {
+    public static void Load(string argumentPath) {
         if (argumentPath != "auto" && File.Exists(argumentPath)) {
             GamePath = argumentPath;
             return;
