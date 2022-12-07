@@ -8,7 +8,7 @@ using std::to_string;
 HWND unityWnd = 0;
 HANDLE hPipe  = 0;
 
-std::set<UINT16> PacketWhitelist = { 172, 198, 112, 2676, 7, 21, 135 }; // ping, token, loginreq
+std::set<UINT16> PacketWhitelist = { 179, 130, 156, 2692, 100, 43, 119 }; // ping, token, loginreq
 
 bool OnPacket(KcpPacket* pkt) {
 	if (pkt->data == nullptr) return true;
@@ -29,7 +29,7 @@ bool OnPacket(KcpPacket* pkt) {
 		return false;
 	}
 	printf("Passed cmdid: %d\n", ReadMapped<UINT16>(data->vector, 2));
-	if (ReadMapped<UINT16>(data->vector, 2) == 2676) {
+	if (ReadMapped<UINT16>(data->vector, 2) == 2692) {
 		auto headLength = ReadMapped<UINT16>(data->vector, 4);
 		auto dataLength = ReadMapped<UINT32>(data->vector, 6);
 		auto iStr = Genshin::ToBase64String(data, 10 + headLength, dataLength, nullptr);
@@ -41,6 +41,8 @@ bool OnPacket(KcpPacket* pkt) {
 	delete[] data;
 	return true;
 }
+
+std::map<INT, UINT> signatures;
 
 namespace Hook {
 
@@ -62,21 +64,14 @@ namespace Hook {
 		return OnPacket(evt->fields.packet) ? result : false;
 	}
 
-	std::map<INT, UINT> signatures;
-
 	ByteArray* UnityEngine_RecordUserData(INT type) {
-		if (signatures.count(type)) {
-			return GCHandle_GetObject<ByteArray>(signatures[type]);
-		}
-		auto result = CALL_ORIGIN(UnityEngine_RecordUserData, type);
-		signatures[type] = GCHandle_New(result, true);
-		return result;
+		return GCHandle_GetObject<ByteArray>(signatures[type]);
 	}
 }
 
 void Run(HMODULE* phModule) {
-	//AllocConsole();
-	//freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
+	AllocConsole();
+	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
 	while (
 		GetModuleHandle("UserAssembly.dll") == nullptr ||
 		(unityWnd = FindMainWindowByPID(GetCurrentProcessId())) == 0
@@ -84,14 +79,17 @@ void Run(HMODULE* phModule) {
 		Sleep(1000);
 	}
 	Sleep(5000);
+	DisableVMProtect();
 	InitIL2CPP();
-	HookManager::install(Genshin::UnityEngine_RecordUserData, Hook::UnityEngine_RecordUserData);
 	for (int i = 0; i < 4; i++) {
-		Genshin::RecordUserData(i, nullptr);
+		auto result = Genshin::RecordUserData(i, nullptr);
+		signatures[i] = GCHandle_New(result, true);
 	}
+	signatures[3] = signatures[2];
 	HookManager::install(Genshin::KcpSend, Hook::KcpSend);
 	HookManager::install(Genshin::KcpRecv, Hook::KcpRecv);
 	HookManager::install(Genshin::SetVersion, Hook::SetVersion);
+	HookManager::install(Genshin::UnityEngine_RecordUserData, Hook::UnityEngine_RecordUserData);
 	hPipe = CreateFile(R"(\\.\pipe\YaeAchievementPipe)", GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
 	if (hPipe == INVALID_HANDLE_VALUE) {
 		Win32ErrorDialog(1001);
