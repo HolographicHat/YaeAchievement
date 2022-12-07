@@ -22,18 +22,19 @@ public static partial class AchievementAllDataNotifyReflection {
   static AchievementAllDataNotifyReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "Ch5BY2hpZXZlbWVudEFsbERhdGFOb3RpZnkucHJvdG8iowIKGEFjaGlldmVt",
-          "ZW50QWxsRGF0YU5vdGlmeRIzCgRsaXN0GAQgAygLMiUuQWNoaWV2ZW1lbnRB",
-          "bGxEYXRhTm90aWZ5LkFjaGlldmVtZW50GtEBCgtBY2hpZXZlbWVudBIKCgJp",
-          "ZBgOIAEoDRI8CgZzdGF0dXMYDSABKA4yLC5BY2hpZXZlbWVudEFsbERhdGFO",
-          "b3RpZnkuQWNoaWV2ZW1lbnQuU3RhdHVzEg8KB2N1cnJlbnQYDCABKA0SDQoF",
-          "dG90YWwYCCABKA0SEQoJdGltZXN0YW1wGAsgASgNIkUKBlN0YXR1cxILCgdJ",
-          "TlZBTElEEAASDgoKVU5GSU5JU0hFRBABEgwKCEZJTklTSEVEEAISEAoMUkVX",
-          "QVJEX1RBS0VOEANiBnByb3RvMw=="));
+          "Ch5BY2hpZXZlbWVudEFsbERhdGFOb3RpZnkucHJvdG8ivwIKGEFjaGlldmVt",
+          "ZW50QWxsRGF0YU5vdGlmeRIzCgRsaXN0GAggAygLMiUuQWNoaWV2ZW1lbnRB",
+          "bGxEYXRhTm90aWZ5LkFjaGlldmVtZW50Gu0BCgtBY2hpZXZlbWVudBIRCgl0",
+          "aW1lc3RhbXAYCCABKA0SDwoHY3VycmVudBgLIAEoDRINCgV0b3RhbBgGIAEo",
+          "DRIKCgJpZBgOIAEoDRI8CgZzdGF0dXMYDyABKA4yLC5BY2hpZXZlbWVudEFs",
+          "bERhdGFOb3RpZnkuQWNoaWV2ZW1lbnQuU3RhdHVzImEKBlN0YXR1cxISCg5T",
+          "VEFUVVNfSU5WQUxJRBAAEhUKEVNUQVRVU19VTkZJTklTSEVEEAESEwoPU1RB",
+          "VFVTX0ZJTklTSEVEEAISFwoTU1RBVFVTX1JFV0FSRF9UQUtFThADYgZwcm90",
+          "bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::AchievementAllDataNotify), global::AchievementAllDataNotify.Parser, new[]{ "List" }, null, null, null, new pbr::GeneratedClrTypeInfo[] { new pbr::GeneratedClrTypeInfo(typeof(global::AchievementAllDataNotify.Types.Achievement), global::AchievementAllDataNotify.Types.Achievement.Parser, new[]{ "Id", "Status", "Current", "Total", "Timestamp" }, null, new[]{ typeof(global::AchievementAllDataNotify.Types.Achievement.Types.Status) }, null, null)})
+          new pbr::GeneratedClrTypeInfo(typeof(global::AchievementAllDataNotify), global::AchievementAllDataNotify.Parser, new[]{ "List" }, null, null, null, new pbr::GeneratedClrTypeInfo[] { new pbr::GeneratedClrTypeInfo(typeof(global::AchievementAllDataNotify.Types.Achievement), global::AchievementAllDataNotify.Types.Achievement.Parser, new[]{ "Timestamp", "Current", "Total", "Id", "Status" }, null, new[]{ typeof(global::AchievementAllDataNotify.Types.Achievement.Types.Status) }, null, null)})
         }));
   }
   #endregion
@@ -85,9 +86,9 @@ public sealed partial class AchievementAllDataNotify : pb::IMessage<AchievementA
   }
 
   /// <summary>Field number for the "list" field.</summary>
-  public const int ListFieldNumber = 4;
+  public const int ListFieldNumber = 8;
   private static readonly pb::FieldCodec<global::AchievementAllDataNotify.Types.Achievement> _repeated_list_codec
-      = pb::FieldCodec.ForMessage(34, global::AchievementAllDataNotify.Types.Achievement.Parser);
+      = pb::FieldCodec.ForMessage(66, global::AchievementAllDataNotify.Types.Achievement.Parser);
   private readonly pbc::RepeatedField<global::AchievementAllDataNotify.Types.Achievement> list_ = new pbc::RepeatedField<global::AchievementAllDataNotify.Types.Achievement>();
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -188,7 +189,7 @@ public sealed partial class AchievementAllDataNotify : pb::IMessage<AchievementA
         default:
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
           break;
-        case 34: {
+        case 66: {
           list_.AddEntriesFrom(input, _repeated_list_codec);
           break;
         }
@@ -207,7 +208,7 @@ public sealed partial class AchievementAllDataNotify : pb::IMessage<AchievementA
         default:
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
           break;
-        case 34: {
+        case 66: {
           list_.AddEntriesFrom(ref input, _repeated_list_codec);
           break;
         }
@@ -255,11 +256,11 @@ public sealed partial class AchievementAllDataNotify : pb::IMessage<AchievementA
       [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
       [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
       public Achievement(Achievement other) : this() {
-        id_ = other.id_;
-        status_ = other.status_;
+        timestamp_ = other.timestamp_;
         current_ = other.current_;
         total_ = other.total_;
-        timestamp_ = other.timestamp_;
+        id_ = other.id_;
+        status_ = other.status_;
         _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
       }
 
@@ -267,6 +268,42 @@ public sealed partial class AchievementAllDataNotify : pb::IMessage<AchievementA
       [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
       public Achievement Clone() {
         return new Achievement(this);
+      }
+
+      /// <summary>Field number for the "timestamp" field.</summary>
+      public const int TimestampFieldNumber = 8;
+      private uint timestamp_;
+      [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+      [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+      public uint Timestamp {
+        get { return timestamp_; }
+        set {
+          timestamp_ = value;
+        }
+      }
+
+      /// <summary>Field number for the "current" field.</summary>
+      public const int CurrentFieldNumber = 11;
+      private uint current_;
+      [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+      [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+      public uint Current {
+        get { return current_; }
+        set {
+          current_ = value;
+        }
+      }
+
+      /// <summary>Field number for the "total" field.</summary>
+      public const int TotalFieldNumber = 6;
+      private uint total_;
+      [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+      [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+      public uint Total {
+        get { return total_; }
+        set {
+          total_ = value;
+        }
       }
 
       /// <summary>Field number for the "id" field.</summary>
@@ -282,7 +319,7 @@ public sealed partial class AchievementAllDataNotify : pb::IMessage<AchievementA
       }
 
       /// <summary>Field number for the "status" field.</summary>
-      public const int StatusFieldNumber = 13;
+      public const int StatusFieldNumber = 15;
       private global::AchievementAllDataNotify.Types.Achievement.Types.Status status_ = global::AchievementAllDataNotify.Types.Achievement.Types.Status.Invalid;
       [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
       [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -290,42 +327,6 @@ public sealed partial class AchievementAllDataNotify : pb::IMessage<AchievementA
         get { return status_; }
         set {
           status_ = value;
-        }
-      }
-
-      /// <summary>Field number for the "current" field.</summary>
-      public const int CurrentFieldNumber = 12;
-      private uint current_;
-      [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-      [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-      public uint Current {
-        get { return current_; }
-        set {
-          current_ = value;
-        }
-      }
-
-      /// <summary>Field number for the "total" field.</summary>
-      public const int TotalFieldNumber = 8;
-      private uint total_;
-      [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-      [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-      public uint Total {
-        get { return total_; }
-        set {
-          total_ = value;
-        }
-      }
-
-      /// <summary>Field number for the "timestamp" field.</summary>
-      public const int TimestampFieldNumber = 11;
-      private uint timestamp_;
-      [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-      [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-      public uint Timestamp {
-        get { return timestamp_; }
-        set {
-          timestamp_ = value;
         }
       }
 
@@ -344,11 +345,11 @@ public sealed partial class AchievementAllDataNotify : pb::IMessage<AchievementA
         if (ReferenceEquals(other, this)) {
           return true;
         }
-        if (Id != other.Id) return false;
-        if (Status != other.Status) return false;
+        if (Timestamp != other.Timestamp) return false;
         if (Current != other.Current) return false;
         if (Total != other.Total) return false;
-        if (Timestamp != other.Timestamp) return false;
+        if (Id != other.Id) return false;
+        if (Status != other.Status) return false;
         return Equals(_unknownFields, other._unknownFields);
       }
 
@@ -356,11 +357,11 @@ public sealed partial class AchievementAllDataNotify : pb::IMessage<AchievementA
       [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
       public override int GetHashCode() {
         int hash = 1;
-        if (Id != 0) hash ^= Id.GetHashCode();
-        if (Status != global::AchievementAllDataNotify.Types.Achievement.Types.Status.Invalid) hash ^= Status.GetHashCode();
+        if (Timestamp != 0) hash ^= Timestamp.GetHashCode();
         if (Current != 0) hash ^= Current.GetHashCode();
         if (Total != 0) hash ^= Total.GetHashCode();
-        if (Timestamp != 0) hash ^= Timestamp.GetHashCode();
+        if (Id != 0) hash ^= Id.GetHashCode();
+        if (Status != global::AchievementAllDataNotify.Types.Achievement.Types.Status.Invalid) hash ^= Status.GetHashCode();
         if (_unknownFields != null) {
           hash ^= _unknownFields.GetHashCode();
         }
@@ -380,24 +381,24 @@ public sealed partial class AchievementAllDataNotify : pb::IMessage<AchievementA
         output.WriteRawMessage(this);
       #else
         if (Total != 0) {
-          output.WriteRawTag(64);
+          output.WriteRawTag(48);
           output.WriteUInt32(Total);
         }
         if (Timestamp != 0) {
-          output.WriteRawTag(88);
+          output.WriteRawTag(64);
           output.WriteUInt32(Timestamp);
         }
         if (Current != 0) {
-          output.WriteRawTag(96);
+          output.WriteRawTag(88);
           output.WriteUInt32(Current);
-        }
-        if (Status != global::AchievementAllDataNotify.Types.Achievement.Types.Status.Invalid) {
-          output.WriteRawTag(104);
-          output.WriteEnum((int) Status);
         }
         if (Id != 0) {
           output.WriteRawTag(112);
           output.WriteUInt32(Id);
+        }
+        if (Status != global::AchievementAllDataNotify.Types.Achievement.Types.Status.Invalid) {
+          output.WriteRawTag(120);
+          output.WriteEnum((int) Status);
         }
         if (_unknownFields != null) {
           _unknownFields.WriteTo(output);
@@ -410,24 +411,24 @@ public sealed partial class AchievementAllDataNotify : pb::IMessage<AchievementA
       [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
       void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
         if (Total != 0) {
-          output.WriteRawTag(64);
+          output.WriteRawTag(48);
           output.WriteUInt32(Total);
         }
         if (Timestamp != 0) {
-          output.WriteRawTag(88);
+          output.WriteRawTag(64);
           output.WriteUInt32(Timestamp);
         }
         if (Current != 0) {
-          output.WriteRawTag(96);
+          output.WriteRawTag(88);
           output.WriteUInt32(Current);
-        }
-        if (Status != global::AchievementAllDataNotify.Types.Achievement.Types.Status.Invalid) {
-          output.WriteRawTag(104);
-          output.WriteEnum((int) Status);
         }
         if (Id != 0) {
           output.WriteRawTag(112);
           output.WriteUInt32(Id);
+        }
+        if (Status != global::AchievementAllDataNotify.Types.Achievement.Types.Status.Invalid) {
+          output.WriteRawTag(120);
+          output.WriteEnum((int) Status);
         }
         if (_unknownFields != null) {
           _unknownFields.WriteTo(ref output);
@@ -439,11 +440,8 @@ public sealed partial class AchievementAllDataNotify : pb::IMessage<AchievementA
       [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
       public int CalculateSize() {
         int size = 0;
-        if (Id != 0) {
-          size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Id);
-        }
-        if (Status != global::AchievementAllDataNotify.Types.Achievement.Types.Status.Invalid) {
-          size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Status);
+        if (Timestamp != 0) {
+          size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Timestamp);
         }
         if (Current != 0) {
           size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Current);
@@ -451,8 +449,11 @@ public sealed partial class AchievementAllDataNotify : pb::IMessage<AchievementA
         if (Total != 0) {
           size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Total);
         }
-        if (Timestamp != 0) {
-          size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Timestamp);
+        if (Id != 0) {
+          size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Id);
+        }
+        if (Status != global::AchievementAllDataNotify.Types.Achievement.Types.Status.Invalid) {
+          size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Status);
         }
         if (_unknownFields != null) {
           size += _unknownFields.CalculateSize();
@@ -466,11 +467,8 @@ public sealed partial class AchievementAllDataNotify : pb::IMessage<AchievementA
         if (other == null) {
           return;
         }
-        if (other.Id != 0) {
-          Id = other.Id;
-        }
-        if (other.Status != global::AchievementAllDataNotify.Types.Achievement.Types.Status.Invalid) {
-          Status = other.Status;
+        if (other.Timestamp != 0) {
+          Timestamp = other.Timestamp;
         }
         if (other.Current != 0) {
           Current = other.Current;
@@ -478,8 +476,11 @@ public sealed partial class AchievementAllDataNotify : pb::IMessage<AchievementA
         if (other.Total != 0) {
           Total = other.Total;
         }
-        if (other.Timestamp != 0) {
-          Timestamp = other.Timestamp;
+        if (other.Id != 0) {
+          Id = other.Id;
+        }
+        if (other.Status != global::AchievementAllDataNotify.Types.Achievement.Types.Status.Invalid) {
+          Status = other.Status;
         }
         _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
       }
@@ -496,24 +497,24 @@ public sealed partial class AchievementAllDataNotify : pb::IMessage<AchievementA
             default:
               _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
               break;
-            case 64: {
+            case 48: {
               Total = input.ReadUInt32();
               break;
             }
-            case 88: {
+            case 64: {
               Timestamp = input.ReadUInt32();
               break;
             }
-            case 96: {
+            case 88: {
               Current = input.ReadUInt32();
-              break;
-            }
-            case 104: {
-              Status = (global::AchievementAllDataNotify.Types.Achievement.Types.Status) input.ReadEnum();
               break;
             }
             case 112: {
               Id = input.ReadUInt32();
+              break;
+            }
+            case 120: {
+              Status = (global::AchievementAllDataNotify.Types.Achievement.Types.Status) input.ReadEnum();
               break;
             }
           }
@@ -531,24 +532,24 @@ public sealed partial class AchievementAllDataNotify : pb::IMessage<AchievementA
             default:
               _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
               break;
-            case 64: {
+            case 48: {
               Total = input.ReadUInt32();
               break;
             }
-            case 88: {
+            case 64: {
               Timestamp = input.ReadUInt32();
               break;
             }
-            case 96: {
+            case 88: {
               Current = input.ReadUInt32();
-              break;
-            }
-            case 104: {
-              Status = (global::AchievementAllDataNotify.Types.Achievement.Types.Status) input.ReadEnum();
               break;
             }
             case 112: {
               Id = input.ReadUInt32();
+              break;
+            }
+            case 120: {
+              Status = (global::AchievementAllDataNotify.Types.Achievement.Types.Status) input.ReadEnum();
               break;
             }
           }
@@ -562,10 +563,10 @@ public sealed partial class AchievementAllDataNotify : pb::IMessage<AchievementA
       [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
       public static partial class Types {
         public enum Status {
-          [pbr::OriginalName("INVALID")] Invalid = 0,
-          [pbr::OriginalName("UNFINISHED")] Unfinished = 1,
-          [pbr::OriginalName("FINISHED")] Finished = 2,
-          [pbr::OriginalName("REWARD_TAKEN")] RewardTaken = 3,
+          [pbr::OriginalName("STATUS_INVALID")] Invalid = 0,
+          [pbr::OriginalName("STATUS_UNFINISHED")] Unfinished = 1,
+          [pbr::OriginalName("STATUS_FINISHED")] Finished = 2,
+          [pbr::OriginalName("STATUS_REWARD_TAKEN")] RewardTaken = 3,
         }
 
       }

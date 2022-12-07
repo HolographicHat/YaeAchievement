@@ -70,8 +70,8 @@ namespace Hook {
 }
 
 void Run(HMODULE* phModule) {
-	AllocConsole();
-	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
+	//AllocConsole();
+	//freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
 	while (
 		GetModuleHandle("UserAssembly.dll") == nullptr ||
 		(unityWnd = FindMainWindowByPID(GetCurrentProcessId())) == 0
