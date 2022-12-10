@@ -204,8 +204,8 @@ public static class Utils {
         return true;
         #else
         return File.Exists(path) && File.ReadAllBytes(path).MD5Hash() 
-            is "0a5477fd6f8011a66c59f66cdfb48a49"
-            or "6f9edf761606561c36898a3a2d21dc20";
+            is "34433aa962523e55213c596d4e6b1f9c"
+            or "1fa8e1445b8121d5d1b5c1e6a8daa905"; // TODO: Use api
         #endif
     }
     

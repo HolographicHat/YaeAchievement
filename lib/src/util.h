@@ -2,6 +2,7 @@
 
 using std::string;
 
+VOID DisableVMProtect();
 bool IsLittleEndian();
 HWND FindMainWindowByPID(DWORD pid);
 UINT32 GCHandle_New(LPVOID object, bool pinned);
