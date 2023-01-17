@@ -41,7 +41,7 @@ public static class Export {
         var result = JsonSerializer.Serialize(ExportToUIAFApp(data));
         using var request = new HttpRequestMessage {
             Method = HttpMethod.Post,
-            RequestUri = new Uri($"https://77.cocogoat.work/v1/memo?source={App.AllAchievement}"),
+            RequestUri = new Uri($"https://77.cocogoat.cn/v1/memo?source={App.AllAchievement}"),
             Content = new StringContent(result, Encoding.UTF8, "application/json")
         };
         using var response = Utils.CHttpClient.Send(request);
