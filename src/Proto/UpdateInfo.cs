@@ -22,15 +22,16 @@ public static partial class UpdateInfoReflection {
   static UpdateInfoReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "ChBVcGRhdGVJbmZvLnByb3RvIqwBCgpVcGRhdGVJbmZvEhMKC3ZlcnNpb25D",
+          "ChBVcGRhdGVJbmZvLnByb3RvIuIBCgpVcGRhdGVJbmZvEhMKC3ZlcnNpb25D",
           "b2RlGAEgASgNEhMKC3ZlcnNpb25OYW1lGAIgASgJEhMKC2Rlc2NyaXB0aW9u",
           "GAMgASgJEhMKC3BhY2thZ2VMaW5rGAQgASgJEhMKC2ZvcmNlVXBkYXRlGAUg",
           "ASgIEhkKEWVuYWJsZUxpYkRvd25sb2FkGAYgASgIEhoKEmVuYWJsZUF1dG9E",
-          "b3dubG9hZBgHIAEoCGIGcHJvdG8z"));
+          "b3dubG9hZBgHIAEoCBIZChFjdXJyZW50Q05HYW1lSGFzaBgIIAEoCRIZChFj",
+          "dXJyZW50T1NHYW1lSGFzaBgJIAEoCWIGcHJvdG8z"));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::UpdateInfo), global::UpdateInfo.Parser, new[]{ "VersionCode", "VersionName", "Description", "PackageLink", "ForceUpdate", "EnableLibDownload", "EnableAutoDownload" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::UpdateInfo), global::UpdateInfo.Parser, new[]{ "VersionCode", "VersionName", "Description", "PackageLink", "ForceUpdate", "EnableLibDownload", "EnableAutoDownload", "CurrentCNGameHash", "CurrentOSGameHash" }, null, null, null, null)
         }));
   }
   #endregion
@@ -78,6 +79,8 @@ public sealed partial class UpdateInfo : pb::IMessage<UpdateInfo>
     forceUpdate_ = other.forceUpdate_;
     enableLibDownload_ = other.enableLibDownload_;
     enableAutoDownload_ = other.enableAutoDownload_;
+    currentCNGameHash_ = other.currentCNGameHash_;
+    currentOSGameHash_ = other.currentOSGameHash_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -171,6 +174,30 @@ public sealed partial class UpdateInfo : pb::IMessage<UpdateInfo>
     }
   }
 
+  /// <summary>Field number for the "currentCNGameHash" field.</summary>
+  public const int CurrentCNGameHashFieldNumber = 8;
+  private string currentCNGameHash_ = "";
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public string CurrentCNGameHash {
+    get { return currentCNGameHash_; }
+    set {
+      currentCNGameHash_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    }
+  }
+
+  /// <summary>Field number for the "currentOSGameHash" field.</summary>
+  public const int CurrentOSGameHashFieldNumber = 9;
+  private string currentOSGameHash_ = "";
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public string CurrentOSGameHash {
+    get { return currentOSGameHash_; }
+    set {
+      currentOSGameHash_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -193,6 +220,8 @@ public sealed partial class UpdateInfo : pb::IMessage<UpdateInfo>
     if (ForceUpdate != other.ForceUpdate) return false;
     if (EnableLibDownload != other.EnableLibDownload) return false;
     if (EnableAutoDownload != other.EnableAutoDownload) return false;
+    if (CurrentCNGameHash != other.CurrentCNGameHash) return false;
+    if (CurrentOSGameHash != other.CurrentOSGameHash) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -207,6 +236,8 @@ public sealed partial class UpdateInfo : pb::IMessage<UpdateInfo>
     if (ForceUpdate != false) hash ^= ForceUpdate.GetHashCode();
     if (EnableLibDownload != false) hash ^= EnableLibDownload.GetHashCode();
     if (EnableAutoDownload != false) hash ^= EnableAutoDownload.GetHashCode();
+    if (CurrentCNGameHash.Length != 0) hash ^= CurrentCNGameHash.GetHashCode();
+    if (CurrentOSGameHash.Length != 0) hash ^= CurrentOSGameHash.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -253,6 +284,14 @@ public sealed partial class UpdateInfo : pb::IMessage<UpdateInfo>
       output.WriteRawTag(56);
       output.WriteBool(EnableAutoDownload);
     }
+    if (CurrentCNGameHash.Length != 0) {
+      output.WriteRawTag(66);
+      output.WriteString(CurrentCNGameHash);
+    }
+    if (CurrentOSGameHash.Length != 0) {
+      output.WriteRawTag(74);
+      output.WriteString(CurrentOSGameHash);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -291,6 +330,14 @@ public sealed partial class UpdateInfo : pb::IMessage<UpdateInfo>
       output.WriteRawTag(56);
       output.WriteBool(EnableAutoDownload);
     }
+    if (CurrentCNGameHash.Length != 0) {
+      output.WriteRawTag(66);
+      output.WriteString(CurrentCNGameHash);
+    }
+    if (CurrentOSGameHash.Length != 0) {
+      output.WriteRawTag(74);
+      output.WriteString(CurrentOSGameHash);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -321,6 +368,12 @@ public sealed partial class UpdateInfo : pb::IMessage<UpdateInfo>
     }
     if (EnableAutoDownload != false) {
       size += 1 + 1;
+    }
+    if (CurrentCNGameHash.Length != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeStringSize(CurrentCNGameHash);
+    }
+    if (CurrentOSGameHash.Length != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeStringSize(CurrentOSGameHash);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -354,6 +407,12 @@ public sealed partial class UpdateInfo : pb::IMessage<UpdateInfo>
     }
     if (other.EnableAutoDownload != false) {
       EnableAutoDownload = other.EnableAutoDownload;
+    }
+    if (other.CurrentCNGameHash.Length != 0) {
+      CurrentCNGameHash = other.CurrentCNGameHash;
+    }
+    if (other.CurrentOSGameHash.Length != 0) {
+      CurrentOSGameHash = other.CurrentOSGameHash;
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -398,6 +457,14 @@ public sealed partial class UpdateInfo : pb::IMessage<UpdateInfo>
           EnableAutoDownload = input.ReadBool();
           break;
         }
+        case 66: {
+          CurrentCNGameHash = input.ReadString();
+          break;
+        }
+        case 74: {
+          CurrentOSGameHash = input.ReadString();
+          break;
+        }
       }
     }
   #endif
@@ -439,6 +506,14 @@ public sealed partial class UpdateInfo : pb::IMessage<UpdateInfo>
         }
         case 56: {
           EnableAutoDownload = input.ReadBool();
+          break;
+        }
+        case 66: {
+          CurrentCNGameHash = input.ReadString();
+          break;
+        }
+        case 74: {
+          CurrentOSGameHash = input.ReadString();
           break;
         }
       }
