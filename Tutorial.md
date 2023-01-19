@@ -1,4 +1,4 @@
-##                                                          使用说明
+## 使用说明
 
 1.选择正确的下载文件（以2.4.1版本为例）：
 
@@ -7,8 +7,6 @@
 点击图中红框圈中的名称为“YaeAchievement.exe”的文件，浏览器会自动弹出下载。建议将该文件保存在桌面或者其它易于寻找的文件夹内。
 
 ![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/1.png)
-
-
 
 2.安装启动软件所需文件（若已安装该运行时可忽略此步骤）
 
@@ -21,8 +19,6 @@
 ![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/2.png)
 
 直接点击安装即可。
-
-
 
 3.打开主程序所需的操作以及成就导出的选择
 
@@ -40,17 +36,15 @@
 
 选择完毕后各工具导出页面如下：
 
-椰羊：
+#### 椰羊：
 
 ![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/5.png)
 
-Snap.Hutao：
+#### Snap.Hutao：
 
 ![image](https://github.com/Finchaos/yae-markdown-230119/blob/main//images/6.png)
 
-
-
-Seelie.me：
+#### Seelie.me：
 
 此时YaeAchievement会提示成就数据已导出。请在保存YaeAchievement的文件夹内找到名称形如export-20xxxxxxxxxxxx-seelie.json的文件。
 
@@ -70,20 +64,18 @@ Seelie.me：
 
 此时可选择左栏成就，查看导入的成就数据。
 
-寻空：
+#### 寻空：
 
 ![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/11.png)
 
+### 各种工具的介绍烦请移步至各工具的官方页面进行查看（下方序号对应导出序号）
 
+0. [椰羊](https://cocogoat.work/achievement)
 
-4.各种工具的介绍烦请移步至各工具的官方页面进行查看（下方序号对应导出序号）
+1. [Snap·HuTao](https://github.com/DGP-Studio/Snap.HuTao)
 
-[0] [椰羊](https://cocogoat.work/achievement)
+2. [Paimon.moe](https://paimon.moe/achievement/)
 
-[1] [Snap·HuTao](https://github.com/DGP-Studio/Snap.HuTao)
+3. [Seelie.me](https://seelie.me/achievements)
 
-[3] [Paimon.moe](https://paimon.moe/achievement/)
-
-[4] [Seelie.me](https://seelie.me/achievements)
-
-[5] [寻空](https://github.com/xunkong/xunkong)
+4. [寻空](https://github.com/xunkong/xunkong)
