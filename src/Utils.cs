@@ -79,6 +79,9 @@ public static class Utils {
             throw new Win32Exception();
         }
     }
+
+    // ReSharper disable once NotAccessedField.Local
+    private static UpdateInfo _updateInfo = null!;
     
     public static void CheckUpdate(bool useLocalLib) {
         var info = UpdateInfo.Parser.ParseFrom(GetBucketFileAsByteArray("schicksal/version"))!;
@@ -110,6 +113,7 @@ public static class Utils {
         } else if (info.EnableLibDownload) {
             File.WriteAllBytes(GlobalVars.LibFilePath, GetBucketFileAsByteArray("schicksal/lib.dll"));
         }
+        _updateInfo = info;
     }
 
     public static void CheckSelfIsRunning() {
@@ -203,9 +207,8 @@ public static class Utils {
         #if DEBUG
         return true;
         #else
-        return File.Exists(path) && File.ReadAllBytes(path).MD5Hash() 
-            is "34433aa962523e55213c596d4e6b1f9c"
-            or "1fa8e1445b8121d5d1b5c1e6a8daa905"; // TODO: Use api
+        var hash = File.ReadAllBytes(path).MD5Hash();
+        return File.Exists(path) && (hash == _updateInfo.CurrentCNGameHash || hash == _updateInfo.CurrentOSGameHash);
         #endif
     }
     
