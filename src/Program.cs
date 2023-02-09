@@ -4,12 +4,12 @@ using YaeAchievement.AppCenterSDK.Models;
 using YaeAchievement.res;
 using static YaeAchievement.Utils;
 
+TryDisableQuickEdit();
 InstallExitHook();
 InstallExceptionHook();
 
 await CheckVcRuntime();
 CheckSelfIsRunning();
-TryDisableQuickEdit();
 CheckGenshinIsRunning();
 
 Console.WriteLine(@"----------------------------------------------------");

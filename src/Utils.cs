@@ -94,10 +94,7 @@ public static class Utils {
                 File.WriteAllBytes(tmpPath, GetBucketFileAsByteArray(info.PackageLink));
                 var updaterArgs = $"{Environment.ProcessId}|{Environment.ProcessPath}|{tmpPath}";
                 var updaterPath = Path.Combine(GlobalVars.DataPath, "update.exe");
-                var updaterHash = App.Updater.MD5Hash();
-                if (!File.Exists(updaterPath) || File.ReadAllBytes(updaterPath).MD5Hash() != updaterHash) {
-                    File.WriteAllBytes(updaterPath, App.Updater);
-                }
+                File.WriteAllBytes(updaterPath, App.Updater);
                 ShellOpen(updaterPath, updaterArgs.ToBytes().ToBase64());
                 GlobalVars.PauseOnExit = false;
                 Environment.Exit(0);

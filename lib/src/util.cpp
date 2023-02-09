@@ -14,20 +14,12 @@ VOID DisableVMProtect() {
 
 #pragma region StringConvert
 
-string IlStringToString(Il2CppString* str, UINT codePage) {
+string ToString(Il2CppString* str, UINT codePage) {
     auto chars = reinterpret_cast<const wchar_t*>(str->chars);
     auto len = WideCharToMultiByte(codePage, 0, chars, -1, nullptr, 0, nullptr, nullptr);
     auto buffer = new char[len];
     WideCharToMultiByte(codePage, 0, chars, -1, buffer, len, nullptr, nullptr);
     return string(buffer);
-}
-
-#pragma endregion
-
-#pragma region GC
-
-UINT32 GCHandle_New(void* object, bool pinned) {
-    return il2cpp_gchandle_new((Il2CppObject*)object, pinned);
 }
 
 #pragma endregion

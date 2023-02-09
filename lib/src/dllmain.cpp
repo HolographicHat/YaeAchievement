@@ -33,7 +33,7 @@ bool OnPacket(KcpPacket* pkt) {
 		auto headLength = ReadMapped<UINT16>(data->vector, 4);
 		auto dataLength = ReadMapped<UINT32>(data->vector, 6);
 		auto iStr = Genshin::ToBase64String(data, 10 + headLength, dataLength, nullptr);
-		auto cStr = IlStringToString(iStr) + "\n";
+		auto cStr = ToString(iStr) + "\n";
 		WriteFile(hPipe, cStr.c_str(), cStr.length(), nullptr, nullptr);
 		CloseHandle(hPipe);
 		ExitProcess(0);
@@ -42,7 +42,7 @@ bool OnPacket(KcpPacket* pkt) {
 	return true;
 }
 
-std::map<INT, UINT> signatures;
+std::string checksum;
 
 namespace Hook {
 
@@ -51,7 +51,7 @@ namespace Hook {
 	}
 
 	void SetVersion(void* obj, Il2CppString* value, void* method) {
-		auto version = IlStringToString(value);
+		auto version = ToString(value);
 		value = string_new(version + " YaeAchievement");
 		CALL_ORIGIN(SetVersion, obj, value, method);
 	}
@@ -65,7 +65,17 @@ namespace Hook {
 	}
 
 	ByteArray* UnityEngine_RecordUserData(INT type) {
-		return GCHandle_GetObject<ByteArray>(signatures[type]);
+		return Genshin::GetBytes(Genshin::GetDefaultEncoding(), il2cpp_string_new(""));
+	}
+
+	VOID SetChecksum(LPVOID obj, Il2CppString* value) {
+		CALL_ORIGIN(SetChecksum, obj, il2cpp_string_new(checksum.c_str()));
+	}
+
+	VOID RequestLogin(LPVOID obj, LPVOID token, UINT32 uid) {
+		HookManager::install(Genshin::SetChecksum, SetChecksum);
+		CALL_ORIGIN(RequestLogin, obj, token, uid);
+		HookManager::detach(SetChecksum);
 	}
 }
 
@@ -81,14 +91,14 @@ void Run(HMODULE* phModule) {
 	Sleep(5000);
 	DisableVMProtect();
 	InitIL2CPP();
-	for (int i = 0; i < 4; i++) {
-		auto result = Genshin::RecordUserData(i, nullptr);
-		signatures[i] = GCHandle_New(result, true);
+	auto enc = Genshin::GetDefaultEncoding();
+	for (int i = 0; i < 3; i++) {
+		checksum += ToString(Genshin::GetString(enc, Genshin::RecordUserData(i)));
 	}
-	signatures[3] = signatures[2];
 	HookManager::install(Genshin::KcpSend, Hook::KcpSend);
 	HookManager::install(Genshin::KcpRecv, Hook::KcpRecv);
 	HookManager::install(Genshin::SetVersion, Hook::SetVersion);
+	HookManager::install(Genshin::RequestLogin, Hook::RequestLogin);
 	HookManager::install(Genshin::UnityEngine_RecordUserData, Hook::UnityEngine_RecordUserData);
 	hPipe = CreateFile(R"(\\.\pipe\YaeAchievementPipe)", GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
 	if (hPipe == INVALID_HANDLE_VALUE) {
