@@ -1,0 +1,53 @@
+﻿<Window
+    x:Class="YaeAchievement.UI.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:YaeAchievement.UI"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.modernwpf.com/2019"
+    Width="400"
+    Height="400"
+    ui:WindowHelper.UseModernWindowStyle="True"
+    Loaded="OnWindowLoaded"
+    ResizeMode="NoResize"
+    Closed="OnWindowClosed"
+    mc:Ignorable="d">
+    <Window.Background>
+        <SolidColorBrush Color="{StaticResource CompatBackgroundColor}"/>
+    </Window.Background>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <ui:RadioButtons
+            Grid.Row="0"
+            Margin="16"
+            Header="请先选择导出目标"
+            x:Name="ExportTargetRadioButtons"
+            SelectedIndex="0">
+            <RadioButton Content="Snap Hutao 胡桃"/>
+            <RadioButton Content="Paimon 派蒙网"/>
+            <RadioButton Content="Seelie 仙灵网"/>
+            <RadioButton Content="Csv 简单表格"/>
+            <RadioButton Content="Xunkong 寻空"/>
+            <RadioButton Content="原魔工具箱"/>
+            <RadioButton Content="Cocogoat 椰羊"/>
+        </ui:RadioButtons>
+
+        <ui:HyperlinkButton
+            Padding="16,8"
+            Grid.Row="1"
+            Margin="16"
+            Content="项目地址"
+            NavigateUri="https://github.com/HolographicHat/YaeAchievement"/>
+        <Button
+            Padding="16,8"
+            Grid.Row="1"
+            Margin="16"
+            HorizontalAlignment="Right"
+            Click="OnExportButtonClick"
+            Content="从游戏导出成就"/>
+    </Grid>
+</Window>
