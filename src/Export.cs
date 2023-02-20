@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -141,6 +142,7 @@ public static class Export {
         var path = Path.GetFullPath($"achievement-{DateTime.Now:yyyyMMddHHmmss}.csv");
         File.WriteAllText(path, $"\uFEFF{string.Join("\n", output)}");
         Console.WriteLine(App.ExportToFileSuccess, path);
+        Process.Start("explorer.exe", $"{Path.GetDirectoryName(path)}");
     }
 
     private static void ToXunkong(AchievementAllDataNotify data) {
