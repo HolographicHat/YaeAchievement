@@ -5,7 +5,8 @@ using System.IO.Pipes;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Sockets;
-using System.Runtime.Versioning;
+using System.Runtime.InteropServices;
+using System.Text;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Console;
@@ -68,17 +69,20 @@ public static class Utils {
         return value != null && bool.TryParse(value, out var result) && result;
     }
 
-    [SupportedOSPlatform("windows5.0")]
     public static unsafe void CopyToClipboard(string text) {
-        if (Native.OpenClipboard(HWND.Null)) {
+        if (Native.OpenClipboard(HWND.Null))
+        {
             Native.EmptyClipboard();
-            Span<char> textSpan = text.ToCharArray();
-            fixed (char* lpBuffer = textSpan)
-            {
-                Native.SetClipboardData(/*CF_UNICODETEXT*/13, (HANDLE)(nint)lpBuffer);
-                Native.CloseClipboard();
-            }
-        } else {
+            HANDLE hGlobal = (HANDLE)Marshal.AllocHGlobal((text.Length + 1) * 2);
+            IntPtr hPtr = (IntPtr)Native.GlobalLock(hGlobal);
+            Marshal.Copy(text.ToCharArray(), 0, hPtr, text.Length);
+            Native.GlobalUnlock(hPtr);
+            Native.SetClipboardData(13, hGlobal);
+            Marshal.FreeHGlobal(hGlobal);
+            Native.CloseClipboard();
+        }
+        else
+        {
             throw new Win32Exception();
         }
     }
@@ -227,37 +231,38 @@ public static class Utils {
         if (!Injector.CreateProcess(exePath, out var hProcess, out var hThread, out var pid)) {
             Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("ICreateProcess fail"));
         }
-        using (hProcess)
+        if (Injector.LoadLibraryAndInject(hProcess,Encoding.UTF8.GetBytes(GlobalVars.LibFilePath)) != 0)
         {
-            if (Injector.LoadLibraryAndInject(hProcess, GlobalVars.LibFilePath) != 0)
+            if (!Native.TerminateProcess(hProcess, 0))
             {
-                if (!Native.TerminateProcess(hProcess, 0))
-                {
-                    Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("TerminateProcess fail"));
-                }
-            }
-            Console.WriteLine(App.GameLoading, pid);
-            proc = Process.GetProcessById(Convert.ToInt32(pid));
-            proc.EnableRaisingEvents = true;
-            proc.Exited += (_, _) => {
-                if (GlobalVars.UnexpectedExit)
-                {
-                    proc = null;
-                    Console.WriteLine(App.GameProcessExit);
-                    Environment.Exit(114514);
-                }
-            };
-            if (Native.ResumeThread(hThread) == 0xFFFFFFFF)
-            {
-                var e = new Win32Exception();
-                if (!Native.TerminateProcess(hProcess, 0))
-                {
-                    new Win32Exception().PrintMsgAndReturnErrCode("TerminateProcess fail");
-                }
-                Environment.Exit(e.PrintMsgAndReturnErrCode("ResumeThread fail"));
+                Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("TerminateProcess fail"));
             }
         }
-            
+        Console.WriteLine(App.GameLoading, pid);
+        proc = Process.GetProcessById(Convert.ToInt32(pid));
+        proc.EnableRaisingEvents = true;
+        proc.Exited += (_, _) => {
+            if (GlobalVars.UnexpectedExit)
+            {
+                proc = null;
+                Console.WriteLine(App.GameProcessExit);
+                Environment.Exit(114514);
+            }
+        };
+        if (Native.ResumeThread(hThread) == 0xFFFFFFFF)
+        {
+            var e = new Win32Exception();
+            if (!Native.TerminateProcess(hProcess, 0))
+            {
+                new Win32Exception().PrintMsgAndReturnErrCode("TerminateProcess fail");
+            }
+            Environment.Exit(e.PrintMsgAndReturnErrCode("ResumeThread fail"));
+        }
+        if (!Native.CloseHandle(hProcess))
+        {
+            Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("CloseHandle fail"));
+        }
+
         var ts = new ThreadStart(() => {
             var server = new NamedPipeServerStream(GlobalVars.PipeName);
             server.WaitForConnection();

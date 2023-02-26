@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Windows.Win32;
+using Windows.Win32.Foundation;
 using Windows.Win32.System.Memory;
 using Windows.Win32.System.Threading;
 using YaeAchievement.Win32;
@@ -10,7 +11,7 @@ using YaeAchievement.Win32;
 namespace YaeAchievement;
 
 public static class Injector {
-    public static unsafe bool CreateProcess(string path, out SafeHandle hProc, out SafeHandle hThread, out uint pid) {
+    public static unsafe bool CreateProcess(string path, out HANDLE hProc, out HANDLE hThread, out uint pid) {
         Span<char> cmdLines = stackalloc char[1]; // "\0"
         var si = new STARTUPINFOW() { cb = unchecked((uint)sizeof(STARTUPINFOW)) };
         var dir = Path.GetDirectoryName(path)!;
@@ -19,53 +20,58 @@ public static class Injector {
             PROCESS_CREATION_FLAGS.CREATE_SUSPENDED, default, dir, in si, out var pi
         );
         pid = pi.dwProcessId;
-        hProc = new SafeFileHandle(pi.hProcess, true);
-        hThread = new SafeFileHandle(pi.hThread, true);
+        hProc = pi.hProcess;
+        hThread = pi.hThread;
         return result;
     }
 
     // todo: refactor
-    public static unsafe int LoadLibraryAndInject(SafeHandle hProc, string libPath)
+    public static unsafe int LoadLibraryAndInject(HANDLE hProc, ReadOnlySpan<byte> libPath)
     {
-        var hKernel = Native.GetModuleHandle("kernel32.dll");
-        if (hKernel.IsInvalid)
+        fixed (char* lpModelName = "kernel32.dll")
         {
-            return new Win32Exception().PrintMsgAndReturnErrCode("GetModuleHandle fail");
-        }
-        var pLoadLibrary = Native.GetProcAddress(hKernel, "LoadLibraryA");
-        if (pLoadLibrary.IsNull)
-        {
-            return new Win32Exception().PrintMsgAndReturnErrCode("GetProcAddress fail");
-        }
-        var pBase = Native.VirtualAllocEx(hProc, default, unchecked((uint)libPath.Length + 1), VIRTUAL_ALLOCATION_TYPE.MEM_RESERVE | VIRTUAL_ALLOCATION_TYPE.MEM_COMMIT, PAGE_PROTECTION_FLAGS.PAGE_READWRITE);
-        if ((nint)pBase == 0)
-        {
-            return new Win32Exception().PrintMsgAndReturnErrCode("VirtualAllocEx fail");
-        }
-        fixed (void* lpBuffer = libPath.ToCharArray())
-        {
-            if (!Native.WriteProcessMemory(hProc, pBase, lpBuffer, unchecked((uint)libPath.Length), default))
-            {
-                return new Win32Exception().PrintMsgAndReturnErrCode("WriteProcessMemory fail");
-            }
-        }
-        var lpStartAddress = pLoadLibrary.CreateDelegate<LPTHREAD_START_ROUTINE>();
+            HINSTANCE hKernel = Native.GetModuleHandle(lpModelName);
 
-        using (var hThread = Native.CreateRemoteThread(hProc, default, 0, lpStartAddress, pBase, 0, default))
-        {
-            if (hThread.IsInvalid)
+            if (hKernel.IsNull)
             {
-                var e = new Win32Exception();
-                Native.VirtualFreeEx(hProc, pBase, 0, VIRTUAL_FREE_TYPE.MEM_RELEASE);
-                return e.PrintMsgAndReturnErrCode("CreateRemoteThread fail");
+                return new Win32Exception().PrintMsgAndReturnErrCode("GetModuleHandle fail");
             }
-            if (Native.WaitForSingleObject(hThread, 2000) == 0)
+
+            fixed(byte* lpProcName = "LoadLibraryA"u8)
             {
-                Native.VirtualFreeEx(hProc, pBase, 0, VIRTUAL_FREE_TYPE.MEM_RELEASE);
+                var pLoadLibrary = Native.GetProcAddress(hKernel, (PCSTR)lpProcName);
+                if (pLoadLibrary.IsNull)
+                {
+                    return new Win32Exception().PrintMsgAndReturnErrCode("GetProcAddress fail");
+                }
+                var pBase = Native.VirtualAllocEx(hProc, default, unchecked((uint)libPath.Length + 1), VIRTUAL_ALLOCATION_TYPE.MEM_RESERVE | VIRTUAL_ALLOCATION_TYPE.MEM_COMMIT, PAGE_PROTECTION_FLAGS.PAGE_READWRITE);
+                if ((nint)pBase == 0)
+                {
+                    return new Win32Exception().PrintMsgAndReturnErrCode("VirtualAllocEx fail");
+                }
+                fixed (void* lpBuffer = libPath)
+                {
+                    if (!Native.WriteProcessMemory(hProc, pBase, lpBuffer, unchecked((uint)libPath.Length), default))
+                    {
+                        return new Win32Exception().PrintMsgAndReturnErrCode("WriteProcessMemory fail");
+                    }
+                }
+
+                var lpStartAddress = pLoadLibrary.CreateDelegate<LPTHREAD_START_ROUTINE>();
+                var hThread = Native.CreateRemoteThread(hProc, default, 0, lpStartAddress, pBase, 0, default);
+
+                if (hThread.IsNull)
+                {
+                    var e = new Win32Exception();
+                    Native.VirtualFreeEx(hProc, pBase, 0, VIRTUAL_FREE_TYPE.MEM_RELEASE);
+                    return e.PrintMsgAndReturnErrCode("CreateRemoteThread fail");
+                }
+                if (Native.WaitForSingleObject(hThread, 2000) == 0)
+                {
+                    Native.VirtualFreeEx(hProc, pBase, 0, VIRTUAL_FREE_TYPE.MEM_RELEASE);
+                }
+                return !Native.CloseHandle(hThread) ? new Win32Exception().PrintMsgAndReturnErrCode("CloseHandle fail") : 0;
             }
-            //return !Native.CloseHandle(hThread) ? new Win32Exception().PrintMsgAndReturnErrCode("CloseHandle fail") : 0;
-            return 0;
         }
     }
-
 }
