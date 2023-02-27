@@ -1,11 +1,15 @@
-﻿using System.ComponentModel;
+﻿using Microsoft.Win32;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO.Pipes;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using Microsoft.Win32;
+using System.Text;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Console;
 using YaeAchievement.AppCenterSDK;
 using YaeAchievement.res;
 using YaeAchievement.Win32;
@@ -64,18 +68,21 @@ public static class Utils {
     public static bool ToBooleanOrFalse(string? value) {
         return value != null && bool.TryParse(value, out var result) && result;
     }
-    
-    public static void CopyToClipboard(string text) {
-        if (Native.OpenClipboard(IntPtr.Zero)) {
+
+    public static unsafe void CopyToClipboard(string text) {
+        if (Native.OpenClipboard(HWND.Null))
+        {
             Native.EmptyClipboard();
-            var hGlobal = Marshal.AllocHGlobal((text.Length + 1) * 2);
-            var hPtr = Native.GlobalLock(hGlobal);
+            HANDLE hGlobal = (HANDLE)Marshal.AllocHGlobal((text.Length + 1) * 2);
+            IntPtr hPtr = (IntPtr)Native.GlobalLock(hGlobal);
             Marshal.Copy(text.ToCharArray(), 0, hPtr, text.Length);
             Native.GlobalUnlock(hPtr);
             Native.SetClipboardData(13, hGlobal);
             Marshal.FreeHGlobal(hGlobal);
             Native.CloseClipboard();
-        } else {
+        }
+        else
+        {
             throw new Win32Exception();
         }
     }
@@ -144,9 +151,10 @@ public static class Utils {
     }
 
     // ReSharper disable once UnusedMethodReturnValue.Global
-    public static bool TryDisableQuickEdit() {
-        var handle = Native.GetStdHandle();
-        return Native.GetConsoleMode(handle, out var mode) && Native.SetConsoleMode(handle, mode&~64);
+    public static unsafe bool TryDisableQuickEdit() {
+        var handle = Native.GetStdHandle(STD_HANDLE.STD_INPUT_HANDLE);
+        CONSOLE_MODE mode = default;
+        return Native.GetConsoleMode(handle, &mode) && Native.SetConsoleMode(handle, mode & ~CONSOLE_MODE.ENABLE_QUICK_EDIT_MODE);
     }
 
     public static void CheckGenshinIsRunning() {
@@ -208,7 +216,7 @@ public static class Utils {
         return File.Exists(path) && (hash == _updateInfo.CurrentCNGameHash || hash == _updateInfo.CurrentOSGameHash);
         #endif
     }
-    
+
     // ReSharper disable once UnusedMethodReturnValue.Global
     public static Thread StartAndWaitResult(string exePath, Func<string, bool> onReceive) {
         if (!CheckGenshinIsLatestVersion(exePath)) {
@@ -223,8 +231,10 @@ public static class Utils {
         if (!Injector.CreateProcess(exePath, out var hProcess, out var hThread, out var pid)) {
             Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("ICreateProcess fail"));
         }
-        if (Injector.LoadLibraryAndInject(hProcess, GlobalVars.LibFilePath) != 0) {
-            if (!Native.TerminateProcess(hProcess, 0)) {
+        if (Injector.LoadLibraryAndInject(hProcess,Encoding.UTF8.GetBytes(GlobalVars.LibFilePath)) != 0)
+        {
+            if (!Native.TerminateProcess(hProcess, 0))
+            {
                 Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("TerminateProcess fail"));
             }
         }
@@ -232,22 +242,27 @@ public static class Utils {
         proc = Process.GetProcessById(Convert.ToInt32(pid));
         proc.EnableRaisingEvents = true;
         proc.Exited += (_, _) => {
-            if (GlobalVars.UnexpectedExit) {
+            if (GlobalVars.UnexpectedExit)
+            {
                 proc = null;
                 Console.WriteLine(App.GameProcessExit);
                 Environment.Exit(114514);
             }
         };
-        if (Native.ResumeThread(hThread) == 0xFFFFFFFF) {
+        if (Native.ResumeThread(hThread) == 0xFFFFFFFF)
+        {
             var e = new Win32Exception();
-            if (!Native.TerminateProcess(hProcess, 0)) {
+            if (!Native.TerminateProcess(hProcess, 0))
+            {
                 new Win32Exception().PrintMsgAndReturnErrCode("TerminateProcess fail");
             }
             Environment.Exit(e.PrintMsgAndReturnErrCode("ResumeThread fail"));
         }
-        if (!Native.CloseHandle(hProcess)) {
+        if (!Native.CloseHandle(hProcess))
+        {
             Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("CloseHandle fail"));
         }
+
         var ts = new ThreadStart(() => {
             var server = new NamedPipeServerStream(GlobalVars.PipeName);
             server.WaitForConnection();

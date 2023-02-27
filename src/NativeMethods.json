@@ -1,0 +1,6 @@
+﻿{
+  "$schema": "https://aka.ms/CsWin32.schema.json",
+  "className": "Native",
+  "allowMarshaling": true,
+  "public": true  
+}

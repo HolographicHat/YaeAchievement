@@ -1,8 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0-windows7</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
@@ -21,8 +21,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Google.Protobuf" Version="3.21.6" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+        <PackageReference Include="Google.Protobuf" Version="3.22.0" />
+        <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.2.188-beta">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     </ItemGroup>
 
     <ItemGroup>
@@ -31,6 +35,10 @@
         <LastGenOutput>App.Designer.cs</LastGenOutput>
       </EmbeddedResource>
       <None Remove="res\Updater.exe" />
+      <None Remove="src\NativeMethods.json" />
+      <None Remove="src\NativeMethods.txt" />
+      <AdditionalFiles Include="src\NativeMethods.json" />
+      <AdditionalFiles Include="src\NativeMethods.txt" />
       <EmbeddedResource Include="res\Updater.exe">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </EmbeddedResource>
