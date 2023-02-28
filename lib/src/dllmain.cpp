@@ -8,7 +8,8 @@ using std::to_string;
 HWND unityWnd = 0;
 HANDLE hPipe  = 0;
 
-std::set<UINT16> PacketWhitelist = { 105, 155, 187, 198, 2688, 20, 74 }; // Allow Protocol: GetPlayerToken, PlayerLogin, AchievementAllDataNotify, Ping
+// Allow Protocol: GetPlayerToken, PlayerLogin, AchievementAllDataNotify, Ping
+std::set<UINT16> PacketWhitelist = { 167, 175, 154, 164, 2698, 14, 34, 106 };
 
 bool OnPacket(KcpPacket* pkt) {
 	if (pkt->data == nullptr) return true;
@@ -29,14 +30,15 @@ bool OnPacket(KcpPacket* pkt) {
 		return false;
 	}
 	printf("Passed cmdid: %d\n", ReadMapped<UINT16>(data->vector, 2));
-	if (ReadMapped<UINT16>(data->vector, 2) == 2688) {
+	if (ReadMapped<UINT16>(data->vector, 2) == 2698) {
 		auto headLength = ReadMapped<UINT16>(data->vector, 4);
 		auto dataLength = ReadMapped<UINT32>(data->vector, 6);
 		auto iStr = Genshin::ToBase64String(data, 10 + headLength, dataLength, nullptr);
 		auto cStr = ToString(iStr) + "\n";
 		WriteFile(hPipe, cStr.c_str(), cStr.length(), nullptr, nullptr);
 		CloseHandle(hPipe);
-		ExitProcess(0);
+		auto manager = Genshin::GetSingletonInstance(Genshin::GetSingletonManager(), il2cpp_string_new("GameManager"));
+		Genshin::ForceQuit(manager);
 	}
 	delete[] data;
 	return true;

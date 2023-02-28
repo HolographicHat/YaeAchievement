@@ -12,7 +12,6 @@ using Windows.Win32.Foundation;
 using Windows.Win32.System.Console;
 using YaeAchievement.AppCenterSDK;
 using YaeAchievement.res;
-using YaeAchievement.Win32;
 
 namespace YaeAchievement;
 

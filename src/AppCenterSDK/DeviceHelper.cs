@@ -2,7 +2,6 @@
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
-//using YaeAchievement.Win32;
 
 namespace YaeAchievement.AppCenterSDK;
 
@@ -26,7 +25,7 @@ public static class DeviceHelper {
     public static string GetScreenSize() {
         var desktop = Native.GetDC(HWND.Null);
         var size = $"{Native.GetDeviceCaps(desktop, GET_DEVICE_CAPS_INDEX.DESKTOPHORZRES)}x{Native.GetDeviceCaps(desktop, GET_DEVICE_CAPS_INDEX.DESKTOPVERTRES)}";
-        Native.ReleaseDC(HWND.Null, desktop);
+        _ = Native.ReleaseDC(HWND.Null, desktop);
         return size;
     }
     

@@ -1,10 +1,11 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Net;
-using System.Runtime.Versioning;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Win32;
+using YaeAchievement.AppCenterSDK;
 using YaeAchievement.res;
 using static AchievementAllDataNotify.Types.Achievement.Types;
 
@@ -212,5 +213,12 @@ public static class Export {
     private static AchievementInfo LoadAchievementInfo() {
         var b = Utils.GetBucketFileAsByteArray("schicksal/metadata");
         return AchievementInfo.Parser.ParseFrom(b);
+    }
+
+    public static int PrintMsgAndReturnErrCode(this Win32Exception ex, string msg) {
+        // ReSharper disable once LocalizableElement
+        Console.WriteLine($"{msg}: {ex.Message}");
+        AppCenter.TrackCrash(ex, false);
+        return ex.NativeErrorCode;
     }
 }
