@@ -16,13 +16,13 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 7.0.102
+        dotnet-version: 7.0.x
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
     - name: Publish
-      run: dotnet publish -o .\publish\
+      run: dotnet publish --property:OutputPath=.\publish\
     - name: Upload artifact
       uses: actions/upload-artifact@v3.1.0
       with:
