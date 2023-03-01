@@ -22,8 +22,9 @@
 [issues](https://github.com/HolographicHat/YaeAchievement/issues)或[QQ群: 913777414](https://qm.qq.com/cgi-bin/qm/qr?k=9UGz-chQVTjZa4b82RA_A41vIcBVNpms&jump_from=webapi)
 
 ## 常见问题
-0. Q: 打不开   
+0. Q: 打不开  
    A: 安装 [.NET Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-7.0.3-windows-x64-installer)
+      从2.5更新至2.6后需要下载.NET 7.0，之前下载的.NET 6.0无法打开2.6版本的YaeAchievement，请点击上方链接重新下载.NET 7.0
 
 1. Q: 原神启动时报错: 数据异常(31-4302)   
    A: 不要把软件和原神主程序放一起   
