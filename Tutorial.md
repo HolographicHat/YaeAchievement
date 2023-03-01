@@ -10,11 +10,11 @@
 
 2.安装启动软件所需文件（若已安装该运行时可忽略此步骤）
 
-点击该网址：https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-7.0.3-windows-x64-installer 。
+点击该网址：[https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-7.0.3-windows-x64-installer](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-7.0.3-windows-x64-installer) 。
 
 进入网页后浏览器会自动弹出下载，同样地，将文件保存在桌面或者其它易于寻找的文件夹内。
 
-下载完成后打开名称形如dotnet-runtime-x.x.x-win-x64.exe的文件，会弹出安装窗口，如下图所示。
+下载完成后打开名称形如dotnet-runtime-x.x.x-win-x64.exe的文件，会弹出安装窗口，如下图所示（当前版本为7.0.3）。
 
 ![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/2.png)
 
