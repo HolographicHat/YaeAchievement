@@ -23,7 +23,7 @@
 
 ## 常见问题
 0. Q: 打不开   
-   A: 安装 [.NET Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-6.0.7-windows-x64-installer)
+   A: 安装 [.NET Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-7.0.3-windows-x64-installer)
 
 1. Q: 原神启动时报错: 数据异常(31-4302)   
    A: 不要把软件和原神主程序放一起   
