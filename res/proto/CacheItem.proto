@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option csharp_namespace = "Proto";
+
+message CacheItem {
+  uint32 version = 1;
+  string checksum = 2;
+  string etag = 3;
+  bytes content = 4;
+}

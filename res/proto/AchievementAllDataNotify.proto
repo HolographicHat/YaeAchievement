@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option csharp_namespace = "Proto";
+
+message Achievement {
+  enum Status {
+    INVALID = 0;
+    UNFINISHED = 1;
+    FINISHED = 2;
+    REWARD_TAKEN = 3;
+  }
+  uint32 timestamp = 13;
+  uint32 current = 2;
+  uint32 total = 5;
+  uint32 id = 9;
+  Status status = 6;
+}
+
+message AchievementAllDataNotify {
+    repeated Achievement list = 15;
+}

@@ -10,6 +10,7 @@ using System.Text;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Console;
+using Proto;
 using YaeAchievement.AppCenterSDK;
 using YaeAchievement.res;
 

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option csharp_namespace = "Proto";
+
+message UpdateInfo {
+  uint32 versionCode = 1;
+  string versionName = 2;
+  string description = 3;
+  string packageLink = 4;
+  bool   forceUpdate = 5;
+  bool   enableLibDownload = 6;
+  bool   enableAutoDownload = 7;
+  string currentCNGameHash = 8;
+  string currentOSGameHash = 9;
+}

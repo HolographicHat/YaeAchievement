@@ -5,9 +5,10 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Win32;
+using Proto;
 using YaeAchievement.AppCenterSDK;
 using YaeAchievement.res;
-using static AchievementAllDataNotify.Types.Achievement.Types;
+using static Proto.Achievement.Types;
 
 namespace YaeAchievement; 
 

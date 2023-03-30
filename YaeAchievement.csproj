@@ -26,6 +26,10 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="Grpc.Tools" Version="2.51.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     </ItemGroup>
 
@@ -50,6 +54,10 @@
         <AutoGen>True</AutoGen>
         <DependentUpon>App.resx</DependentUpon>
       </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Protobuf Include="res/proto/*.proto" OutputDir="src/Proto/" ProtoRoot="res/proto" GrpcServices="None" />
     </ItemGroup>
 
 </Project>

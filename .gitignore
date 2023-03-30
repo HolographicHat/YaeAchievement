@@ -11,3 +11,5 @@ riderModule.iml
 *.userosscache
 *.sln.docstates
 .vs/
+
+src/Proto/*

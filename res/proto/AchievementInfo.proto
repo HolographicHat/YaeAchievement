@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option csharp_namespace = "Proto";
+
+message AchievementItem {
+    uint32 pre = 1;
+    uint32 group = 2;
+    string name = 3;
+    string description = 4;
+}
+
+message AchievementInfo {
+    string version = 1;
+    map<uint32, string> group = 2;
+    map<uint32, AchievementItem> items = 3;
+}

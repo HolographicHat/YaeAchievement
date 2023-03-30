@@ -1,5 +1,6 @@
 ﻿using System.IO.Compression;
 using Google.Protobuf;
+using Proto;
 
 namespace YaeAchievement; 
 
