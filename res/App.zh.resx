@@ -117,4 +117,7 @@
     <data name="GenshinHashError" xml:space="preserve">
         <value>请将原神更新至最新版本后重试</value>
     </data>
+    <data name="NoWritePermission" xml:space="preserve">
+        <value>无法写入文件，请更换软件所在目录后重试</value>
+    </data>
 </root>

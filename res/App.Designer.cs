@@ -247,6 +247,15 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No write permission on {0}..
+        /// </summary>
+        internal static string NoWritePermission {
+            get {
+                return ResourceManager.GetString("NoWritePermission", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Press any key to exit..
         /// </summary>
         internal static string PressKeyToExit {

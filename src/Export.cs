@@ -85,8 +85,9 @@ public static class Export {
     // ReSharper disable once InconsistentNaming
     private static void ToUIAFJson(AchievementAllDataNotify data) {
         var path = Path.GetFullPath($"uiaf-{DateTime.Now:yyyyMMddHHmmss}.json");
-        File.WriteAllText(path, JsonSerializer.Serialize(ExportToUIAFApp(data)));
-        Console.WriteLine(App.ExportToFileSuccess, path);
+        if (TryWriteToFile(path, JsonSerializer.Serialize(ExportToUIAFApp(data)))) {
+            Console.WriteLine(App.ExportToFileSuccess, path);
+        }
     }
 
     private static void ToPaimon(AchievementAllDataNotify data) {
@@ -105,8 +106,9 @@ public static class Export {
             ["achievement"] = output.OrderBy(pair => pair.Key).ToDictionary(pair => pair.Key, pair => pair.Value)
         };
         var path = Path.GetFullPath($"export-{DateTime.Now:yyyyMMddHHmmss}-paimon.json");
-        File.WriteAllText(path, JsonSerializer.Serialize(final));
-        Console.WriteLine(App.ExportToFileSuccess, path);
+        if (TryWriteToFile(path, JsonSerializer.Serialize(final))) {
+            Console.WriteLine(App.ExportToFileSuccess, path);
+        }
     }
     
     private static void ToSeelie(AchievementAllDataNotify data) {
@@ -120,8 +122,9 @@ public static class Export {
             ["achievements"] = output.OrderBy(pair => pair.Key).ToDictionary(pair => pair.Key, pair => pair.Value)
         };
         var path = Path.GetFullPath($"export-{DateTime.Now:yyyyMMddHHmmss}-seelie.json");
-        File.WriteAllText(path, JsonSerializer.Serialize(final));
-        Console.WriteLine(App.ExportToFileSuccess, path);
+        if (TryWriteToFile(path, JsonSerializer.Serialize(final))) {
+            Console.WriteLine(App.ExportToFileSuccess, path);
+        }
     }
 
     // ReSharper disable once InconsistentNaming
@@ -151,9 +154,10 @@ public static class Export {
             return item.JoinToString(",");
         }));
         var path = Path.GetFullPath($"achievement-{DateTime.Now:yyyyMMddHHmmss}.csv");
-        File.WriteAllText(path, $"\uFEFF{string.Join("\n", output)}");
-        Console.WriteLine(App.ExportToFileSuccess, path);
-        Process.Start("explorer.exe", $"{Path.GetDirectoryName(path)}");
+        if (TryWriteToFile(path, $"\uFEFF{string.Join("\n", output)}")) {
+            Console.WriteLine(App.ExportToFileSuccess, path);
+            Process.Start("explorer.exe", $"{Path.GetDirectoryName(path)}");
+        }
     }
 
     private static void ToXunkong(AchievementAllDataNotify data) {
@@ -169,10 +173,12 @@ public static class Export {
 
     private static void ToRawJson(AchievementAllDataNotify data) {
         var path = Path.GetFullPath($"export-{DateTime.Now:yyyyMMddHHmmss}-raw.json");
-        File.WriteAllText(path, JsonSerializer.Serialize(data, new JsonSerializerOptions {
+        var text = JsonSerializer.Serialize(data, new JsonSerializerOptions {
             WriteIndented = true
-        }));
-        Console.WriteLine(App.ExportToFileSuccess, path);
+        });
+        if (TryWriteToFile(path, text)) {
+            Console.WriteLine(App.ExportToFileSuccess, path);
+        }
     }
 
     // ReSharper disable once InconsistentNaming
@@ -227,5 +233,15 @@ public static class Export {
         Console.WriteLine($"{msg}: {ex.Message}");
         AppCenter.TrackCrash(ex, false);
         return ex.NativeErrorCode;
+    }
+
+    private static bool TryWriteToFile(string path, string contents) {
+        try {
+            File.WriteAllText(path, contents);
+            return true;
+        } catch (UnauthorizedAccessException) {
+            Console.WriteLine(App.NoWritePermission, path);
+            return false;
+        }
     }
 }

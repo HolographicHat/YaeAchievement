@@ -50,7 +50,7 @@ public static class Utils {
                 cacheFile.Write(responseBytes, etag);
             }
             return responseBytes;
-        } catch (Exception e) {
+        } catch (Exception e) when(e is SocketException or TaskCanceledException) {
             Console.WriteLine(App.NetworkError, e.Message);
             Environment.Exit(-1);
             return null!;
@@ -73,8 +73,8 @@ public static class Utils {
         if (Native.OpenClipboard(HWND.Null))
         {
             Native.EmptyClipboard();
-            HANDLE hGlobal = (HANDLE)Marshal.AllocHGlobal((text.Length + 1) * 2);
-            IntPtr hPtr = (IntPtr)Native.GlobalLock(hGlobal);
+            var hGlobal = (HANDLE) Marshal.AllocHGlobal((text.Length + 1) * 2);
+            var hPtr = (nint) Native.GlobalLock(hGlobal);
             Marshal.Copy(text.ToCharArray(), 0, hPtr, text.Length);
             Native.GlobalUnlock(hPtr);
             Native.SetClipboardData(13, hGlobal);
@@ -121,15 +121,17 @@ public static class Utils {
     }
 
     public static void CheckSelfIsRunning() {
-        Process.EnterDebugMode(); 
-        var cur = Process.GetCurrentProcess();
-        foreach (var process in Process.GetProcesses().Where(process => process.Id != cur.Id)) {
-            if (process.ProcessName == cur.ProcessName) {
-                Console.WriteLine(App.AnotherInstance);
-                Environment.Exit(302);
+        try {
+            Process.EnterDebugMode();
+            var cur = Process.GetCurrentProcess();
+            foreach (var process in Process.GetProcesses().Where(process => process.Id != cur.Id)) {
+                if (process.ProcessName == cur.ProcessName) {
+                    Console.WriteLine(App.AnotherInstance);
+                    Environment.Exit(302);
+                }
             }
-        }
-        Process.LeaveDebugMode();
+            Process.LeaveDebugMode();
+        } catch (Win32Exception) {}
     }
 
     // ReSharper disable once UnusedMethodReturnValue.Global
@@ -162,7 +164,7 @@ public static class Utils {
         foreach (var process in Process.GetProcesses()) {
             if (process.ProcessName is "GenshinImpact" or "YuanShen" 
                 && !process.HasExited 
-                && process.MainWindowHandle != IntPtr.Zero
+                && process.MainWindowHandle != nint.Zero
             ) {
                 Console.WriteLine(App.GenshinIsRunning, process.Id);
                 Environment.Exit(301);
@@ -212,8 +214,9 @@ public static class Utils {
         #if DEBUG
         return true;
         #else
+        if (!File.Exists(path)) return false;
         var hash = File.ReadAllBytes(path).MD5Hash();
-        return File.Exists(path) && (hash == _updateInfo.CurrentCNGameHash || hash == _updateInfo.CurrentOSGameHash);
+        return hash == _updateInfo.CurrentCNGameHash || hash == _updateInfo.CurrentOSGameHash;
         #endif
     }
 
@@ -282,8 +285,6 @@ public static class Utils {
         th.Start();
         return th;
     }
-    
-    #pragma warning disable CA1416
 
     public static async Task CheckVcRuntime() {
         using var root = Registry.LocalMachine;
@@ -301,7 +302,14 @@ public static class Utils {
         if (!installed) {
             Console.WriteLine(App.VcRuntimeDownload);
             var pkgPath = Path.Combine(GlobalVars.DataPath, "vc_redist.x64.exe");
-            var bytes = await CHttpClient.GetByteArrayAsync("https://aka.ms/vs/17/release/vc_redist.x64.exe");
+            byte[] bytes;
+            try {
+                bytes = await CHttpClient.GetByteArrayAsync("https://aka.ms/vs/17/release/vc_redist.x64.exe");
+            } catch (Exception e) when(e is SocketException or TaskCanceledException) {
+                Console.WriteLine(App.NetworkError, e.Message);
+                Environment.Exit(-1);
+                return;
+            }
             await File.WriteAllBytesAsync(pkgPath, bytes);
             Console.WriteLine(App.VcRuntimeInstalling);
             using var process = new Process {

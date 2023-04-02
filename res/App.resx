@@ -126,4 +126,7 @@ Input a number (0-5): </value>
     <data name="GenshinHashError" xml:space="preserve">
         <value>Please update genshin and retry.</value>
     </data>
+    <data name="NoWritePermission" xml:space="preserve">
+        <value>No write permission on {0}.</value>
+    </data>
 </root>

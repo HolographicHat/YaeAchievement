@@ -9,8 +9,8 @@ TryDisableQuickEdit();
 InstallExitHook();
 InstallExceptionHook();
 
-await CheckVcRuntime();
 CheckSelfIsRunning();
+await CheckVcRuntime();
 CheckGenshinIsRunning();
 
 Console.WriteLine(@"----------------------------------------------------");
