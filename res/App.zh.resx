@@ -26,7 +26,8 @@
 [4] 表格文件
 [5] 寻空
 [6] 原魔工具箱
-输入一个数字 (0-6): </value>
+[7] UIAF JSON文件
+输入一个数字 (0-7): </value>
     </data>
     <data name="ExportToCocogoatSuccess" xml:space="preserve">
         <value>在浏览器内进行下一步操作</value>

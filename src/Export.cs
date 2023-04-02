@@ -32,7 +32,8 @@ public static class Export {
             4 => ToCSV,
             5 => ToXunkong,
             6 => ToWxApp1,
-            7 => ToRawJson,
+            7 => ToUIAFJson,
+            8 => ToRawJson,
             _ => ToCocogoat
         })).Invoke(data);
     }
@@ -81,6 +82,13 @@ public static class Export {
         Console.WriteLine(App.ExportToSnapGenshinSuccess);
     }
     
+    // ReSharper disable once InconsistentNaming
+    private static void ToUIAFJson(AchievementAllDataNotify data) {
+        var path = Path.GetFullPath($"uiaf-{DateTime.Now:yyyyMMddHHmmss}.json");
+        File.WriteAllText(path, JsonSerializer.Serialize(ExportToUIAFApp(data)));
+        Console.WriteLine(App.ExportToFileSuccess, path);
+    }
+
     private static void ToPaimon(AchievementAllDataNotify data) {
         var info = LoadAchievementInfo();
         var output = new Dictionary<uint, Dictionary<uint, bool>>();
@@ -189,11 +197,9 @@ public static class Export {
         };
     }
 
-    #pragma warning disable CA1416
     private static bool CheckXunkongScheme() {
         return (string?)Registry.ClassesRoot.OpenSubKey("xunkong")?.GetValue("") == "URL:xunkong";
     }
-    #pragma warning restore CA1416
 
     private static string JoinToString(this IEnumerable<object> list, string separator) {
         return string.Join(separator, list);

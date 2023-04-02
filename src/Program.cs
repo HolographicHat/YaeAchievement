@@ -1,4 +1,5 @@
-﻿using YaeAchievement;
+﻿using Proto;
+using YaeAchievement;
 using YaeAchievement.AppCenterSDK;
 using YaeAchievement.AppCenterSDK.Models;
 using YaeAchievement.res;
