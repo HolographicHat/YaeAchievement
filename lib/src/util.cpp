@@ -4,12 +4,12 @@
 VOID DisableVMProtect() {
     DWORD oldProtect = 0;
     auto ntdll = GetModuleHandleA("ntdll.dll");
-    BYTE callcode = ((BYTE*)GetProcAddress(ntdll, "NtQuerySection"))[4] - 1;
-    BYTE restore[] = { 0x4C, 0x8B, 0xD1, 0xB8, callcode };
-    auto nt_vp = (BYTE*)GetProcAddress(ntdll, "NtProtectVirtualMemory");
-    VirtualProtect(nt_vp, sizeof(restore), PAGE_EXECUTE_READWRITE, &oldProtect);
-    memcpy(nt_vp, restore, sizeof(restore));
-    VirtualProtect(nt_vp, sizeof(restore), oldProtect, &oldProtect);
+    auto pNtProtectVirtualMemory = GetProcAddress(ntdll, "NtProtectVirtualMemory");
+    auto pNtQuerySection = GetProcAddress(ntdll, "NtQuerySection");
+    DWORD old;
+    VirtualProtect(pNtProtectVirtualMemory, 1, PAGE_EXECUTE_READWRITE, &old);
+    *(uintptr_t*)pNtProtectVirtualMemory = *(uintptr_t*)pNtQuerySection & ~(0xFFui64 << 32) | (uintptr_t)(*(uint32_t*)((uintptr_t)pNtQuerySection + 4) - 1) << 32;
+    VirtualProtect(pNtProtectVirtualMemory, 1, old, &old);
 }
 
 #pragma region StringConvert

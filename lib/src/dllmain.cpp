@@ -5,11 +5,11 @@
 using Genshin::ByteArray, Genshin::ClientKcpEvent, Genshin::KcpPacket, Genshin::KcpEventType;
 using std::to_string;
 
-HWND unityWnd = 0;
-HANDLE hPipe  = 0;
+HWND unityWnd = nullptr;
+HANDLE hPipe  = nullptr;
 
 // Allow Protocol: GetPlayerToken, PlayerLogin, AchievementAllDataNotify, Ping
-std::set<UINT16> PacketWhitelist = { 167, 175, 154, 164, 2698, 14, 34, 106 };
+std::set<UINT16> PacketWhitelist = { 190, 196, 189, 176, 2659, 16, 56, 152 };
 
 bool OnPacket(KcpPacket* pkt) {
 	if (pkt->data == nullptr) return true;
@@ -30,7 +30,7 @@ bool OnPacket(KcpPacket* pkt) {
 		return false;
 	}
 	printf("Passed cmdid: %d\n", ReadMapped<UINT16>(data->vector, 2));
-	if (ReadMapped<UINT16>(data->vector, 2) == 2698) {
+	if (ReadMapped<UINT16>(data->vector, 2) == 2659) {
 		auto headLength = ReadMapped<UINT16>(data->vector, 4);
 		auto dataLength = ReadMapped<UINT32>(data->vector, 6);
 		auto iStr = Genshin::ToBase64String(data, 10 + headLength, dataLength, nullptr);
@@ -86,7 +86,7 @@ void Run(HMODULE* phModule) {
 	//freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
 	while (
 		GetModuleHandle("UserAssembly.dll") == nullptr ||
-		(unityWnd = FindMainWindowByPID(GetCurrentProcessId())) == 0
+		(unityWnd = FindMainWindowByPID(GetCurrentProcessId())) == nullptr
 	) {
 		Sleep(1000);
 	}
