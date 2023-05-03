@@ -26,7 +26,8 @@
 
 ## Frequently asked questions
 0. Q: Unable to start   
-   A: Download and install [.NET Runtime 6](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-7.0.3-windows-x64-installer)
+   A: Download and install [.NET Runtime 7](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-7.0.5-windows-x64-installer) or 'winget install Microsoft.DotNet.Runtime.7'
+ 
 
 1. Q: Error while Genshin started: Data Exception (31-4302)   
    A: Don't place software in the directory containing Genshin Impact.
