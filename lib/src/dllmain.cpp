@@ -9,7 +9,7 @@ HWND unityWnd = nullptr;
 HANDLE hPipe  = nullptr;
 
 // Allow Protocol: GetPlayerToken, PlayerLogin, AchievementAllDataNotify, Ping
-std::set<UINT16> PacketWhitelist = { 190, 196, 189, 176, 2659, 16, 56, 152 };
+std::set<UINT16> PacketWhitelist = { 175, 196, 102, 172, 2678, 55, 48, 160 };
 
 bool OnPacket(KcpPacket* pkt) {
 	if (pkt->data == nullptr) return true;
@@ -30,7 +30,7 @@ bool OnPacket(KcpPacket* pkt) {
 		return false;
 	}
 	printf("Passed cmdid: %d\n", ReadMapped<UINT16>(data->vector, 2));
-	if (ReadMapped<UINT16>(data->vector, 2) == 2659) {
+	if (ReadMapped<UINT16>(data->vector, 2) == 2678) {
 		auto headLength = ReadMapped<UINT16>(data->vector, 4);
 		auto dataLength = ReadMapped<UINT32>(data->vector, 6);
 		auto iStr = Genshin::ToBase64String(data, 10 + headLength, dataLength, nullptr);
@@ -106,7 +106,6 @@ void Run(HMODULE* phModule) {
 	if (hPipe == INVALID_HANDLE_VALUE) {
 		Win32ErrorDialog(1001);
 		ExitProcess(0);
-		return;
 	}
 }
 
