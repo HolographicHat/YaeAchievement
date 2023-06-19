@@ -7,7 +7,7 @@ Click Here：https://github.com/HolographicHat/YaeAchievement/releases
 
 Click on the file named "YaeAchievement.exe" in the red box to automatically pop up and download.It is recommended that you save this file in a desktop or other easy-to-see folder.
 
-![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/1.png)
+![image](https://github.com/prpjzz/yae-markdown-en/blob/main/image/Guide1.png)
 
 2.Install .NET Runtime 7 (this step can be ignored if the runtime is already installed)
 
@@ -19,7 +19,7 @@ The browser automatically pops up and downloads when you enter the web page, as 
 
 When you open a file with the name dotnet-runtime-x.x.x-win-x64.exe after the download is complete, an installation window pops up, as shown below.
 
-![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/2.png)
+![image](https://github.com/prpjzz/yae-markdown-en/blob/main/image/Guide2.png)
 
 Just click Install.
 
@@ -27,13 +27,13 @@ Just click Install.
 
 Double-click the file named "YaeAchievement.exe" downloaded in the first step to open it successfully, indicating that the original god is starting, as shown below.
 
-![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/3.png)
+![image](https://github.com/prpjzz/yae-markdown-en/blob/main/image/Guide3.png)
 
 Once the primordial startup is complete, click to enter the game.
 
 When you click into the game, the tool prompts you to choose which tool to export, as shown below.
 
-![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/4.png)
+![image](https://github.com/prpjzz/yae-markdown-en/blob/main/image/Guide4.png)
 
 For global user, you should select [3] Seelie.me or  [4] Export to csv file。
 
@@ -41,25 +41,25 @@ After selecting, each page exports the tool as follows:
 
 #### Snap.Hutao：
 
-![image](https://github.com/Finchaos/yae-markdown-230119/blob/main//images/6.png)
+![image](https://github.com/prpjzz/yae-markdown-en/blob/main/image/Guide5.png)
 
 #### Seelie.me：
 
 At this point, Yae Achievement will remind that performance data has been exported. Please find the file named export-20xxxxxxxxxxxx-seelie.json in the Yae Achievement save directory.
 
-![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/7.png)
+![image](https://github.com/prpjzz/yae-markdown-en/blob/main/image/Guide6.png)
 
 Then click on the URL: https://seelie.me/settings, enter the website and select Import Account, as illustrated in the figure below.
 
-![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/8.png)
+![image](https://github.com/prpjzz/yae-markdown-en/blob/main/image/Guide7.png)
 
 After clicking Import, select a file named export-20xxxxxxxxxxxx-seelie.json, as shown in the figure below.
 
-![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/9.png)
+![image](https://github.com/prpjzz/yae-markdown-en/blob/main/image/Guide8.png)
 
 When the prompt as shown in the image below pops up, the import process succeeds.
 
-![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/10.png)
+![image](https://github.com/prpjzz/yae-markdown-en/blob/main/image/Guide9.png)
 
 At this time, you can select the Achievements in the left column to view the imported performance data.
 
