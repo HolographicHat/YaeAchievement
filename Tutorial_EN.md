@@ -1,7 +1,7 @@
 ## Instructions for Use
 
 
-1.Download YaeAchievement（以2.4.1版本为例）：
+1.Download YaeAchievement（Latest Version）：
 
 Click Here：https://github.com/HolographicHat/YaeAchievement/releases
 
@@ -11,7 +11,7 @@ Click on the file named "YaeAchievement.exe" in the red box to automatically pop
 
 2.Install .NET Runtime 7 (this step can be ignored if the runtime is already installed)
 
-Click Here：https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-7.0.3-windows-x64-installer .
+Click Here：https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-7.0.7-windows-x64-installer .
 
 Or `winget install Microsoft.DotNet.Runtime.7` if you use Windows 11 or have Winget installed.
 
@@ -35,13 +35,9 @@ When you click into the game, the tool prompts you to choose which tool to expor
 
 ![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/4.png)
 
-此时可根据自己的需要进行选择，一般推荐导出至[0]椰羊以及[4]表格文件（.csv）。
+For global user, you should select [3] Seelie.me or  [4] Export to csv file。
 
-选择完毕后各工具导出页面如下：
-
-#### 椰羊：
-
-![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/5.png)
+After selecting, each page exports the tool as follows:
 
 #### Snap.Hutao：
 
@@ -49,31 +45,25 @@ When you click into the game, the tool prompts you to choose which tool to expor
 
 #### Seelie.me：
 
-此时YaeAchievement会提示成就数据已导出。请在保存YaeAchievement的文件夹内找到名称形如export-20xxxxxxxxxxxx-seelie.json的文件。
+At this point, Yae Achievement will remind that performance data has been exported. Please find the file named export-20xxxxxxxxxxxx-seelie.json in the Yae Achievement save directory.
 
 ![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/7.png)
 
-然后点击该网址https://seelie.me/settings, 进入网页后选择导入，如下图所示。
+Then click on the URL: https://seelie.me/settings, enter the website and select Import Account, as illustrated in the figure below.
 
 ![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/8.png)
 
-点击导入后选中名称形如export-20xxxxxxxxxxxx-seelie.json的文件，如下图所示。
+After clicking Import, select a file named export-20xxxxxxxxxxxx-seelie.json, as shown in the figure below.
 
 ![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/9.png)
 
-当弹出如下图所示的提示时表示导入成功。
+When the prompt as shown in the image below pops up, the import process succeeds.
 
 ![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/10.png)
 
-此时可选择左栏成就，查看导入的成就数据。
+At this time, you can select the Achievements in the left column to view the imported performance data.
 
-#### 寻空：
-
-![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/11.png)
-
-### 各种工具的介绍烦请移步至各工具的官方页面进行查看（下方序号对应导出序号）
-
-0. [椰羊](https://cocogoat.work/achievement)
+### For the introduction of different tools, please visit the official page of each tool to see:
 
 1. [Snap·HuTao](https://github.com/DGP-Studio/Snap.HuTao)
 
@@ -81,4 +71,3 @@ When you click into the game, the tool prompts you to choose which tool to expor
 
 3. [Seelie.me](https://seelie.me/achievements)
 
-4. [寻空](https://github.com/xunkong/xunkong)
