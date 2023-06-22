@@ -16,12 +16,8 @@
 - Support for exporting to [Cocogoat](https://cocogoat.work/achievement), [Snap·HuTao](https://github.com/DGP-Studio/Snap.HuTao), [Paimon.moe](https://paimon.moe/achievement/), [Seelie.me](https://seelie.me/achievements)、[XunKong](https://github.com/xunkong/xunkong) and form files (csv)
 - There are no requirements for window size, game language, etc.
 
-## How to use:
-The first time you open it, you need to set the path that contains the Genshin main program (YuanShen.exe / GenshinIimpact.exe)
-![alt](https://upload-bbs.mihoyo.com/upload/2022/04/06/165631158/e540a5a6d50cd5fdee19665435548e00_514247033566841954.jpg)
-After setting up, wait for the game to start.
-When you see the door, press in to enter the game, the game will automatically exit.
-After the game exits, enter a number inside the program to select the site/application to export to
+## Instructions for Use:
+→ [Tutorial_EN.md](Tutorial_EN.md)
 
 ## Download: [Here](https://github.com/HolographicHat/YaeAchievement/releases/latest)
 
@@ -30,7 +26,8 @@ After the game exits, enter a number inside the program to select the site/appli
 
 ## Frequently asked questions
 0. Q: Unable to start   
-   A: Download and install [.NET Runtime 6](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-7.0.3-windows-x64-installer)
+   A: Download and install [.NET Runtime 7](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-7.0.7-windows-x64-installer) or ` winget install Microsoft.DotNet.Runtime.7`
+ 
 
 1. Q: Error while Genshin started: Data Exception (31-4302)   
    A: Don't place software in the directory containing Genshin Impact.
