@@ -20,13 +20,13 @@
     <data name="ExportChoose" xml:space="preserve">
         <value>导出至: 
 [0] 椰羊 (https://cocogoat.work/achievement, 默认)
-[1] Snap.HuTao
+[1] Snap Hutao
 [2] Paimon.moe
 [3] Seelie.me
 [4] 表格文件
 [5] 寻空
 [6] 原魔工具箱
-[7] UIAF JSON文件
+[7] UIAF JSON 文件
 输入一个数字 (0-7): </value>
     </data>
     <data name="ExportToCocogoatSuccess" xml:space="preserve">
@@ -36,10 +36,10 @@
         <value>在小程序导入页面输入以下代码: {0}</value>
     </data>
     <data name="ExportToSnapGenshinSuccess" xml:space="preserve">
-        <value>在 SnapHutao 进行下一步操作</value>
+        <value>在 Snap Hutao 中进行下一步操作</value>
     </data>
     <data name="ExportToSnapGenshinNeedUpdate" xml:space="preserve">
-        <value>更新 SnapHutao 至最新版本后重试</value>
+        <value>更新/安装 Snap Hutao 最新版本后重试</value>
     </data>
     <data name="ExportToFileSuccess" xml:space="preserve">
         <value>成就数据已导出至 {0}</value>

@@ -77,9 +77,17 @@ public static class Export {
     }
 
     private static void ToHuTao(AchievementAllDataNotify data) {
-        Utils.CopyToClipboard(JsonSerializer.Serialize(ExportToUIAFApp(data)));
-        Utils.ShellOpen("hutao://achievement/import");
-        Console.WriteLine(App.ExportToSnapGenshinSuccess);
+        if (CheckWinUIAppScheme("hutao"))
+        {
+            Utils.CopyToClipboard(JsonSerializer.Serialize(ExportToUIAFApp(data)));
+            Utils.ShellOpen("hutao://achievement/import");
+            Console.WriteLine(App.ExportToSnapGenshinSuccess);
+        }
+        else
+        {
+            Console.WriteLine(App.ExportToSnapGenshinNeedUpdate);
+            Utils.ShellOpen("ms-windows-store://pdp/?productid=9PH4NXJ2JN52");
+        }
     }
     
     // ReSharper disable once InconsistentNaming
@@ -161,7 +169,7 @@ public static class Export {
     }
 
     private static void ToXunkong(AchievementAllDataNotify data) {
-        if (CheckXunkongScheme()) {
+        if (CheckWinUIAppScheme("xunkong")) {
             Utils.CopyToClipboard(JsonSerializer.Serialize(ExportToUIAFApp(data)));
             Utils.ShellOpen("xunkong://import-achievement?caller=YaeAchievement&from=clipboard");
             Console.WriteLine(App.ExportToXunkongSuccess);
@@ -203,8 +211,8 @@ public static class Export {
         };
     }
 
-    private static bool CheckXunkongScheme() {
-        return (string?)Registry.ClassesRoot.OpenSubKey("xunkong")?.GetValue("") == "URL:xunkong";
+    private static bool CheckWinUIAppScheme(string protocol) {
+        return (string?)Registry.ClassesRoot.OpenSubKey(protocol)?.GetValue("") == $"URL:{protocol}";
     }
 
     private static string JoinToString(this IEnumerable<object> list, string separator) {
