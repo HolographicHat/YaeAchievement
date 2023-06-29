@@ -157,7 +157,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please update SnapGenshin and retry..
+        ///   Looks up a localized string similar to Please update Snap Hutao and retry..
         /// </summary>
         internal static string ExportToSnapGenshinNeedUpdate {
             get {
@@ -166,7 +166,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Successfully exported to snap genshin..
+        ///   Looks up a localized string similar to Successfully exported to Snap Hutao..
         /// </summary>
         internal static string ExportToSnapGenshinSuccess {
             get {

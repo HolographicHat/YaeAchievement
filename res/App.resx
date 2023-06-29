@@ -41,10 +41,10 @@ Input a number (0-5): </value>
         <value>{0}</value>
     </data>
     <data name="ExportToSnapGenshinSuccess" xml:space="preserve">
-        <value>Successfully exported to snap genshin.</value>
+        <value>Successfully exported to Snap Hutao.</value>
     </data>
     <data name="ExportToSnapGenshinNeedUpdate" xml:space="preserve">
-        <value>Please update SnapGenshin and retry.</value>
+        <value>Please update Snap Hutao and retry.</value>
     </data>
     <data name="ExportToFileSuccess" xml:space="preserve">
         <value>Successfully exported to {0}</value>
