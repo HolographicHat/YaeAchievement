@@ -8,8 +8,8 @@ using std::to_string;
 HWND unityWnd = nullptr;
 HANDLE hPipe  = nullptr;
 
-// Allow Protocol: GetPlayerToken, PlayerLogin, AchievementAllDataNotify, Ping
-std::set<UINT16> PacketWhitelist = { 175, 196, 102, 172, 2678, 55, 48, 160 };
+// Allow Protocol: GetPlayerToken, PlayerLogin, AchievementAllDataNotify, Ping, PlayerForceExit
+std::set<UINT16> PacketWhitelist = { 6929, 7187, 4356, 6011, 1268, 24845, 24404, 29313 };
 
 bool OnPacket(KcpPacket* pkt) {
 	if (pkt->data == nullptr) return true;
@@ -30,7 +30,7 @@ bool OnPacket(KcpPacket* pkt) {
 		return false;
 	}
 	printf("Passed cmdid: %d\n", ReadMapped<UINT16>(data->vector, 2));
-	if (ReadMapped<UINT16>(data->vector, 2) == 2678) {
+	if (ReadMapped<UINT16>(data->vector, 2) == 1268) {
 		auto headLength = ReadMapped<UINT16>(data->vector, 4);
 		auto dataLength = ReadMapped<UINT32>(data->vector, 6);
 		auto iStr = Genshin::ToBase64String(data, 10 + headLength, dataLength, nullptr);
