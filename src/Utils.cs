@@ -92,7 +92,7 @@ public static class Utils {
     
     public static void CheckUpdate(bool useLocalLib) {
         var info = UpdateInfo.Parser.ParseFrom(GetBucketFileAsByteArray("schicksal/version"))!;
-        if (GlobalVars.AppVersionCode != info.VersionCode) {
+        if (GlobalVars.AppVersionCode < info.VersionCode) {
             Console.WriteLine(App.UpdateNewVersion, GlobalVars.AppVersionName, info.VersionName);
             Console.WriteLine(App.UpdateDescription, info.Description);
             if (info.EnableAutoDownload) {
