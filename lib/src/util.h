@@ -6,6 +6,7 @@ VOID DisableVMProtect();
 bool IsLittleEndian();
 HWND FindMainWindowByPID(DWORD pid);
 string ToString(Il2CppString* str, UINT codePage = CP_ACP);
+std::string base64_encode(BYTE const* buf, unsigned int bufLen);
 
 #define cstring_new(str) il2cpp_string_new(str)
 #define string_new(str) cstring_new((str).c_str())

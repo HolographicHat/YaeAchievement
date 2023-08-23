@@ -8,8 +8,8 @@ using std::to_string;
 HWND unityWnd = nullptr;
 HANDLE hPipe  = nullptr;
 
-// Allow Protocol: GetPlayerToken, PlayerLogin, AchievementAllDataNotify, Ping, PlayerForceExit
-std::set<UINT16> PacketWhitelist = { 21228, 2407, 25842, 29665, 27422, 5285, 8231, 1819 };
+// Allow Protocol: GetPlayerTokenRsp, PlayerLoginRsp, AchievementAllDataNotify, PingRsp
+std::set<UINT16> PacketWhitelist = { 2407, 29665, 27422, 8231 };
 
 bool OnPacket(KcpPacket* pkt) {
 	if (pkt->data == nullptr) return true;
@@ -31,10 +31,9 @@ bool OnPacket(KcpPacket* pkt) {
 	}
 	printf("Passed cmdid: %d\n", ReadMapped<UINT16>(data->vector, 2));
 	if (ReadMapped<UINT16>(data->vector, 2) == 27422) {
-		auto headLength = ReadMapped<UINT16>(data->vector, 4);
-		auto dataLength = ReadMapped<UINT32>(data->vector, 6);
-		auto iStr = Genshin::ToBase64String(data, 10 + headLength, dataLength, nullptr);
-		auto cStr = ToString(iStr) + "\n";
+		const auto headLength = ReadMapped<UINT16>(data->vector, 4);
+		const auto dataLength = ReadMapped<UINT32>(data->vector, 6);
+		const auto cStr = base64_encode(data->vector + 10 + headLength, dataLength) + "\n";
 		WriteFile(hPipe, cStr.c_str(), cStr.length(), nullptr, nullptr);
 		CloseHandle(hPipe);
 		auto manager = Genshin::GetSingletonInstance(Genshin::GetSingletonManager(), il2cpp_string_new("GameManager"));
@@ -48,18 +47,14 @@ std::string checksum;
 
 namespace Hook {
 
-	int KcpSend(void* client, KcpPacket* pkt, void* method) {
-		return OnPacket(pkt) ? CALL_ORIGIN(KcpSend, client, pkt, method) : 0;
-	}
-
 	void SetVersion(void* obj, Il2CppString* value, void* method) {
-		auto version = ToString(value);
+		const auto version = ToString(value);
 		value = string_new(version + " YaeAchievement");
 		CALL_ORIGIN(SetVersion, obj, value, method);
 	}
 
 	bool KcpRecv(void* client, ClientKcpEvent* evt, void* method) {
-		auto result = CALL_ORIGIN(KcpRecv, client, evt, method);
+		const auto result = CALL_ORIGIN(KcpRecv, client, evt, method);
 		if (result == 0 || evt->fields.type != KcpEventType::EventRecvMsg) {
 			return result;
 		}
@@ -67,40 +62,22 @@ namespace Hook {
 	}
 
 	ByteArray* UnityEngine_RecordUserData(INT type) {
-		return Genshin::GetBytes(Genshin::GetDefaultEncoding(), il2cpp_string_new(""));
+		return new ByteArray {};
 	}
-
-	VOID SetChecksum(LPVOID obj, Il2CppString* value) {
-		CALL_ORIGIN(SetChecksum, obj, il2cpp_string_new(checksum.c_str()));
-	}
-
-	VOID RequestLogin(LPVOID obj, LPVOID token, UINT32 uid) {
-		HookManager::install(Genshin::SetChecksum, SetChecksum);
-		CALL_ORIGIN(RequestLogin, obj, token, uid);
-		HookManager::detach(SetChecksum);
-	}
+	// 不再使用checksum(?
 }
 
 void Run(HMODULE* phModule) {
 	//AllocConsole();
 	//freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
-	while (
-		GetModuleHandle("UserAssembly.dll") == nullptr ||
-		(unityWnd = FindMainWindowByPID(GetCurrentProcessId())) == nullptr
-	) {
+	while ((unityWnd = FindMainWindowByPID(GetCurrentProcessId())) == nullptr) {
 		Sleep(1000);
 	}
 	Sleep(5000);
 	DisableVMProtect();
 	InitIL2CPP();
-	auto enc = Genshin::GetDefaultEncoding();
-	for (int i = 0; i < 3; i++) {
-		checksum += ToString(Genshin::GetString(enc, Genshin::RecordUserData(i)));
-	}
-	HookManager::install(Genshin::KcpSend, Hook::KcpSend);
 	HookManager::install(Genshin::KcpRecv, Hook::KcpRecv);
 	HookManager::install(Genshin::SetVersion, Hook::SetVersion);
-	HookManager::install(Genshin::RequestLogin, Hook::RequestLogin);
 	HookManager::install(Genshin::UnityEngine_RecordUserData, Hook::UnityEngine_RecordUserData);
 	hPipe = CreateFile(R"(\\.\pipe\YaeAchievementPipe)", GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
 	if (hPipe == INVALID_HANDLE_VALUE) {
