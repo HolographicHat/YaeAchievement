@@ -26,8 +26,9 @@
 [4] 表格文件
 [5] 寻空
 [6] 原魔工具箱
-[7] UIAF JSON 文件
-输入一个数字 (0-7): </value>
+[7] Teyvat Guide
+[8] UIAF JSON 文件
+输入一个数字 (0-8): </value>
     </data>
     <data name="ExportToCocogoatSuccess" xml:space="preserve">
         <value>在浏览器内进行下一步操作</value>
@@ -119,5 +120,11 @@
     </data>
     <data name="NoWritePermission" xml:space="preserve">
         <value>无法写入文件，请更换软件所在目录后重试</value>
+    </data>
+    <data name="ExportToTauriFail" xml:space="preserve">
+        <value>更新 Teyvat Guide 至最新版本后重试</value>
+    </data>
+    <data name="ExportToTauriSuccess" xml:space="preserve">
+        <value>在 Teyvat Guide 进行下一步操作</value>
     </data>
 </root>

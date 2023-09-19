@@ -32,7 +32,9 @@
 [3] Seelie.me
 [4] Csv file
 [5] Xunkong
-Input a number (0-5): </value>
+[7] Teyvat Guide
+[8] UIAF JSON File
+Input a number (0-8): </value>
     </data>
     <data name="ExportToCocogoatSuccess" xml:space="preserve">
         <value>Successfully exported to cocogoat.</value>
@@ -128,5 +130,11 @@ Input a number (0-5): </value>
     </data>
     <data name="NoWritePermission" xml:space="preserve">
         <value>No write permission on {0}.</value>
+    </data>
+    <data name="ExportToTauriSuccess" xml:space="preserve">
+        <value>Successfully exported to Teyvat Guide.</value>
+    </data>
+    <data name="ExportToTauriFail" xml:space="preserve">
+        <value>Please update Teyvat Guide and retry.</value>
     </data>
 </root>

@@ -32,8 +32,9 @@ public static class Export {
             4 => ToCSV,
             5 => ToXunkong,
             6 => ToWxApp1,
-            7 => ToUIAFJson,
-            8 => ToRawJson,
+            7 => ToTeyvatGuide,
+            8 => ToUIAFJson,
+            9 => ToRawJson,
             _ => ToCocogoat
         })).Invoke(data);
     }
@@ -77,19 +78,38 @@ public static class Export {
     }
 
     private static void ToHuTao(AchievementAllDataNotify data) {
-        if (CheckWinUIAppScheme("hutao"))
-        {
+        if (CheckWinUIAppScheme("hutao")) {
             Utils.CopyToClipboard(JsonSerializer.Serialize(ExportToUIAFApp(data)));
             Utils.ShellOpen("hutao://achievement/import");
             Console.WriteLine(App.ExportToSnapGenshinSuccess);
-        }
-        else
-        {
+        } else {
             Console.WriteLine(App.ExportToSnapGenshinNeedUpdate);
             Utils.ShellOpen("ms-windows-store://pdp/?productid=9PH4NXJ2JN52");
         }
     }
     
+    private static void ToXunkong(AchievementAllDataNotify data) {
+        if (CheckWinUIAppScheme("xunkong")) {
+            Utils.CopyToClipboard(JsonSerializer.Serialize(ExportToUIAFApp(data)));
+            Utils.ShellOpen("xunkong://import-achievement?caller=YaeAchievement&from=clipboard");
+            Console.WriteLine(App.ExportToXunkongSuccess);
+        } else {
+            Console.WriteLine(App.ExportToXunkongNeedUpdate);
+            Utils.ShellOpen("ms-windows-store://pdp/?productid=9N2SVG0JMT12");
+        }
+    }
+
+    private static void ToTeyvatGuide(AchievementAllDataNotify data) {
+        if (CheckWinUIAppScheme("teyvatgiude")) {
+            Utils.CopyToClipboard(JsonSerializer.Serialize(ExportToUIAFApp(data)));
+            Utils.ShellOpen("teyvatgiude://import_uigf?app=YaeAchievement");
+            Console.WriteLine(App.ExportToTauriSuccess);
+        } else {
+            Console.WriteLine(App.ExportToTauriFail);
+            Utils.ShellOpen("ms-windows-store://pdp/?productid=9NLBNNNBNSJN");
+        }
+    }
+
     // ReSharper disable once InconsistentNaming
     private static void ToUIAFJson(AchievementAllDataNotify data) {
         var path = Path.GetFullPath($"uiaf-{DateTime.Now:yyyyMMddHHmmss}.json");
@@ -165,17 +185,6 @@ public static class Export {
         if (TryWriteToFile(path, $"\uFEFF{string.Join("\n", output)}")) {
             Console.WriteLine(App.ExportToFileSuccess, path);
             Process.Start("explorer.exe", $"{Path.GetDirectoryName(path)}");
-        }
-    }
-
-    private static void ToXunkong(AchievementAllDataNotify data) {
-        if (CheckWinUIAppScheme("xunkong")) {
-            Utils.CopyToClipboard(JsonSerializer.Serialize(ExportToUIAFApp(data)));
-            Utils.ShellOpen("xunkong://import-achievement?caller=YaeAchievement&from=clipboard");
-            Console.WriteLine(App.ExportToXunkongSuccess);
-        } else {
-            Console.WriteLine(App.ExportToXunkongNeedUpdate);
-            Utils.ShellOpen("ms-windows-store://pdp/?productid=9N2SVG0JMT12");
         }
     }
 

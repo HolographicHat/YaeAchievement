@@ -121,7 +121,9 @@ namespace YaeAchievement.res {
         ///[3] Seelie.me
         ///[4] Csv file
         ///[5] Xunkong
-        ///Input a number (0-5): .
+        ///[7] Teyvat Guide
+        ///[8] UIAF JSON File
+        ///Input a number (0-8): .
         /// </summary>
         internal static string ExportChoose {
             get {
@@ -171,6 +173,24 @@ namespace YaeAchievement.res {
         internal static string ExportToSnapGenshinSuccess {
             get {
                 return ResourceManager.GetString("ExportToSnapGenshinSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please update Teyvat Guide and retry..
+        /// </summary>
+        internal static string ExportToTauriFail {
+            get {
+                return ResourceManager.GetString("ExportToTauriFail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successfully exported to Teyvat Guide..
+        /// </summary>
+        internal static string ExportToTauriSuccess {
+            get {
+                return ResourceManager.GetString("ExportToTauriSuccess", resourceCulture);
             }
         }
         
