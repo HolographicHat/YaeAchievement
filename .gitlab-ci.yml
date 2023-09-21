@@ -1,0 +1,14 @@
+image: mcr.microsoft.com/windows/server
+
+Build:
+  tags:
+    - windows
+  script:
+    - dotnet restore
+    - dotnet build -c Release --no-restore
+    - dotnet publish --property:OutputPath=.\publish\
+    - Move-Item -Path .\publish\publish\*.exe -Destination .\
+  artifacts:
+    paths:
+      - .\*.exe
+    expire_in: 90 days
