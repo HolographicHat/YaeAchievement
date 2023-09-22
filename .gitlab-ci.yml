@@ -1,14 +1,64 @@
-image: mcr.microsoft.com/windows/server
+stages:
+  - test
+  - build
+  - release
 
-Build:
+Test:
+  stage: test
+  image: mcr.microsoft.com/windows/server
   tags:
     - windows
   script:
     - dotnet restore
     - dotnet build -c Release --no-restore
     - dotnet publish --property:OutputPath=.\publish\
-    - Move-Item -Path .\publish\publish\*.exe -Destination .\
+    - Move-Item -Path .\publish\publish\*.exe -Destination ..\ -Force
+
+Build:
+  stage: build
+  only:
+    - tags
+  tags:
+    - windows
+  needs:
+    - job: Test
+  script:
+    - echo "This is build stage."
+    - Move-Item -Path ..\YaeAchievement.exe .\ -Force
+  after_script:
+    - echo "Current Job ID is $CI_JOB_ID"
+    - echo "THIS_JOB_ID=$CI_JOB_ID" >> build.env
   artifacts:
     paths:
       - .\*.exe
     expire_in: 90 days
+    reports:
+      dotenv: build.env
+
+
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  only:
+    - tags
+  needs:
+    - job: Build
+      artifacts: true
+  variables:
+    TAG: '$CI_COMMIT_TAG'
+  script:
+    - echo "Create Release $TAG"
+    - echo "$THIS_JOB_ID"
+  release:
+    name: '$TAG'
+    tag_name: '$TAG'
+    ref: '$TAG'
+    description: 'Release $TAG by CI'
+    assets:
+      links:
+        - name: "YaeAchievement.exe"
+          url: "https://$CI_SERVER_SHELL_SSH_HOST/$CI_PROJECT_PATH/-/jobs/$THIS_JOB_ID/artifacts/raw/YaeAchievement.exe?inline=false"
+          link_type: package
+        - name: ".NET 7.0 Desktop Runtime"
+          url: "https://dotnet.microsoft.com/zh-cn/download/dotnet/thank-you/runtime-desktop-7.0.11-windows-x64-installer"
+          link_type: other
