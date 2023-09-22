@@ -135,6 +135,6 @@ Input a number (0-8): </value>
         <value>Successfully exported to Teyvat Guide.</value>
     </data>
     <data name="ExportToTauriFail" xml:space="preserve">
-        <value>Please update Teyvat Guide and retry.</value>
+        <value>Please launch/update Teyvat Guide and retry.</value>
     </data>
 </root>
