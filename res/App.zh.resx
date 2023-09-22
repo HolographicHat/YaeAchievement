@@ -122,7 +122,7 @@
         <value>无法写入文件，请更换软件所在目录后重试</value>
     </data>
     <data name="ExportToTauriFail" xml:space="preserve">
-        <value>更新 Teyvat Guide 至最新版本后重试</value>
+        <value>启动 Teyvat Guide 或更新 Teyvat Guide 至最新版本后重试</value>
     </data>
     <data name="ExportToTauriSuccess" xml:space="preserve">
         <value>在 Teyvat Guide 进行下一步操作</value>

@@ -100,9 +100,9 @@ public static class Export {
     }
 
     private static void ToTeyvatGuide(AchievementAllDataNotify data) {
-        if (CheckWinUIAppScheme("teyvatgiude")) {
+        if (Process.GetProcessesByName("TeyvatGuide").Any()) {
             Utils.CopyToClipboard(JsonSerializer.Serialize(ExportToUIAFApp(data)));
-            Utils.ShellOpen("teyvatgiude://import_uigf?app=YaeAchievement");
+            Utils.ShellOpen("teyvatguide://import_uigf?app=YaeAchievement");
             Console.WriteLine(App.ExportToTauriSuccess);
         } else {
             Console.WriteLine(App.ExportToTauriFail);

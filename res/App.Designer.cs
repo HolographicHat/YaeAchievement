@@ -177,7 +177,7 @@ namespace YaeAchievement.res {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please update Teyvat Guide and retry..
+        ///   Looks up a localized string similar to Please launch/update Teyvat Guide and retry..
         /// </summary>
         internal static string ExportToTauriFail {
             get {
