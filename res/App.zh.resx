@@ -116,7 +116,7 @@
         <value>网络错误，请检查网络后重试 ({0}: {1})</value>
     </data>
     <data name="GenshinHashError" xml:space="preserve">
-        <value>请将原神更新至最新版本后重试</value>
+        <value>当前适配版本不匹配，请更新原神至最新版本后重试或等待工具更新。</value>
     </data>
     <data name="NoWritePermission" xml:space="preserve">
         <value>无法写入文件，请更换软件所在目录后重试</value>
