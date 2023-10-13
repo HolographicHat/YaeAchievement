@@ -64,7 +64,16 @@ namespace Hook {
 	ByteArray* UnityEngine_RecordUserData(INT type) {
 		return new ByteArray {};
 	}
-	// 不再使用checksum(?
+	
+	VOID SetChecksum(LPVOID obj, Il2CppString* value) {
+		CALL_ORIGIN(SetChecksum, obj, il2cpp_string_new(checksum.c_str()));
+	}
+
+	VOID RequestLogin(LPVOID obj, LPVOID token, UINT32 uid) {
+		HookManager::install(Genshin::SetChecksum, SetChecksum);
+		CALL_ORIGIN(RequestLogin, obj, token, uid);
+		HookManager::detach(SetChecksum);
+	}
 }
 
 void Run(HMODULE* phModule) {
@@ -76,8 +85,13 @@ void Run(HMODULE* phModule) {
 	Sleep(5000);
 	DisableVMProtect();
 	InitIL2CPP();
+	for (int i = 0; i < 3; i++) {
+		const auto result = Genshin::RecordUserData(i);
+		checksum += string(reinterpret_cast<char*>(&result->vector[0]), result->max_length);
+	}
 	HookManager::install(Genshin::KcpRecv, Hook::KcpRecv);
 	HookManager::install(Genshin::SetVersion, Hook::SetVersion);
+	HookManager::install(Genshin::RequestLogin, Hook::RequestLogin);
 	HookManager::install(Genshin::UnityEngine_RecordUserData, Hook::UnityEngine_RecordUserData);
 	hPipe = CreateFile(R"(\\.\pipe\YaeAchievementPipe)", GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
 	if (hPipe == INVALID_HANDLE_VALUE) {
