@@ -9,8 +9,21 @@
 
 - 支持导出所有类别的成就
 - 支持官服，渠道服与国际服
-- 支持导出至[椰羊](https://cocogoat.work/achievement)、[Snap·HuTao](https://github.com/DGP-Studio/Snap.HuTao)、[Paimon.moe](https://paimon.moe/achievement/)、[Seelie.me](https://seelie.me/achievements)、[寻空](https://github.com/xunkong/xunkong)和表格文件(csv)
 - 没有窗口大小、游戏语言等要求
+
+## 导出支持
+
+> 按照数字键选择导出方式，<kbd>0</kbd> 为默认导出方式
+
+0. [椰羊](https://cocogoat.work/achievement)
+1. [胡桃工具箱](https://github.com/DGP-Studio/Snap.HuTao)
+2. [Paimon.moe](https://paimon.moe/achievement/)
+3. [Seelie.me](https://seelie.me/achievements)
+4. 表格文件（.csv）
+5. [寻空](https://github.com/xunkong/xunkong)
+6. [原魔工具箱](https://apps.apple.com/app/id1663989619)
+7. [Teyvat Guide](https://teyvatguide.com/)
+8. [UIAF](https://uigf.org/standards/UIAF.html) JSON 文件
 
 ## 使用说明
 → [Tutorial.md](Tutorial.md)
