@@ -65,9 +65,13 @@ At this time, you can select the Achievements in the left column to view the imp
 
 ### For the introduction of different tools, please visit the official page of each tool to see:
 
-1. [Snap·HuTao](https://github.com/DGP-Studio/Snap.HuTao)
-
+0. [Cocogoat] (https://cocogoat.work/achievement)
+1. [Snap HuTao](https://github.com/DGP-Studio/Snap.HuTao)
 2. [Paimon.moe](https://paimon.moe/achievement/)
-
 3. [Seelie.me](https://seelie.me/achievements)
+4. Form File (.csv)
+5. [XunKong] (https://github.com/xunkong/xunkong)
+6. [YuanmoTools] (https://apps.apple.com/app/id1663989619)
+7. [Teyvat Guide](https://teyvatguide.com/)
+8. [UIAF](https://uigf.org/standards/UIAF.html) JSON file
 
