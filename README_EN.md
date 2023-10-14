@@ -19,7 +19,8 @@
 
 > Select the export method according to the number keys, <kbd>0</kbd> is the default export method
 
-0. [Cocogoat] (https://cocogoat.work/achievement)
+Default export: [Cocogoat](https://cocogoat.work/achievement)
+
 1. [Snap HuTao](https://github.com/DGP-Studio/Snap.HuTao)
 2. [Paimon.moe](https://paimon.moe/achievement/)
 3. [Seelie.me](https://seelie.me/achievements)

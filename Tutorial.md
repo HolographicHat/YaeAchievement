@@ -68,14 +68,15 @@
 
 ![image](https://github.com/Finchaos/yae-markdown-230119/blob/main/images/11.png)
 
-### 各种工具的介绍烦请移步至各工具的官方页面进行查看（下方序号对应导出序号）
+### 各种工具的介绍烦请移步至各工具的官方页面进行查看
 
-0. [椰羊](https://cocogoat.work/achievement)
-1. [胡桃工具箱](https://github.com/DGP-Studio/Snap.HuTao)
-2. [Paimon.moe](https://paimon.moe/achievement/)
-3. [Seelie.me](https://seelie.me/achievements)
-4. ~~表格文件（.csv）~~
-5. [寻空](https://github.com/xunkong/xunkong)
-6. [原魔工具箱](https://apps.apple.com/app/id1663989619)
-7. [Teyvat Guide](https://teyvatguide.com/)
-8. [UIAF](https://uigf.org/standards/UIAF.html) JSON 文件
+> 导出序号见 [导出支持](./README.md#导出支持)
+
+* [椰羊](https://cocogoat.work/achievement)
+* [胡桃工具箱](https://github.com/DGP-Studio/Snap.HuTao)
+* [Paimon.moe](https://paimon.moe/achievement/)
+* [Seelie.me](https://seelie.me/achievements)
+* [寻空](https://github.com/xunkong/xunkong)
+* [原魔工具箱](https://apps.apple.com/app/id1663989619)
+* [Teyvat Guide](https://teyvatguide.com/)
+* [UIAF](https://uigf.org/standards/UIAF.html) JSON 文件

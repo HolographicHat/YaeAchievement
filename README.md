@@ -15,7 +15,8 @@
 
 > 按照数字键选择导出方式，<kbd>0</kbd> 为默认导出方式
 
-0. [椰羊](https://cocogoat.work/achievement)
+默认导出：[椰羊](https://cocogoat.work/achievement)
+
 1. [胡桃工具箱](https://github.com/DGP-Studio/Snap.HuTao)
 2. [Paimon.moe](https://paimon.moe/achievement/)
 3. [Seelie.me](https://seelie.me/achievements)
