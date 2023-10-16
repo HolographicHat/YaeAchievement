@@ -26,7 +26,7 @@
 4. Form File `.csv`
 5. [XunKong](https://github.com/xunkong/xunkong)
 6. [YuanmoTools](https://apps.apple.com/app/id1663989619)
-7. [TeyvatGuide](https://teyvatguide.com/)
+7. [TeyvatGuide](https://github.com/BTMuli/TeyvatGuide)
 8. [UIAF](https://uigf.org/standards/UIAF.html) JSON file
 
 ## Instructions for Use:

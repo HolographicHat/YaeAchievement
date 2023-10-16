@@ -22,7 +22,7 @@
 4. 表格文件 `.csv`
 5. [寻空](https://github.com/xunkong/xunkong)
 6. [原魔工具箱](https://apps.apple.com/app/id1663989619)
-7. [TeyvatGuide](https://teyvatguide.com/)
+7. [TeyvatGuide](https://github.com/BTMuli/TeyvatGuide)
 8. [UIAF](https://uigf.org/standards/UIAF.html) JSON 文件
 
 ## 使用说明
