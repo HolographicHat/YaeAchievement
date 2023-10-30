@@ -45,7 +45,7 @@ public static class Injector {
                         return new Win32Exception().PrintMsgAndReturnErrCode("WriteProcessMemory fail");
                     }
                 }
-                var lpStartAddress = pLoadLibrary.CreateDelegate<LPTHREAD_START_ROUTINE>();
+                var lpStartAddress = (delegate* unmanaged[Stdcall]<void*, uint>)pLoadLibrary.Value; //THREAD_START_ROUTINE
                 var hThread = Native.CreateRemoteThread(hProc, default, 0, lpStartAddress, pBase, 0);
                 if (hThread.IsNull) {
                     var e = new Win32Exception();
