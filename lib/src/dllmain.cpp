@@ -9,7 +9,7 @@ HWND unityWnd = nullptr;
 HANDLE hPipe  = nullptr;
 
 // Allow Protocol: GetPlayerTokenRsp, PlayerLoginRsp, AchievementAllDataNotify, PingRsp
-std::set<UINT16> PacketWhitelist = { 1347, 4424, 20342, 25731 };
+std::set<UINT16> PacketWhitelist = { 1574, 1548, 29462, 2794 };
 
 bool OnPacket(KcpPacket* pkt) {
 	if (pkt->data == nullptr) return true;
@@ -30,7 +30,7 @@ bool OnPacket(KcpPacket* pkt) {
 		return false;
 	}
 	printf("Passed cmdid: %d\n", ReadMapped<UINT16>(data->vector, 2));
-	if (ReadMapped<UINT16>(data->vector, 2) == 20342) {
+	if (ReadMapped<UINT16>(data->vector, 2) == 29462) {
 		const auto headLength = ReadMapped<UINT16>(data->vector, 4);
 		const auto dataLength = ReadMapped<UINT32>(data->vector, 6);
 		const auto cStr = base64_encode(data->vector + 10 + headLength, dataLength) + "\n";
