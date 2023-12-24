@@ -8,9 +8,6 @@ HWND FindMainWindowByPID(DWORD pid);
 string ToString(Il2CppString* str, UINT codePage = CP_ACP);
 std::string base64_encode(BYTE const* buf, unsigned int bufLen);
 
-#define cstring_new(str) il2cpp_string_new(str)
-#define string_new(str) cstring_new((str).c_str())
-
 #define ErrorDialogT(title, msg) MessageBox(unityWnd, msg, title, MB_OK | MB_ICONERROR | MB_SYSTEMMODAL);
 #define ErrorDialog(msg) ErrorDialogT("YaeAchievement", msg)
 #define Win32ErrorDialog(code) ErrorDialogT("YaeAchievement", ("CRITICAL ERROR!\nError code: " + std::to_string(GetLastError()) + "-"#code"\n\nPlease take the screenshot and contact developer by GitHub Issue to solve this problem\nNOT MIHOYO/COGNOSPHERE CUSTOMER SERVICE!").c_str())

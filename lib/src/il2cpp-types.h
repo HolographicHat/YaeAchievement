@@ -1,3 +1,6 @@
+// ReSharper disable CppClangTidyClangDiagnosticReservedIdentifier
+// ReSharper disable CppClangTidyBugproneReservedIdentifier
+
 #pragma once
 
 #pragma region IL2CPPInternalTypes
@@ -36,30 +39,7 @@ namespace Genshin {
         il2cpp_array_size_t max_length;
         uint8_t vector[32];
     };
-
-    struct KcpPacket {
-        BYTE* data;
-        UINT32 length;
+    
+    struct CodedOutputStream__Class {
     };
-
-    enum class KcpEventType : int {
-        EventNotSet = -1,
-        EventConnect = 0,
-        EventConnectFailed = 1,
-        EventDisconnect = 2,
-        EventRecvMsg = 3,
-        EventCount = 4,
-    };
-
-    struct KcpEvent_Fields {
-        KcpEventType type;
-        UINT32 token;
-        UINT32 data;
-        KcpPacket* packet;
-    };
-
-    struct ClientKcpEvent {
-        KcpEvent_Fields fields;
-    };
-
 }

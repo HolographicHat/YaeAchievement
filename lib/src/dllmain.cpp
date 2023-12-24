@@ -1,78 +1,46 @@
-﻿#include "pch.h"
+﻿// ReSharper disable CppCStyleCast
+// ReSharper disable CppInconsistentNaming
+// ReSharper disable CppClangTidyModernizeUseStdPrint
+// ReSharper disable CppClangTidyClangDiagnosticCastAlign
+// ReSharper disable CppClangTidyHicppMultiwayPathsCovered
+// ReSharper disable CppDefaultCaseNotHandledInSwitchStatement
+// ReSharper disable CppClangTidyClangDiagnosticCastFunctionTypeStrict
+
+#include "pch.h"
 #include "util.h"
 #include "il2cpp-init.h"
 
-using Genshin::ByteArray, Genshin::ClientKcpEvent, Genshin::KcpPacket, Genshin::KcpEventType;
-using std::to_string;
+using Genshin::ByteArray;
 
 HWND unityWnd = nullptr;
 HANDLE hPipe  = nullptr;
-
-// Allow Protocol: GetPlayerTokenRsp, PlayerLoginRsp, AchievementAllDataNotify, PingRsp
-std::set<UINT16> PacketWhitelist = { 1574, 1548, 29462, 2794 };
-
-bool OnPacket(KcpPacket* pkt) {
-	if (pkt->data == nullptr) return true;
-	auto len = pkt->length;
-	auto data = (ByteArray*)new BYTE[len + 32];
-	data->max_length = len;
-	memcpy(data->vector, pkt->data, len);
-	Genshin::XorEncrypt(&data, len, nullptr);
-	if (ReadMapped<UINT16>(data->vector, 0) != 0x4567) {
-		delete[] data;
-		return true;
-	}
-	if (!PacketWhitelist.contains(ReadMapped<UINT16>(data->vector, 2))) {
-		//ifdef _DEBUG
-		printf("Blocked cmdid: %d\n", ReadMapped<UINT16>(data->vector, 2));
-		//endif
-		delete[] data;
-		return false;
-	}
-	printf("Passed cmdid: %d\n", ReadMapped<UINT16>(data->vector, 2));
-	if (ReadMapped<UINT16>(data->vector, 2) == 29462) {
-		const auto headLength = ReadMapped<UINT16>(data->vector, 4);
-		const auto dataLength = ReadMapped<UINT32>(data->vector, 6);
-		const auto cStr = base64_encode(data->vector + 10 + headLength, dataLength) + "\n";
-		WriteFile(hPipe, cStr.c_str(), cStr.length(), nullptr, nullptr);
-		CloseHandle(hPipe);
-		auto manager = Genshin::GetSingletonInstance(Genshin::GetSingletonManager(), il2cpp_string_new("GameManager"));
-		Genshin::ForceQuit(manager);
-	}
-	delete[] data;
-	return true;
-}
 
 std::string checksum;
 
 namespace Hook {
 
-	void SetVersion(void* obj, Il2CppString* value, void* method) {
-		const auto version = ToString(value);
-		value = string_new(version + " YaeAchievement");
-		CALL_ORIGIN(SetVersion, obj, value, method);
-	}
-
-	bool KcpRecv(void* client, ClientKcpEvent* evt, void* method) {
-		const auto result = CALL_ORIGIN(KcpRecv, client, evt, method);
-		if (result == 0 || evt->fields.type != KcpEventType::EventRecvMsg) {
-			return result;
+	ByteArray* UnityEngine_RecordUserData(const INT type) {
+		if (type == 0) {
+			const auto arr = new ByteArray {};
+			const auto len = checksum.length();
+			arr->max_length = len;
+			memcpy(&arr->vector[0], checksum.data(), len);
+			return arr;
 		}
-		return OnPacket(evt->fields.packet) ? result : false;
-	}
-
-	ByteArray* UnityEngine_RecordUserData(INT type) {
 		return new ByteArray {};
 	}
 	
-	VOID SetChecksum(LPVOID obj, Il2CppString* value) {
-		CALL_ORIGIN(SetChecksum, obj, il2cpp_string_new(checksum.c_str()));
-	}
-
-	VOID RequestLogin(LPVOID obj, LPVOID token, UINT32 uid) {
-		HookManager::install(Genshin::SetChecksum, SetChecksum);
-		CALL_ORIGIN(RequestLogin, obj, token, uid);
-		HookManager::detach(SetChecksum);
+	void OnAchievementAllDataNotify(LPVOID obj, const LPVOID ntf) {
+		const auto cos = Genshin::il2cpp_object_new(*Genshin::CodedOutputStream__TypeInfo);
+		const auto len = Genshin::CalculateSize(ntf);
+		const auto buf = (ByteArray*) new uint8_t[0x20 + len] {};
+		buf->max_length = len;
+		Genshin::CodedOutputStreamInit(cos, buf, 0, len);
+		Genshin::ProtoWriteTo(ntf, cos);
+		const auto str = base64_encode(buf->vector, len) + "\n";
+		WriteFile(hPipe, str.c_str(), (DWORD) str.length(), nullptr, nullptr);
+		CloseHandle(hPipe);
+		ExitProcess(0);
 	}
 }
 
@@ -89,9 +57,7 @@ void Run(HMODULE* phModule) {
 		const auto result = Genshin::RecordUserData(i);
 		checksum += string(reinterpret_cast<char*>(&result->vector[0]), result->max_length);
 	}
-	HookManager::install(Genshin::KcpRecv, Hook::KcpRecv);
-	HookManager::install(Genshin::SetVersion, Hook::SetVersion);
-	HookManager::install(Genshin::RequestLogin, Hook::RequestLogin);
+	HookManager::install(Genshin::OnAchievementAllDataNotify, Hook::OnAchievementAllDataNotify);
 	HookManager::install(Genshin::UnityEngine_RecordUserData, Hook::UnityEngine_RecordUserData);
 	hPipe = CreateFile(R"(\\.\pipe\YaeAchievementPipe)", GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
 	if (hPipe == INVALID_HANDLE_VALUE) {
