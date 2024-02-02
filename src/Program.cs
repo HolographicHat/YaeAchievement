@@ -31,9 +31,13 @@ new EventLog("AppInit") {
 }.Enqueue();
 var usePreviousData = false;
 var historyCache = new CacheFile("ExportData");
-if (historyCache.LastWriteTime.AddMinutes(10) > DateTime.UtcNow) {
+if (historyCache.LastWriteTime.AddMinutes(60) > DateTime.UtcNow) {
     Console.WriteLine(App.UsePreviousData);
-    usePreviousData = Console.ReadLine() == "yes";
+    var text = Console.ReadLine();
+    if (text != null) {
+        text = text.ToUpper(); 
+        usePreviousData = (text == "" || text == "Y" || text == "YES");
+    }
 }
 Export:
 if(usePreviousData) {
