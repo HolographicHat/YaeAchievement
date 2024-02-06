@@ -39,13 +39,9 @@ try {
 
 if (historyCache.LastWriteTime.AddMinutes(60) > DateTime.UtcNow && data != null) {
     Console.WriteLine(App.UsePreviousData);
-    var text = Console.ReadLine();
-    if (text != null) {
-        text = text.ToUpper();
-        if (text == "Y" || text == "YES") {
-          Export.Choose(data);
-          return;
-        }
+    if (Console.ReadLine()?.ToUpper() is "Y" or "YES") {
+        Export.Choose(data);
+        return;
     }
 }
 
