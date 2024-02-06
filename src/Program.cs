@@ -36,7 +36,7 @@ if (historyCache.LastWriteTime.AddMinutes(60) > DateTime.UtcNow) {
     var text = Console.ReadLine();
     if (text != null) {
         text = text.ToUpper(); 
-        usePreviousData = (text == "" || text == "Y" || text == "YES");
+        usePreviousData = (text == "Y" || text == "YES");
     }
 }
 Export:
