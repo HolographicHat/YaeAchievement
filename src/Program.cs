@@ -29,33 +29,31 @@ new EventLog("AppInit") {
         { "SystemVersion", DeviceHelper.GetSystemVersion() }
     }
 }.Enqueue();
-var usePreviousData = false;
+
 var historyCache = new CacheFile("ExportData");
-if (historyCache.LastWriteTime.AddMinutes(60) > DateTime.UtcNow) {
+
+AchievementAllDataNotify? data = null;
+try {
+    data = AchievementAllDataNotify.Parser.ParseFrom(historyCache.Read().Content);
+} catch (Exception) { /* ignored */ }
+
+if (historyCache.LastWriteTime.AddMinutes(60) > DateTime.UtcNow && data != null) {
     Console.WriteLine(App.UsePreviousData);
     var text = Console.ReadLine();
     if (text != null) {
-        text = text.ToUpper(); 
-        usePreviousData = (text == "Y" || text == "YES");
+        text = text.ToUpper();
+        if (text == "Y" || text == "YES") {
+          Export.Choose(data);
+          return;
+        }
     }
 }
-Export:
-if(usePreviousData) {
-    AchievementAllDataNotify data;
-    try {
-        data = AchievementAllDataNotify.Parser.ParseFrom(historyCache.Read().Content);
-    } catch (Exception) {
-        usePreviousData = false;
-        goto Export;
-    }
-    Export.Choose(data);
-} else {
-    StartAndWaitResult(AppConfig.GamePath, str => {
-        GlobalVars.UnexpectedExit = false;
-        var data = Convert.FromBase64String(str);
-        var list = AchievementAllDataNotify.Parser.ParseFrom(data);
-        historyCache.Write(data);
-        Export.Choose(list);
-        return true;
-    });
-}
+
+StartAndWaitResult(AppConfig.GamePath, str => {
+    GlobalVars.UnexpectedExit = false;
+    var bytes = Convert.FromBase64String(str);
+    var list = AchievementAllDataNotify.Parser.ParseFrom(bytes);
+    historyCache.Write(bytes);
+    Export.Choose(list);
+    return true;
+});
