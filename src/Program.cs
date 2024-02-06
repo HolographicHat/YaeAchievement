@@ -37,9 +37,9 @@ try {
     data = AchievementAllDataNotify.Parser.ParseFrom(historyCache.Read().Content);
 } catch (Exception) { /* ignored */ }
 
-if (historyCache.LastWriteTime.AddMinutes(10) > DateTime.UtcNow && data != null) {
+if (historyCache.LastWriteTime.AddMinutes(60) > DateTime.UtcNow && data != null) {
     Console.WriteLine(App.UsePreviousData);
-    if (Console.ReadLine() == "yes") {
+    if (Console.ReadLine()?.ToUpper() is "Y" or "YES") {
         Export.Choose(data);
         return;
     }
