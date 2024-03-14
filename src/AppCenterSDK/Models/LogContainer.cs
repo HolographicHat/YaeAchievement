@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace YaeAchievement.AppCenterSDK.Models; 
+﻿namespace YaeAchievement.AppCenterSDK.Models; 
 
 public class LogContainer {
     
@@ -8,7 +6,6 @@ public class LogContainer {
         Logs = logs;
     }
 
-    [JsonProperty(PropertyName = "logs")]
     public IEnumerable<Log> Logs { get; set; }
     
 }

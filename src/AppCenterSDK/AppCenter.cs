@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using System.Net;
+﻿using System.Net;
+using System.Net.Http.Json;
 using YaeAchievement.AppCenterSDK.Models;
 using YaeAchievement.AppCenterSDK.Models.Serialization;
 
@@ -39,12 +39,6 @@ public static class AppCenter {
         AppDomain.CurrentDomain.ProcessExit += (_, _) => {
             running = false;
         };
-        LogSerializer.AddLogType(PageLog.JsonIdentifier, typeof(PageLog));
-        LogSerializer.AddLogType(EventLog.JsonIdentifier, typeof(EventLog));
-        LogSerializer.AddLogType(HandledErrorLog.JsonIdentifier, typeof(HandledErrorLog));
-        LogSerializer.AddLogType(ManagedErrorLog.JsonIdentifier, typeof(ManagedErrorLog));
-        LogSerializer.AddLogType(StartServiceLog.JsonIdentifier, typeof(StartServiceLog));
-        LogSerializer.AddLogType(StartSessionLog.JsonIdentifier, typeof(StartSessionLog));
     }
     
     // ReSharper restore InconsistentNaming
@@ -59,8 +53,8 @@ public static class AppCenter {
             using var uploadContent = new StringContent(Queue.ToJson());
             try {
                 using var response = httpClient.Value.PostAsync(ApiUrl, uploadContent).Result;
-                var result = response.Content.ReadAsStringAsync().Result;
-                uploadStatus = JsonConvert.DeserializeObject<LogUploadResult>(result)!.Status;
+                var result = response.Content.ReadFromJsonAsync<LogUploadResult>().GetAwaiter().GetResult();
+                uploadStatus = result!.Status;
             } catch (Exception) {
                 // ignored
             }

@@ -1,40 +1,25 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-
-using Newtonsoft.Json;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace YaeAchievement.AppCenterSDK.Models.Serialization;
 
-#pragma warning disable CS8604, CS8765, CS8603
 public static class LogSerializer {
     
-    private static readonly JsonSerializerSettings SerializationSettings;
-    private static readonly LogJsonConverter Converter = new ();
+    private static readonly JsonSerializerOptions SerializationSettings;
 
     static LogSerializer() {
-        SerializationSettings = new JsonSerializerSettings {
-            Formatting = Formatting.None,
-            NullValueHandling = NullValueHandling.Ignore,
-            DateFormatHandling = DateFormatHandling.IsoDateFormat,
-            DateTimeZoneHandling = DateTimeZoneHandling.Utc,
-            ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
-            Converters = { Converter }
+        SerializationSettings = new JsonSerializerOptions {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            ReferenceHandler = ReferenceHandler.IgnoreCycles,
+            Converters = {
+                GuidConverter.Instance,
+                LogJsonConverter.Instance,
+            }
         };
-    }
-
-    public static void AddLogType(string typeName, Type type) {
-        Converter.AddLogType(typeName, type);
     }
     
     public static string Serialize(LogContainer logContainer) {
-        return JsonConvert.SerializeObject(logContainer, SerializationSettings);
-    }
-
-    public static string Serialize(Log log) {
-        return JsonConvert.SerializeObject(log, SerializationSettings);
-    }
-    
-    public static LogContainer? DeserializeLogs(string json) {
-        return JsonConvert.DeserializeObject<LogContainer>(json, SerializationSettings);
+        return JsonSerializer.Serialize(logContainer, SerializationSettings);
     }
 }

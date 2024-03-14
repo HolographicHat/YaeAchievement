@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using YaeAchievement.AppCenterSDK.Models.Serialization;
 
 namespace YaeAchievement.AppCenterSDK.Models; 
 
-[JsonObject(JsonIdentifier)]
+[LogId(JsonIdentifier)]
 public class StartSessionLog : Log {
     public const string JsonIdentifier = "startSession";
 }

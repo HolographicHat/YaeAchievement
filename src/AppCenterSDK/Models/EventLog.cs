@@ -1,20 +1,14 @@
-﻿using Newtonsoft.Json;
+﻿using YaeAchievement.AppCenterSDK.Models.Serialization;
 
 namespace YaeAchievement.AppCenterSDK.Models; 
 
-[JsonObject(JsonIdentifier)]
-public class EventLog : LogWithProperties {
+[LogId(JsonIdentifier)]
+public class EventLog(string name) : LogWithProperties {
     
     public const string JsonIdentifier = "event";
 
-    public EventLog(string name) {
-        Name = name;
-    }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
-    [JsonProperty(PropertyName = "id")]
-    private Guid Id { get; set; } = Guid.NewGuid();
-
-    [JsonProperty(PropertyName = "name")]
-    private string Name { get; set; }
-
+    public string Name { get; set; } = name;
+    
 }

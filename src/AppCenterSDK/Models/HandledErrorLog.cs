@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using YaeAchievement.AppCenterSDK.Models.Serialization;
 
 namespace YaeAchievement.AppCenterSDK.Models; 
 
-[JsonObject(JsonIdentifier)]
+[LogId(JsonIdentifier)]
 public class HandledErrorLog : LogWithProperties {
     
     public const string JsonIdentifier = "handledError";
@@ -12,10 +12,8 @@ public class HandledErrorLog : LogWithProperties {
         Exception = exception;
     }
 
-    [JsonProperty(PropertyName = "id")]
     public Guid? Id { get; set; }
     
-    [JsonProperty(PropertyName = "exception")]
     public MException Exception { get; set; }
     
 }

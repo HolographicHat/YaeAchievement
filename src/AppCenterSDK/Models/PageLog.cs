@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using YaeAchievement.AppCenterSDK.Models.Serialization;
 
 namespace YaeAchievement.AppCenterSDK.Models; 
 
-[JsonObject(JsonIdentifier)]
+[LogId(JsonIdentifier)]
 public class PageLog : LogWithProperties {
     
     public const string JsonIdentifier = "page";
@@ -11,7 +11,6 @@ public class PageLog : LogWithProperties {
         Name = name;
     }
 
-    [JsonProperty(PropertyName = "name")]
     public string Name { get; set; }
     
 }

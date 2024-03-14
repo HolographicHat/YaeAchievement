@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using YaeAchievement.AppCenterSDK.Models.Serialization;
 
 namespace YaeAchievement.AppCenterSDK.Models; 
 
-[JsonObject(JsonIdentifier)]
+[LogId(JsonIdentifier)]
 public class StartServiceLog : Log {
     
     public const string JsonIdentifier = "startService";
@@ -11,7 +11,6 @@ public class StartServiceLog : Log {
         Services = services;
     }
     
-    [JsonProperty(PropertyName = "services")]
     public string[] Services { get; set; }
     
 }

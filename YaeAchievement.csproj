@@ -24,13 +24,11 @@
         <PackageReference Include="Google.Protobuf" Version="3.22.1" />
         <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.2.188-beta">
           <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Grpc.Tools" Version="2.53.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     </ItemGroup>
 
     <ItemGroup>
