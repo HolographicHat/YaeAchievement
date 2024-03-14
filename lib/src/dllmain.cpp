@@ -30,17 +30,17 @@ namespace Hook {
 		return new ByteArray {};
 	}
 	
-	void OnAchievementAllDataNotify(LPVOID obj, const LPVOID ntf) {
-		const auto cos = Genshin::il2cpp_object_new(*Genshin::CodedOutputStream__TypeInfo);
-		const auto len = Genshin::CalculateSize(ntf);
-		const auto buf = (ByteArray*) new uint8_t[0x20 + len] {};
-		buf->max_length = len;
-		Genshin::CodedOutputStreamInit(cos, buf, 0, len);
-		Genshin::ProtoWriteTo(ntf, cos);
-		const auto str = base64_encode(buf->vector, len) + "\n";
-		WriteFile(hPipe, str.c_str(), (DWORD) str.length(), nullptr, nullptr);
-		CloseHandle(hPipe);
-		ExitProcess(0);
+	uint16_t BitConverter_ToUInt16(ByteArray* val, const int startIndex) {
+		const auto ret = CALL_ORIGIN(BitConverter_ToUInt16, val, startIndex);
+		if (ret == 0xAB89 && ReadMapped<UINT16>(val->vector, 2) == 20248) {
+			const auto headLength = ReadMapped<UINT16>(val->vector, 4);
+			const auto dataLength = ReadMapped<UINT32>(val->vector, 6);
+			const auto cStr = base64_encode(val->vector + 10 + headLength, dataLength) + "\n";
+			WriteFile(hPipe, cStr.c_str(), (DWORD) cStr.length(), nullptr, nullptr);
+			CloseHandle(hPipe);
+			ExitProcess(0);
+		}
+		return ret;
 	}
 }
 
@@ -57,7 +57,7 @@ void Run(HMODULE* phModule) {
 		const auto result = Genshin::RecordUserData(i);
 		checksum += string(reinterpret_cast<char*>(&result->vector[0]), result->max_length);
 	}
-	HookManager::install(Genshin::OnAchievementAllDataNotify, Hook::OnAchievementAllDataNotify);
+	HookManager::install(Genshin::BitConverter_ToUInt16, Hook::BitConverter_ToUInt16);
 	HookManager::install(Genshin::UnityEngine_RecordUserData, Hook::UnityEngine_RecordUserData);
 	hPipe = CreateFile(R"(\\.\pipe\YaeAchievementPipe)", GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
 	if (hPipe == INVALID_HANDLE_VALUE) {
