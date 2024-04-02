@@ -11,7 +11,6 @@ using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Console;
 using Proto;
-using YaeAchievement.AppCenterSDK;
 using YaeAchievement.res;
 
 namespace YaeAchievement;
@@ -31,10 +30,9 @@ public static class Utils {
 
     public static byte[] GetBucketFileAsByteArray(string path, bool cache = true) {
         try {
-            using var msg = new HttpRequestMessage {
-                Method = HttpMethod.Get,
-                RequestUri = new Uri($"{GlobalVars.BucketHost}/{path}")
-            };
+            using var msg = new HttpRequestMessage();
+            msg.Method = HttpMethod.Get;
+            msg.RequestUri = new Uri($"{GlobalVars.BucketHost}/{path}");
             var cacheFile = new CacheFile(path);
             if (cache && cacheFile.Exists()) {
                 msg.Headers.TryAddWithoutValidation("If-None-Match", $"{cacheFile.Read().Etag}");
@@ -73,11 +71,11 @@ public static class Utils {
         if (Native.OpenClipboard(HWND.Null))
         {
             Native.EmptyClipboard();
-            var hGlobal = (HANDLE) Marshal.AllocHGlobal((text.Length + 1) * 2);
+            var hGlobal = (HGLOBAL) Marshal.AllocHGlobal((text.Length + 1) * 2);
             var hPtr = (nint) Native.GlobalLock(hGlobal);
             Marshal.Copy(text.ToCharArray(), 0, hPtr, text.Length);
-            Native.GlobalUnlock(hPtr);
-            Native.SetClipboardData(13, hGlobal);
+            Native.GlobalUnlock((HGLOBAL) hPtr);
+            Native.SetClipboardData(13,  new HANDLE(hPtr));
             Marshal.FreeHGlobal(hGlobal);
             Native.CloseClipboard();
         }
@@ -201,9 +199,6 @@ public static class Utils {
                     break;
                 default:
                     Console.WriteLine(ex.ToString());
-                    Console.WriteLine(App.UploadError);
-                    AppCenter.TrackCrash((Exception) e.ExceptionObject);
-                    AppCenter.Upload();
                     break;
             }
             Environment.Exit(-1);
@@ -312,12 +307,9 @@ public static class Utils {
             }
             await File.WriteAllBytesAsync(pkgPath, bytes);
             Console.WriteLine(App.VcRuntimeInstalling);
-            using var process = new Process {
-                StartInfo = {
-                    FileName = pkgPath,
-                    Arguments = "/install /passive /norestart"
-                }
-            };
+            using var process = new Process();
+            process.StartInfo.FileName = pkgPath;
+            process.StartInfo.Arguments = "/install /passive /norestart";
             process.Start();
             await process.WaitForExitAsync();
             File.Delete(pkgPath);

@@ -4,16 +4,12 @@ using Proto;
 
 namespace YaeAchievement; 
 
-public class CacheFile {
+public class CacheFile(string identifier) {
 
-    private readonly string _cacheName;
+    private readonly string _cacheName = Path.Combine(GlobalVars.CachePath, $"{identifier.MD5Hash()[..16]}.miko");
     private CacheItem? _content;
     
     public DateTime LastWriteTime => Exists() ? File.GetLastWriteTimeUtc(_cacheName) : DateTime.UnixEpoch;
-
-    public CacheFile(string identifier) {
-        _cacheName = Path.Combine(GlobalVars.CachePath, $"{identifier.MD5Hash()[..16]}.miko");
-    }
 
     public bool Exists() => File.Exists(_cacheName);
 

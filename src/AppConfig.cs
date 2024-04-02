@@ -3,7 +3,7 @@ using YaeAchievement.res;
 
 namespace YaeAchievement; 
 
-public static class AppConfig {
+public static partial class AppConfig {
     
     public static string GamePath { get; private set; } = null!;
 
@@ -52,11 +52,15 @@ public static class AppConfig {
         try {
             File.Delete(copiedLogFilePath);
         } catch (Exception) { /* ignore */}
-        var matchResult = Regex.Match(content, @"(?m).:/.+(GenshinImpact_Data|YuanShen_Data)");
+        var matchResult = GamePathRegex().Match(content);
         if (!matchResult.Success) {
             return null;
         }
         var entryName = matchResult.Groups["1"].Value.Replace("_Data", ".exe");
         return Path.GetFullPath(Path.Combine(matchResult.Value, "..", entryName));
     }
+
+    [GeneratedRegex(@"(?m).:/.+(GenshinImpact_Data|YuanShen_Data)")]
+    private static partial Regex GamePathRegex();
+    
 }

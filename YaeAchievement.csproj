@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net7.0-windows</TargetFramework>
+        <TargetFramework>net8.0-windows</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
@@ -21,11 +21,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Google.Protobuf" Version="3.22.1" />
-        <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.2.188-beta">
+        <PackageReference Include="Google.Protobuf" Version="3.26.1" />
+        <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.49-beta">
           <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="Grpc.Tools" Version="2.53.0">
+        <PackageReference Include="Grpc.Tools" Version="2.62.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

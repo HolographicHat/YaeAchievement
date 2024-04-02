@@ -6,7 +6,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Win32;
 using Proto;
-using YaeAchievement.AppCenterSDK;
 using YaeAchievement.res;
 using static Proto.Achievement.Types;
 
@@ -15,6 +14,10 @@ namespace YaeAchievement;
 public static class Export {
 
     public static uint ExportTo { get; set; } = uint.MaxValue;
+
+    private static readonly JsonSerializerOptions JsonOpts = new () {
+        WriteIndented = true
+    };
 
     public static void Choose(AchievementAllDataNotify data) {
         if (ExportTo == uint.MaxValue) {
@@ -40,16 +43,15 @@ public static class Export {
     }
 
     private class CocogoatResponse {
-        [JsonPropertyName("key")] public string Code { get; set; } = null!;
+        [JsonPropertyName("key")] public string Code { get; init; } = null!;
     }
     
     private static void ToCocogoat(AchievementAllDataNotify data) {
         var result = JsonSerializer.Serialize(ExportToUIAFApp(data));
-        using var request = new HttpRequestMessage {
-            Method = HttpMethod.Post,
-            RequestUri = new Uri($"https://77.cocogoat.cn/v1/memo?source={App.AllAchievement}"),
-            Content = new StringContent(result, Encoding.UTF8, "application/json")
-        };
+        using var request = new HttpRequestMessage();
+        request.Method = HttpMethod.Post;
+        request.RequestUri = new Uri($"https://77.cocogoat.cn/v1/memo?source={App.AllAchievement}");
+        request.Content = new StringContent(result, Encoding.UTF8, "application/json");
         using var response = Utils.CHttpClient.Send(request);
         if (response.StatusCode != HttpStatusCode.Created) {
             Console.WriteLine(App.ExportToCocogoatFail);
@@ -68,11 +70,10 @@ public static class Export {
             { "key", id },
             { "data", ExportToUIAFApp(data) }
         });
-        using var request = new HttpRequestMessage {
-            Method = HttpMethod.Post,
-            RequestUri = new Uri("https://api.qyinter.com/achievementRedis"),
-            Content = new StringContent(result, Encoding.UTF8, "application/json")
-        };
+        using var request = new HttpRequestMessage();
+        request.Method = HttpMethod.Post;
+        request.RequestUri = new Uri("https://api.qyinter.com/achievementRedis");
+        request.Content = new StringContent(result, Encoding.UTF8, "application/json");
         using var response = Utils.CHttpClient.Send(request);
         Console.WriteLine(App.ExportToWxApp1Success, id);
     }
@@ -100,7 +101,7 @@ public static class Export {
     }
 
     private static void ToTeyvatGuide(AchievementAllDataNotify data) {
-        if (Process.GetProcessesByName("TeyvatGuide").Any()) {
+        if (Process.GetProcessesByName("TeyvatGuide").Length != 0) {
             Utils.CopyToClipboard(JsonSerializer.Serialize(ExportToUIAFApp(data)));
             Utils.ShellOpen("teyvatguide://import_uigf?app=YaeAchievement");
             Console.WriteLine(App.ExportToTauriSuccess);
@@ -171,10 +172,10 @@ public static class Export {
                 finishAt = DateTimeOffset.FromUnixTimeSeconds(ts).ToLocalTime().ToString("yyyy/MM/dd HH:mm:ss");
             }
             var current = ach.Status != Status.Unfinished ? ach.Current == 0 ? ach.Total : ach.Current : ach.Current;
-            outList.Add(new List<object> {
-                ach.Id, ach.Status.ToDesc(), achInfo.Group, achInfo.Name, 
+            outList.Add([
+                ach.Id, ach.Status.ToDesc(), achInfo.Group, achInfo.Name,
                 achInfo.Description, current, ach.Total, finishAt
-            });
+            ]);
         }
         var output = new List<string> { "ID,状态,特辑,名称,描述,当前进度,目标进度,完成时间" };
         output.AddRange(outList.OrderBy(v => v[2]).Select(item => {
@@ -190,9 +191,7 @@ public static class Export {
 
     private static void ToRawJson(AchievementAllDataNotify data) {
         var path = Path.GetFullPath($"export-{DateTime.Now:yyyyMMddHHmmss}-raw.json");
-        var text = JsonSerializer.Serialize(data, new JsonSerializerOptions {
-            WriteIndented = true
-        });
+        var text = JsonSerializer.Serialize(data, JsonOpts);
         if (TryWriteToFile(path, text)) {
             Console.WriteLine(App.ExportToFileSuccess, path);
         }
@@ -220,6 +219,7 @@ public static class Export {
         };
     }
 
+    // ReSharper disable once InconsistentNaming
     private static bool CheckWinUIAppScheme(string protocol) {
         return (string?)Registry.ClassesRoot.OpenSubKey(protocol)?.GetValue("") == $"URL:{protocol}";
     }
@@ -228,7 +228,7 @@ public static class Export {
         return string.Join(separator, list);
     }
     
-    private static readonly List<uint> UnusedAchievement = new() { 84517 };
+    private static readonly List<uint> UnusedAchievement = [ 84517 ];
 
     private static string ToDesc(this Status status) {
         return status switch {
@@ -248,7 +248,6 @@ public static class Export {
     public static int PrintMsgAndReturnErrCode(this Win32Exception ex, string msg) {
         // ReSharper disable once LocalizableElement
         Console.WriteLine($"{msg}: {ex.Message}");
-        AppCenter.TrackCrash(ex, false);
         return ex.NativeErrorCode;
     }
 
