@@ -60,7 +60,7 @@ public static partial class AppConfig {
         return Path.GetFullPath(Path.Combine(matchResult.Value, "..", entryName));
     }
 
-    [GeneratedRegex(@"(?m).:/.+(GenshinImpact_Data|YuanShen_Data)")]
+    [GeneratedRegex(@"(?m).:/.+(GenshinImpact_Data|YuanShen_Data)", RegexOptions.IgnoreCase)]
     private static partial Regex GamePathRegex();
     
 }
