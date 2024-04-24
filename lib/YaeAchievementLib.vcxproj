@@ -105,7 +105,7 @@
       <AdditionalDependencies>detours-x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(TargetPath) $(ProjectDir)..\bin\Debug\net7.0-windows\win-x64\YaeAchievementLib.dll /y</Command>
+      <Command>copy $(TargetPath) $(ProjectDir)..\bin\Debug\net8.0-windows\win-x64\YaeAchievementLib.dll /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

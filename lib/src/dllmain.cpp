@@ -32,7 +32,7 @@ namespace Hook {
 	
 	uint16_t BitConverter_ToUInt16(ByteArray* val, const int startIndex) {
 		const auto ret = CALL_ORIGIN(BitConverter_ToUInt16, val, startIndex);
-		if (ret == 0xAB89 && ReadMapped<UINT16>(val->vector, 2) == 20248) {
+		if (ret == 0xAB89 && ReadMapped<UINT16>(val->vector, 2) == 1655) {
 			const auto headLength = ReadMapped<UINT16>(val->vector, 4);
 			const auto dataLength = ReadMapped<UINT32>(val->vector, 6);
 			const auto cStr = base64_encode(val->vector + 10 + headLength, dataLength) + "\n";
