@@ -1,7 +1,11 @@
-﻿using Proto;
+﻿using System.Text;
+using Proto;
 using YaeAchievement;
 using YaeAchievement.res;
 using static YaeAchievement.Utils;
+
+Console.InputEncoding = Encoding.UTF8;
+Console.OutputEncoding = Encoding.UTF8;
 
 TryDisableQuickEdit();
 InstallExitHook();
