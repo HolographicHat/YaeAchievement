@@ -6,9 +6,6 @@
 
 [简体中文](README.md) | English
    
-**I18n support currently in [snapshot version](https://github.com/HolographicHat/YaeAchievement/actions/)**   
-**Next release: 2022/09/28 (Genshin 3.1)**
-   
 </div>
 
 - Support for exporting all categories of achievements
