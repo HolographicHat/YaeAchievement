@@ -11,7 +11,7 @@ Click on the file named "YaeAchievement.exe" in the red box to automatically pop
 
 2.Install .NET Runtime 7 (this step can be ignored if the runtime is already installed)
 
-Click Here：https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-7.0.7-windows-x64-installer .
+Click Here：https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-8.0.4-windows-x64-installer .
 
 Or `winget install Microsoft.DotNet.Runtime.7` if you use Windows 11 or have Winget installed.
 

@@ -39,7 +39,7 @@
 
 ## Frequently asked questions
 0. Q: Unable to start   
-   A: Download and install [.NET Runtime 7](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-7.0.7-windows-x64-installer) or ` winget install Microsoft.DotNet.Runtime.7`
+   A: Download and install [.NET Runtime 7](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-8.0.4-windows-x64-installer) or ` winget install Microsoft.DotNet.Runtime.8`
  
 
 1. Q: Error while Genshin started: Data Exception (31-4302)   

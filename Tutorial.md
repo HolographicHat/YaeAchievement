@@ -10,7 +10,7 @@
 
 2.安装启动软件所需文件（若已安装该运行时可忽略此步骤）
 
-点击该网址：https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-7.0.3-windows-x64-installer 。
+点击该网址：https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-8.0.4-windows-x64-installer 。
 
 进入网页后浏览器会自动弹出下载，同样地，将文件保存在桌面或者其它易于寻找的文件夹内。
 
