@@ -112,7 +112,6 @@
     <ClInclude Include="src\HookManager.h" />
     <ClInclude Include="src\il2cpp-appdata.h" />
     <ClInclude Include="src\il2cpp-functions.h" />
-    <ClInclude Include="src\il2cpp-types-ptr.h" />
     <ClInclude Include="src\il2cpp-types.h" />
     <ClInclude Include="src\il2cpp-init.h" />
     <ClInclude Include="src\pch.h" />

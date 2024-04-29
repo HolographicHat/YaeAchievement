@@ -12,24 +12,12 @@ VOID DisableVMProtect() {
     VirtualProtect(pNtProtectVirtualMemory, 1, old, &old);
 }
 
-#pragma region StringConvert
-
-string ToString(Il2CppString* str, UINT codePage) {
-    auto chars = reinterpret_cast<const wchar_t*>(str->chars);
-    auto len = WideCharToMultiByte(codePage, 0, chars, -1, nullptr, 0, nullptr, nullptr);
-    auto buffer = new char[len];
-    WideCharToMultiByte(codePage, 0, chars, -1, buffer, len, nullptr, nullptr);
-    return string(buffer);
-}
-
-#pragma endregion
-
 #pragma region ByteUtils
 
 bool IsLittleEndian() {
     UINT i = 1;
     char* c = (char*)&i;
-    return (*c);
+    return *c;
 }
 
 #pragma endregion

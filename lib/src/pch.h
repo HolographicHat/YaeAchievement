@@ -14,12 +14,8 @@
 // 添加要在此处预编译的标头
 
 #include <map>
-#include <set>
 #include <string>
-#include <vector>
-#include <codecvt>
 #include <cstdint>
-#include <iostream>
 #include <detours.h>
 #include "HookManager.h"
 #include "il2cpp-appdata.h"

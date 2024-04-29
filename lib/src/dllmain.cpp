@@ -15,19 +15,19 @@ using Genshin::ByteArray;
 HWND unityWnd = nullptr;
 HANDLE hPipe  = nullptr;
 
+void* baClass;
 std::string checksum;
 
 namespace Hook {
 
 	ByteArray* UnityEngine_RecordUserData(const INT type) {
 		if (type == 0) {
-			const auto arr = new ByteArray {};
 			const auto len = checksum.length();
-			arr->max_length = len;
+			const auto arr = Genshin::il2cpp_array_new_specific(baClass, len);
 			memcpy(&arr->vector[0], checksum.data(), len);
 			return arr;
 		}
-		return new ByteArray {};
+		return Genshin::il2cpp_array_new_specific(baClass, 0);
 	}
 	
 	uint16_t BitConverter_ToUInt16(ByteArray* val, const int startIndex) {
@@ -52,13 +52,19 @@ void Run(HMODULE* phModule) {
 	}
 	Sleep(5000);
 	DisableVMProtect();
-	InitIL2CPP();
+	void* ppRecordUserData = nullptr;
+	InitIL2CPP(ppRecordUserData);
+	if (!ppRecordUserData) {
+		ErrorDialog("ppRecordUserData == nullptr\n");
+		ExitProcess(-1);
+	}
 	for (int i = 0; i < 3; i++) {
 		const auto result = Genshin::RecordUserData(i);
 		checksum += string(reinterpret_cast<char*>(&result->vector[0]), result->max_length);
+		baClass = result->klass;
 	}
 	HookManager::install(Genshin::BitConverter_ToUInt16, Hook::BitConverter_ToUInt16);
-	HookManager::install(Genshin::UnityEngine_RecordUserData, Hook::UnityEngine_RecordUserData);
+	*(void**) ppRecordUserData = (void*) &Hook::UnityEngine_RecordUserData;
 	hPipe = CreateFile(R"(\\.\pipe\YaeAchievementPipe)", GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
 	if (hPipe == INVALID_HANDLE_VALUE) {
 		Win32ErrorDialog(1001);
