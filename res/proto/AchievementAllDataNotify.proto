@@ -10,12 +10,12 @@ message Achievement {
     REWARD_TAKEN = 3;
   }
   uint32 timestamp = 13;
-  uint32 current = 6;
+  uint32 current = 15;
   uint32 total = 9;
-  uint32 id = 1;
-  Status status = 2;
+  uint32 id = 14;
+  Status status = 8;
 }
 
 message AchievementAllDataNotify {
-    repeated Achievement list = 11;
+    repeated Achievement list = 8;
 }

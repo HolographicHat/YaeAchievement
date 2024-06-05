@@ -32,7 +32,7 @@ namespace Hook {
 	
 	uint16_t BitConverter_ToUInt16(ByteArray* val, const int startIndex) {
 		const auto ret = CALL_ORIGIN(BitConverter_ToUInt16, val, startIndex);
-		if (ret == 0xAB89 && ReadMapped<UINT16>(val->vector, 2) == 1655) {
+		if (ret == 0xAB89 && ReadMapped<UINT16>(val->vector, 2) == 7450) {
 			const auto headLength = ReadMapped<UINT16>(val->vector, 4);
 			const auto dataLength = ReadMapped<UINT32>(val->vector, 6);
 			const auto cStr = base64_encode(val->vector + 10 + headLength, dataLength) + "\n";
@@ -45,8 +45,8 @@ namespace Hook {
 }
 
 void Run(HMODULE* phModule) {
-	//AllocConsole();
-	//freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
+	AllocConsole();
+	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
 	while ((unityWnd = FindMainWindowByPID(GetCurrentProcessId())) == nullptr) {
 		Sleep(1000);
 	}
@@ -63,6 +63,7 @@ void Run(HMODULE* phModule) {
 		checksum += string(reinterpret_cast<char*>(&result->vector[0]), result->max_length);
 		baClass = result->klass;
 	}
+	printf("Checksum=%s\n", checksum.c_str());
 	HookManager::install(Genshin::BitConverter_ToUInt16, Hook::BitConverter_ToUInt16);
 	*(void**) ppRecordUserData = (void*) &Hook::UnityEngine_RecordUserData;
 	hPipe = CreateFile(R"(\\.\pipe\YaeAchievementPipe)", GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
