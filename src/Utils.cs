@@ -293,7 +293,7 @@ public static class Utils {
                 }
             })
             .Select(item => item?.GetValue("DisplayName") as string ?? string.Empty)
-            .Any(name => name.Contains("Microsoft Visual C++ 2022 X64 "));
+            .Any(name => name.Contains("Microsoft Visual C++ 2022 X64 ") || name.Contains("Microsoft Visual C++ 2015-2022 Redistributable (x64)"));
         if (!installed) {
             Console.WriteLine(App.VcRuntimeDownload);
             var pkgPath = Path.Combine(GlobalVars.DataPath, "vc_redist.x64.exe");
