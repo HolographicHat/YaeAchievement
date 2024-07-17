@@ -20,8 +20,8 @@ public static class GlobalVars {
     public static readonly string CachePath = Path.Combine(DataPath, "cache");
     public static readonly string LibFilePath = Path.Combine(DataPath, "YaeAchievement.dll");
     
-    public const uint   AppVersionCode = 47;
-    public const string AppVersionName = "3.7";
+    public const uint   AppVersionCode = 48;
+    public const string AppVersionName = "3.8";
     
     public const string PipeName = "YaeAchievementPipe";
     public const string BucketHost = "https://cn-cd-1259389942.file.myqcloud.com";
