@@ -4,7 +4,7 @@
 
 ![GitHub](https://img.shields.io/badge/License-GPL--3.0-brightgreen?style=flat-square) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/HolographicHat/YaeAchievement?color=brightgreen&label=Release&style=flat-square) ![GitHub issues](https://img.shields.io/github/issues/HolographicHat/YaeAchievement?label=Issues&style=flat-square) ![Downloads](https://img.shields.io/github/downloads/HolographicHat/YaeAchievement/total?color=brightgreen&label=Downloads&style=flat-square) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
 
-[简体中文](README.md) | English
+[简体中文](README.md) | English | [日本語](README_JP.md)
    
 </div>
 
