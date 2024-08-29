@@ -9,8 +9,8 @@
 
 namespace YaeAchievement.res {
     using System;
-    
-    
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -22,15 +22,15 @@ namespace YaeAchievement.res {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class App {
-        
+   
         private static global::System.Resources.ResourceManager resourceMan;
-        
+   
         private static global::System.Globalization.CultureInfo resourceCulture;
-        
+   
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal App() {
         }
-        
+   
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
@@ -44,7 +44,7 @@ namespace YaeAchievement.res {
                 return resourceMan;
             }
         }
-        
+   
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
@@ -58,7 +58,7 @@ namespace YaeAchievement.res {
                 resourceCulture = value;
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to all achievement.
         /// </summary>
@@ -67,7 +67,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("AllAchievement", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Please close another instance..
         /// </summary>
@@ -76,7 +76,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("AnotherInstance", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to YaeAchievement ({0}).
         /// </summary>
@@ -85,7 +85,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("AppBanner", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to You need to login genshin impact before exporting..
         /// </summary>
@@ -94,7 +94,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("ConfigNeedStartGenshin", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Download: {0}.
         /// </summary>
@@ -103,7 +103,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("DownloadLink", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Network error ({0}: {1}).
         /// </summary>
@@ -112,9 +112,9 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("ExceptionNetwork", resourceCulture);
             }
         }
-        
+   
         /// <summary>
-        ///   Looks up a localized string similar to Export to: 
+        ///   Looks up a localized string similar to Export to:
         ///[0] Cocogoat (https://cocogoat.work/achievement, Default)
         ///[1] Snap.HuTao
         ///[2] Paimon.moe
@@ -130,7 +130,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("ExportChoose", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Fail, please contact developer to get help information.
         /// </summary>
@@ -139,7 +139,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("ExportToCocogoatFail", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Successfully exported to cocogoat..
         /// </summary>
@@ -148,7 +148,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("ExportToCocogoatSuccess", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Successfully exported to {0}.
         /// </summary>
@@ -157,7 +157,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("ExportToFileSuccess", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Please update Snap Hutao and retry..
         /// </summary>
@@ -166,7 +166,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("ExportToSnapGenshinNeedUpdate", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Successfully exported to Snap Hutao..
         /// </summary>
@@ -175,7 +175,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("ExportToSnapGenshinSuccess", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Please launch/update Teyvat Guide and retry..
         /// </summary>
@@ -184,7 +184,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("ExportToTauriFail", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Successfully exported to Teyvat Guide..
         /// </summary>
@@ -193,7 +193,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("ExportToTauriSuccess", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to {0}.
         /// </summary>
@@ -202,7 +202,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("ExportToWxApp1Success", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Please update xunkong and retry..
         /// </summary>
@@ -211,7 +211,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("ExportToXunkongNeedUpdate", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Successfully exported to xunkong..
         /// </summary>
@@ -220,7 +220,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("ExportToXunkongSuccess", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Game process start ({0}).
         /// </summary>
@@ -229,7 +229,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("GameLoading", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Game exited..
         /// </summary>
@@ -238,7 +238,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("GameProcessExit", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Please update genshin and retry..
         /// </summary>
@@ -247,7 +247,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("GenshinHashError", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Please close game before run this application. ({0}).
         /// </summary>
@@ -256,7 +256,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("GenshinIsRunning", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Network error:.
         /// </summary>
@@ -265,7 +265,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("NetworkError", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to No write permission on {0}..
         /// </summary>
@@ -274,7 +274,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("NoWritePermission", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Press any key to exit..
         /// </summary>
@@ -283,7 +283,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("PressKeyToExit", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Reward not taken.
         /// </summary>
@@ -292,7 +292,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("StatusFinished", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Invalid.
         /// </summary>
@@ -301,7 +301,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("StatusInvalid", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Finished.
         /// </summary>
@@ -310,7 +310,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("StatusRewardTaken", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Unfinished.
         /// </summary>
@@ -319,9 +319,9 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("StatusUnfinished", resourceCulture);
             }
         }
-        
+   
         /// <summary>
-        ///   Looks up a localized string similar to Description: 
+        ///   Looks up a localized string similar to Description:
         ///{0}.
         /// </summary>
         internal static string UpdateDescription {
@@ -329,7 +329,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("UpdateDescription", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Downloading update package....
         /// </summary>
@@ -338,7 +338,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("UpdateDownloading", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Has update: {0} =&gt; {1}.
         /// </summary>
@@ -347,7 +347,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("UpdateNewVersion", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
@@ -357,7 +357,7 @@ namespace YaeAchievement.res {
                 return ((byte[])(obj));
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Upload error to appcenter....
         /// </summary>
@@ -366,7 +366,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("UploadError", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Use previous fetched data? (yes|no).
         /// </summary>
@@ -375,7 +375,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("UsePreviousData", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Downloading Visual C++ Redistributable....
         /// </summary>
@@ -384,7 +384,7 @@ namespace YaeAchievement.res {
                 return ResourceManager.GetString("VcRuntimeDownload", resourceCulture);
             }
         }
-        
+   
         /// <summary>
         ///   Looks up a localized string similar to Installing Visual C++ Redistributable....
         /// </summary>

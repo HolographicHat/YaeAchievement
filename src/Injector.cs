@@ -7,7 +7,7 @@ using Windows.Win32.System.Threading;
 namespace YaeAchievement;
 
 public static class Injector {
-    
+
     public static unsafe bool CreateProcess(string path, out HANDLE hProc, out HANDLE hThread, out uint pid) {
         Span<char> cmdLines = stackalloc char[1]; // "\0"
         var si = new STARTUPINFOW {

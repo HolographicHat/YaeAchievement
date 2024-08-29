@@ -62,7 +62,7 @@ public static class Utils {
     public static uint? ToUIntOrNull(string? value) {
         return value != null ? uint.TryParse(value, out var result) ? result : null : null;
     }
-    
+
     public static bool ToBooleanOrFalse(string? value) {
         return value != null && bool.TryParse(value, out var result) && result;
     }
@@ -87,7 +87,7 @@ public static class Utils {
 
     // ReSharper disable once NotAccessedField.Local
     private static UpdateInfo _updateInfo = null!;
-    
+
     public static void CheckUpdate(bool useLocalLib) {
         var info = UpdateInfo.Parser.ParseFrom(GetBucketFileAsByteArray("schicksal/version"))!;
         if (GlobalVars.AppVersionCode < info.VersionCode) {
@@ -160,8 +160,8 @@ public static class Utils {
     public static void CheckGenshinIsRunning() {
         Process.EnterDebugMode();
         foreach (var process in Process.GetProcesses()) {
-            if (process.ProcessName is "GenshinImpact" or "YuanShen" 
-                && !process.HasExited 
+            if (process.ProcessName is "GenshinImpact" or "YuanShen"
+                && !process.HasExited
                 && process.MainWindowHandle != nint.Zero
             ) {
                 Console.WriteLine(App.GenshinIsRunning, process.Id);
@@ -170,10 +170,10 @@ public static class Utils {
         }
         Process.LeaveDebugMode();
     }
-    
+
     // ReSharper disable once InconsistentNaming
     private static Process? proc;
-    
+
     public static void InstallExitHook() {
         AppDomain.CurrentDomain.ProcessExit += (_, _) => {
             proc?.Kill();
@@ -222,7 +222,7 @@ public static class Utils {
             Environment.Exit(0);
         }
         AppDomain.CurrentDomain.ProcessExit += (_, _) => {
-            try { 
+            try {
                 File.Delete(GlobalVars.LibFilePath);
             } catch (Exception) { /* ignored */ }
         };

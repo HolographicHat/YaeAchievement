@@ -1,10 +1,10 @@
 ﻿using System.Text.RegularExpressions;
 using YaeAchievement.res;
 
-namespace YaeAchievement; 
+namespace YaeAchievement;
 
 public static partial class AppConfig {
-    
+
     public static string GamePath { get; private set; } = null!;
 
     internal static void Load(string argumentPath) {
@@ -36,8 +36,8 @@ public static partial class AppConfig {
             var osLastWriteTime = File.GetLastWriteTime(osLogPath);
             finalLogPath = cnLastWriteTime > osLastWriteTime ? cnLogPath : osLogPath;
         }
-        GamePath = GetGamePathFromLogFile(finalLogPath) 
-                   ?? GetGamePathFromLogFile($"{finalLogPath}.last") 
+        GamePath = GetGamePathFromLogFile(finalLogPath)
+                   ?? GetGamePathFromLogFile($"{finalLogPath}.last")
                    ?? throw new ApplicationException(App.ConfigNeedStartGenshin);
         pathCacheFile.Write(GamePath);
     }
@@ -62,5 +62,5 @@ public static partial class AppConfig {
 
     [GeneratedRegex(@"(?m).:/.+(GenshinImpact_Data|YuanShen_Data)", RegexOptions.IgnoreCase)]
     private static partial Regex GamePathRegex();
-    
+
 }

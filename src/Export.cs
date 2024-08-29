@@ -9,7 +9,7 @@ using Proto;
 using YaeAchievement.res;
 using static Proto.Achievement.Types;
 
-namespace YaeAchievement; 
+namespace YaeAchievement;
 
 public static class Export {
 
@@ -45,7 +45,7 @@ public static class Export {
     private class CocogoatResponse {
         [JsonPropertyName("key")] public string Code { get; init; } = null!;
     }
-    
+
     private static void ToCocogoat(AchievementAllDataNotify data) {
         var result = JsonSerializer.Serialize(ExportToUIAFApp(data));
         using var request = new HttpRequestMessage();
@@ -63,7 +63,7 @@ public static class Export {
             ? App.ExportToCocogoatSuccess
             : $"https://cocogoat.work/achievement?memo={responseJson.Code}");
     }
-    
+
     private static void ToWxApp1(AchievementAllDataNotify data) {
         var id = Guid.NewGuid().ToString("N").Substring(20, 8);
         var result = JsonSerializer.Serialize(new Dictionary<string, object> {
@@ -88,7 +88,7 @@ public static class Export {
             Utils.ShellOpen("ms-windows-store://pdp/?productid=9PH4NXJ2JN52");
         }
     }
-    
+
     private static void ToXunkong(AchievementAllDataNotify data) {
         if (CheckWinUIAppScheme("xunkong")) {
             Utils.CopyToClipboard(JsonSerializer.Serialize(ExportToUIAFApp(data)));
@@ -139,7 +139,7 @@ public static class Export {
             Console.WriteLine(App.ExportToFileSuccess, path);
         }
     }
-    
+
     private static void ToSeelie(AchievementAllDataNotify data) {
         var output = new Dictionary<uint, Dictionary<string, bool>>();
         foreach (var ach in data.List.Where(a => a.Status is Status.Finished or Status.RewardTaken)) {
@@ -227,7 +227,7 @@ public static class Export {
     private static string JoinToString(this IEnumerable<object> list, string separator) {
         return string.Join(separator, list);
     }
-    
+
     private static readonly List<uint> UnusedAchievement = [ 84517 ];
 
     private static string ToDesc(this Status status) {
