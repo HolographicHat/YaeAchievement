@@ -120,19 +120,14 @@ public static class Export {
     }
 
     private static void ToPaimon(AchievementAllDataNotify data) {
-        var info = LoadAchievementInfo();
-        var output = new Dictionary<uint, Dictionary<uint, bool>>();
-        foreach (var ach in data.List.Where(a => a.Status is Status.Finished or Status.RewardTaken)) {
-            if (!info.Items.TryGetValue(ach.Id, out var achInfo) || achInfo == null) {
-                Console.WriteLine($@"Unable to find {ach.Id} in metadata.");
-                continue;
-            }
-            var map = output.GetValueOrDefault(achInfo.Group, new Dictionary<uint, bool>());
-            map[ach.Id == 81222 ? 81219 : ach.Id] = true;
-            output[achInfo.Group] = map;
-        }
+        var info = LoadAchievementInfo().Items.ToDictionary(pair => pair.Key, pair => pair.Value.Group);
         var final = new Dictionary<string, Dictionary<uint, Dictionary<uint, bool>>> {
-            ["achievement"] = output.OrderBy(pair => pair.Key).ToDictionary(pair => pair.Key, pair => pair.Value)
+            ["achievement"] = data.List
+                .Where(achievement => achievement.Status is Status.Finished or Status.RewardTaken)
+                .Where(achievement => info.ContainsKey(achievement.Id))
+                .GroupBy(achievement => info[achievement.Id], achievement => achievement.Id)
+                .OrderBy(group => group.Key)
+                .ToDictionary(group => group.Key, group => group.ToDictionary(id => id, _ => true))
         };
         var path = Path.GetFullPath($"export-{DateTime.Now:yyyyMMddHHmmss}-paimon.json");
         if (TryWriteToFile(path, JsonSerializer.Serialize(final))) {
@@ -143,7 +138,7 @@ public static class Export {
     private static void ToSeelie(AchievementAllDataNotify data) {
         var output = new Dictionary<uint, Dictionary<string, bool>>();
         foreach (var ach in data.List.Where(a => a.Status is Status.Finished or Status.RewardTaken)) {
-            output[ach.Id == 81222 ? 81219 : ach.Id] = new Dictionary<string, bool> {
+            output[ach.Id] = new Dictionary<string, bool> {
                 ["done"] = true
             };
         }
