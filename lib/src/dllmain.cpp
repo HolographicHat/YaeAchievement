@@ -6,9 +6,12 @@
 // ReSharper disable CppDefaultCaseNotHandledInSwitchStatement
 // ReSharper disable CppClangTidyClangDiagnosticCastFunctionTypeStrict
 
-#include "pch.h"
+#include <Windows.h>
+#include <string>
+
 #include "util.h"
 #include "il2cpp-init.h"
+#include "il2cpp-types.h"
 
 using Genshin::ByteArray;
 
@@ -21,17 +24,18 @@ std::string checksum;
 namespace Hook {
 
 	ByteArray* UnityEngine_RecordUserData(const INT type) {
-		if (type == 0) {
+		/*if (type == 0) {
 			const auto len = checksum.length();
 			const auto arr = Genshin::il2cpp_array_new_specific(baClass, len);
 			memcpy(&arr->vector[0], checksum.data(), len);
 			return arr;
 		}
-		return Genshin::il2cpp_array_new_specific(baClass, 0);
+		return Genshin::il2cpp_array_new_specific(baClass, 0);*/
+		return {};
 	}
 	
 	uint16_t BitConverter_ToUInt16(ByteArray* val, const int startIndex) {
-		const auto ret = CALL_ORIGIN(BitConverter_ToUInt16, val, startIndex);
+		/*const auto ret = CALL_ORIGIN(BitConverter_ToUInt16, val, startIndex);
 		if (ret == 0xAB89 && ReadMapped<UINT16>(val->vector, 2) == 24082) {
 			const auto headLength = ReadMapped<UINT16>(val->vector, 4);
 			const auto dataLength = ReadMapped<UINT32>(val->vector, 6);
@@ -40,7 +44,8 @@ namespace Hook {
 			CloseHandle(hPipe);
 			ExitProcess(0);
 		}
-		return ret;
+		return ret;*/
+		return {};
 	}
 }
 
@@ -53,13 +58,13 @@ void Run(HMODULE* phModule) {
 	Sleep(5000);
 	DisableVMProtect();
 	InitIL2CPP();
-	for (int i = 0; i < 3; i++) {
+	/*for (int i = 0; i < 3; i++) {
 		const auto result = Genshin::RecordUserData(i);
 		checksum += string(reinterpret_cast<char*>(&result->vector[0]), result->max_length);
 		baClass = result->klass;
 	}
 	HookManager::install(Genshin::RecordUserData, Hook::UnityEngine_RecordUserData);
-	HookManager::install(Genshin::BitConverter_ToUInt16, Hook::BitConverter_ToUInt16);
+	HookManager::install(Genshin::BitConverter_ToUInt16, Hook::BitConverter_ToUInt16);*/
 	hPipe = CreateFile(R"(\\.\pipe\YaeAchievementPipe)", GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
 	if (hPipe == INVALID_HANDLE_VALUE) {
 		Win32ErrorDialog(1001);

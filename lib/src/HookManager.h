@@ -1,6 +1,7 @@
 #pragma once
 
-#include "pch.h"
+#include <detours.h>
+#include <map>
 
 #define CALL_ORIGIN(function, ...) \
 	HookManager::call(function, __func__, __VA_ARGS__)

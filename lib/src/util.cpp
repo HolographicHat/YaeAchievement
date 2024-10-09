@@ -1,4 +1,6 @@
-#include "pch.h"
+#include <Windows.h>
+#include <string>
+
 #include "util.h"
 
 VOID DisableVMProtect() {
