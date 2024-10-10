@@ -1,25 +1,17 @@
+// ReSharper disable CppClangTidyClangDiagnosticLanguageExtensionToken
 #pragma once
+#include <Windows.h>
+#include <type_traits>
 
-using std::string;
 
-VOID DisableVMProtect();
-bool IsLittleEndian();
-HWND FindMainWindowByPID(DWORD pid);
-std::string base64_encode(BYTE const* buf, unsigned int bufLen);
+namespace Util
+{
+	HWND FindMainWindowByPID(DWORD pid);
+	std::string Base64Encode(BYTE const* buf, unsigned int bufLen);
 
-#define ErrorDialogT(title, msg) MessageBox(unityWnd, msg, title, MB_OK | MB_ICONERROR | MB_SYSTEMMODAL)
-#define ErrorDialog(msg) ErrorDialogT("YaeAchievement", msg)
-#define Win32ErrorDialog(code) ErrorDialogT("YaeAchievement", ("CRITICAL ERROR!\nError code: " + std::to_string(GetLastError()) + "-"#code"\n\nPlease take the screenshot and contact developer by GitHub Issue to solve this problem\nNOT MIHOYO/COGNOSPHERE CUSTOMER SERVICE!").c_str())
+	void ErrorDialog(LPCSTR title, LPCSTR msg);
+	void ErrorDialog(LPCSTR msg);
+	void Win32ErrorDialog(DWORD code, DWORD winerrcode);
 
-template<class T>
-static T ReadMapped(void* data, int offset, bool littleEndian = false) {
-	char* cData = (char*)data;
-	T result = {};
-	if (IsLittleEndian() != littleEndian) {
-		for (int i = 0; i < sizeof(T); i++)
-			((char*)&result)[i] = cData[offset + sizeof(T) - i - 1];
-		return result;
-	}
-	memcpy(&result, cData + offset, sizeof(result));
-	return result;
+	
 }
