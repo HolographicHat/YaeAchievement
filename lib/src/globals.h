@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include <unordered_set>
 
 #define PROPERTY2(type, name, cn, os) \
 	type name##_cn = cn; \
@@ -16,11 +17,13 @@ namespace Globals
 	inline uintptr_t BaseAddress = 0;
 
 	// 5.1.0 - 24082
-	inline uint16_t CmdId = 24082; // use non-zero to override dynamic search
-	
+	inline uint16_t CmdId = 0; // use non-zero to override dynamic search
+	inline std::unordered_set<uint16_t> DynamicCmdIds;
+
 	class Offsets
 	{
 	public:
+		//PROPERTY2(uintptr_t, BitConverter_ToUInt16, 0, 0);
 		PROPERTY2(uintptr_t, BitConverter_ToUInt16, 0x0F826CF0, 0x0F825F10); // use non-zero to override dynamic search
 	};
 

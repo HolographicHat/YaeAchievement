@@ -2,6 +2,10 @@
 #include "util.h"
 #include "globals.h"
 
+#ifdef _DEBUG
+#pragma runtime_checks("", off)
+#endif
+
 #pragma region FindMainWindowByPID
 
 namespace
@@ -30,6 +34,31 @@ namespace
 		data.hwnd = handle;
 		return FALSE;
 	}
+
+	std::tuple<std::vector<uint8_t>, std::vector<bool>> PatternToBytes(const char* pattern)
+	{
+		std::vector<uint8_t> bytes;
+		std::vector<bool> maskBytes;
+
+		const auto start = const_cast<char*>(pattern);
+		const auto end = const_cast<char*>(pattern) + strlen(pattern);
+
+		for (auto current = start; current < end; ++current) {
+			if (*current == '?') {
+				++current;
+				if (*current == '?')
+					++current;
+				bytes.push_back(-1);
+				maskBytes.push_back(false);
+			}
+			else {
+				bytes.push_back(strtoul(current, &current, 16));
+				maskBytes.push_back(true);
+			}
+		}
+		return { bytes, maskBytes };
+	}
+
 }
 
 #pragma endregion
@@ -96,4 +125,58 @@ namespace Util
 
 		ErrorDialog("YaeAchievement", msg.c_str());
 	}
+
+	uintptr_t PatternScan(uintptr_t start, uintptr_t end, const char* pattern)
+	{
+		const auto [patternBytes, patternMask] = PatternToBytes(pattern);
+		const auto scanBytes = reinterpret_cast<uint8_t*>(start);
+
+		const auto patternSize = patternBytes.size();
+		const auto pBytes = patternBytes.data();
+
+		for (auto i = 0ul; i < end - start - patternSize; ++i) {
+			bool found = true;
+			for (auto j = 0ul; j < patternSize; ++j) {
+				if (scanBytes[i + j] != pBytes[j] && patternMask[j]) {
+					found = false;
+					break;
+				}
+			}
+			if (found) {
+				return reinterpret_cast<uintptr_t>(&scanBytes[i]);
+			}
+		}
+
+		return 0;
+	}
+
+	std::vector<uintptr_t> PatternScanAll(uintptr_t start, uintptr_t end, const char* pattern)
+	{
+		std::vector<uintptr_t> results;
+		const auto [patternBytes, patternMask] = PatternToBytes(pattern);
+		const auto scanBytes = reinterpret_cast<uint8_t*>(start);
+
+		const auto patternSize = patternBytes.size();
+		const auto pBytes = patternBytes.data();
+
+		for (auto i = 0ul; i < end - start - patternSize; ++i) {
+			bool found = true;
+			for (auto j = 0ul; j < patternSize; ++j) {
+				if (scanBytes[i + j] != pBytes[j] && patternMask[j]) {
+					found = false;
+					break;
+				}
+			}
+			if (found) {
+				results.push_back(reinterpret_cast<uintptr_t>(&scanBytes[i]));
+				i += patternSize - 1;
+			}
+		}
+
+		return results;
+	}
 }
+
+#ifdef _DEBUG
+#pragma runtime_checks("", restore)
+#endif

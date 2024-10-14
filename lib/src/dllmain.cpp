@@ -1,6 +1,7 @@
 ﻿// ReSharper disable CppClangTidyCertErr33C
 #include <Windows.h>
 #include <string>
+#include <future>
 #include <TlHelp32.h>
 
 #include "globals.h"
@@ -27,16 +28,34 @@ namespace Hook {
 
 		const auto packet = reinterpret_cast<PacketMeta*>(val->data());
 
+		auto CheckPacket = [](const PacketMeta* packet) -> bool {
+			const auto cmdid = _byteswap_ushort(packet->CmdId);
+			const auto dataLength = _byteswap_ulong(packet->DataLength);
+
+			if (dataLength < 500) {
+				return false;
+			}
+
+			if (CmdId != 0) {
+				return cmdid == CmdId;
+			}
+
+			return DynamicCmdIds.contains(cmdid);
+		};
+
 		using namespace Globals;
-		if (ret == 0xAB89 && _byteswap_ushort(packet->CmdId) == CmdId)
+		if (ret == 0xAB89 && CheckPacket(packet))
 		{
 			const auto headLength = _byteswap_ushort(packet->HeaderLength);
 			const auto dataLength = _byteswap_ulong(packet->DataLength);
 
+			printf("CmdId: %d\n", _byteswap_ushort(packet->CmdId));
+			printf("DataLength: %d\n", dataLength);
+
 			const auto base64 = Util::Base64Encode(packet->Data + headLength, dataLength) + "\n";
+			printf("Base64: %s\n", base64.c_str());
 
 #ifdef _DEBUG
-			printf("Base64: %s\n", base64.c_str());
 			system("pause");
 #endif
 
@@ -103,8 +122,7 @@ DWORD __stdcall ThreadProc(LPVOID hInstance)
 #endif
 	InitializeCriticalSection(&CriticalSection);
 
-	const auto hInitThread = CreateThread(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(InitIL2CPP), nullptr, 0,
-	                                      nullptr);
+	auto initFuture = std::async(std::launch::async, InitIL2CPP);
 
 	using namespace Globals;
 	const auto pid = GetCurrentProcessId();
@@ -113,19 +131,13 @@ DWORD __stdcall ThreadProc(LPVOID hInstance)
 		SwitchToThread();
 	}
 
-	if (!hInitThread) {
-		InitIL2CPP();
-	}
-	else {
-		WaitForSingleObject(hInitThread, INFINITE);
-		CloseHandle(hInitThread);
-	}
+	initFuture.get();
 	
 	MessagePipe = CreateFileA(R"(\\.\pipe\YaeAchievementPipe)", GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
 	if (MessagePipe == INVALID_HANDLE_VALUE)
 	{
 #ifdef _DEBUG
-		Util::ErrorDialog("Failed to open pipe");
+		printf("CreateFile failed: %d\n", GetLastError());
 #else
 		Util::Win32ErrorDialog(1001, GetLastError());
 		ExitProcess(0);
