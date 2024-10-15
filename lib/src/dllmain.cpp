@@ -1,82 +1,186 @@
-﻿// ReSharper disable CppCStyleCast
-// ReSharper disable CppInconsistentNaming
-// ReSharper disable CppClangTidyModernizeUseStdPrint
-// ReSharper disable CppClangTidyClangDiagnosticCastAlign
-// ReSharper disable CppClangTidyHicppMultiwayPathsCovered
-// ReSharper disable CppDefaultCaseNotHandledInSwitchStatement
-// ReSharper disable CppClangTidyClangDiagnosticCastFunctionTypeStrict
+﻿// ReSharper disable CppClangTidyCertErr33C
+#include <Windows.h>
+#include <string>
+#include <future>
+#include <TlHelp32.h>
 
-#include "pch.h"
+#include "globals.h"
 #include "util.h"
 #include "il2cpp-init.h"
+#include "il2cpp-types.h"
 
-using Genshin::ByteArray;
-
-HWND unityWnd = nullptr;
-HANDLE hPipe  = nullptr;
-
-void* baClass;
-std::string checksum;
+CRITICAL_SECTION CriticalSection;
+void SetBreakpoint(HANDLE thread, uintptr_t address, bool enable, uint8_t index = 0);
 
 namespace Hook {
 
-	ByteArray* UnityEngine_RecordUserData(const INT type) {
-		if (type == 0) {
-			const auto len = checksum.length();
-			const auto arr = Genshin::il2cpp_array_new_specific(baClass, len);
-			memcpy(&arr->vector[0], checksum.data(), len);
-			return arr;
-		}
-		return Genshin::il2cpp_array_new_specific(baClass, 0);
-	}
-	
-	uint16_t BitConverter_ToUInt16(ByteArray* val, const int startIndex) {
-		const auto ret = CALL_ORIGIN(BitConverter_ToUInt16, val, startIndex);
-		if (ret == 0xAB89 && ReadMapped<UINT16>(val->vector, 2) == 24082) {
-			const auto headLength = ReadMapped<UINT16>(val->vector, 4);
-			const auto dataLength = ReadMapped<UINT32>(val->vector, 6);
-			const auto cStr = base64_encode(val->vector + 10 + headLength, dataLength) + "\n";
-			WriteFile(hPipe, cStr.c_str(), (DWORD) cStr.length(), nullptr, nullptr);
-			CloseHandle(hPipe);
+
+	uint16_t __fastcall BitConverter_ToUInt16(Array<uint8_t>* val, const int startIndex) 
+	{
+		using namespace Globals;
+		const auto ToUInt16 = reinterpret_cast<decltype(&BitConverter_ToUInt16)>(Offset.BitConverter_ToUInt16);
+
+		EnterCriticalSection(&CriticalSection);
+		SetBreakpoint((HANDLE)-2, 0, false);
+		const auto ret = ToUInt16(val, startIndex);
+		SetBreakpoint((HANDLE)-2, Offset.BitConverter_ToUInt16, true);
+		LeaveCriticalSection(&CriticalSection);
+
+		const auto packet = reinterpret_cast<PacketMeta*>(val->data());
+
+		auto CheckPacket = [](const PacketMeta* packet) -> bool {
+			const auto cmdid = _byteswap_ushort(packet->CmdId);
+			const auto dataLength = _byteswap_ulong(packet->DataLength);
+
+			if (dataLength < 500) {
+				return false;
+			}
+
+			if (CmdId != 0) {
+				return cmdid == CmdId;
+			}
+
+			return DynamicCmdIds.contains(cmdid);
+		};
+
+		using namespace Globals;
+		if (ret == 0xAB89 && CheckPacket(packet))
+		{
+			const auto headLength = _byteswap_ushort(packet->HeaderLength);
+			const auto dataLength = _byteswap_ulong(packet->DataLength);
+
+			printf("CmdId: %d\n", _byteswap_ushort(packet->CmdId));
+			printf("DataLength: %d\n", dataLength);
+
+			const auto base64 = Util::Base64Encode(packet->Data + headLength, dataLength) + "\n";
+			printf("Base64: %s\n", base64.c_str());
+
+#ifdef _DEBUG
+			system("pause");
+#endif
+
+			WriteFile(MessagePipe, base64.c_str(), (DWORD)base64.length(), nullptr, nullptr);
+			CloseHandle(MessagePipe);
 			ExitProcess(0);
 		}
+
 		return ret;
 	}
 }
 
-void Run(HMODULE* phModule) {
-	//AllocConsole();
-	//freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
-	while ((unityWnd = FindMainWindowByPID(GetCurrentProcessId())) == nullptr) {
-		Sleep(1000);
+LONG __stdcall VectoredExceptionHandler(PEXCEPTION_POINTERS ep)
+{
+	using namespace Globals;
+	const auto exceptionRecord = ep->ExceptionRecord;
+	const auto contextRecord = ep->ContextRecord;
+
+	if (exceptionRecord->ExceptionCode == EXCEPTION_SINGLE_STEP)
+	{
+		if (exceptionRecord->ExceptionAddress != reinterpret_cast<void*>(Offset.BitConverter_ToUInt16)) {
+			return EXCEPTION_CONTINUE_SEARCH;
+		}
+
+		contextRecord->Rip = reinterpret_cast<DWORD64>(Hook::BitConverter_ToUInt16);
+		contextRecord->EFlags &= ~0x100; // clear the trap flag
+		return EXCEPTION_CONTINUE_EXECUTION;
 	}
-	Sleep(5000);
-	DisableVMProtect();
-	InitIL2CPP();
-	for (int i = 0; i < 3; i++) {
-		const auto result = Genshin::RecordUserData(i);
-		checksum += string(reinterpret_cast<char*>(&result->vector[0]), result->max_length);
-		baClass = result->klass;
+
+	return EXCEPTION_CONTINUE_SEARCH;
+}
+
+void SetBreakpoint(HANDLE thread, uintptr_t address, bool enable, uint8_t index)
+{
+	using namespace Globals;
+
+	if (index > 3) {
+		return;
 	}
-	HookManager::install(Genshin::RecordUserData, Hook::UnityEngine_RecordUserData);
-	HookManager::install(Genshin::BitConverter_ToUInt16, Hook::BitConverter_ToUInt16);
-	hPipe = CreateFile(R"(\\.\pipe\YaeAchievementPipe)", GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
-	if (hPipe == INVALID_HANDLE_VALUE) {
-		Win32ErrorDialog(1001);
+
+	if (!BaseAddress || Offset.BitConverter_ToUInt16 <= BaseAddress) {
+		// not initialized yet
+		return;
+	}
+
+	CONTEXT ctx{};
+	ctx.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+	GetThreadContext(thread, &ctx);
+
+	DWORD64* dr = &ctx.Dr0;
+	dr[index] = enable ? address : 0;
+
+	const auto mask = 1ull << (index * 2);
+	ctx.Dr7 |= mask;
+
+	SetThreadContext(thread, &ctx);
+}
+
+DWORD __stdcall ThreadProc(LPVOID hInstance) 
+{
+#ifdef _DEBUG
+	AllocConsole();
+	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
+#endif
+	InitializeCriticalSection(&CriticalSection);
+
+	auto initFuture = std::async(std::launch::async, InitIL2CPP);
+
+	using namespace Globals;
+	const auto pid = GetCurrentProcessId();
+
+    while ((GameWindow = Util::FindMainWindowByPID(pid)) == nullptr) {
+		SwitchToThread();
+	}
+
+	initFuture.get();
+	
+	MessagePipe = CreateFileA(R"(\\.\pipe\YaeAchievementPipe)", GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
+	if (MessagePipe == INVALID_HANDLE_VALUE)
+	{
+#ifdef _DEBUG
+		printf("CreateFile failed: %d\n", GetLastError());
+#else
+		Util::Win32ErrorDialog(1001, GetLastError());
 		ExitProcess(0);
+#endif
 	}
+
+	AddVectoredExceptionHandler(1, VectoredExceptionHandler);
+	while (true)
+	{
+		THREADENTRY32 te32{};
+		te32.dwSize = sizeof(THREADENTRY32);
+		const auto hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+		for (Thread32First(hSnapshot, &te32); Thread32Next(hSnapshot, &te32);)
+		{
+			if (te32.th32OwnerProcessID != pid) {
+				continue;
+			}
+
+			if (const auto hThread = OpenThread(THREAD_ALL_ACCESS, FALSE, te32.th32ThreadID))
+			{
+				EnterCriticalSection(&CriticalSection);
+				SetBreakpoint(hThread, Offset.BitConverter_ToUInt16, true);
+				CloseHandle(hThread);
+				LeaveCriticalSection(&CriticalSection);
+			}
+		}
+		CloseHandle(hSnapshot);
+		Sleep(1);
+	}
+
+	return 0;
 }
 
 // DLL entry point
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ulReasonForCall, LPVOID lpReserved) {
-	switch (ulReasonForCall) {
-	case DLL_PROCESS_ATTACH:
-		CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Run, new HMODULE(hModule), 0, NULL);
-		break;
-	case DLL_THREAD_ATTACH:
-	case DLL_THREAD_DETACH:
-	case DLL_PROCESS_DETACH:
-		break;
+BOOL __stdcall DllMain(HMODULE hInstance, DWORD fdwReason, LPVOID lpReserved)
+{
+
+	if (fdwReason == DLL_PROCESS_ATTACH)
+	{
+		if (const auto hThread = CreateThread(nullptr, 0, ThreadProc, hInstance, 0, nullptr)) {
+			CloseHandle(hThread);
+		}
 	}
+
 	return TRUE;
 }
