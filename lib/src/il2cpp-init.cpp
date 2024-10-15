@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <future>
 #include <mutex>
+#include <immintrin.h>
 
 #include "globals.h"
 #include "Zydis.h"
@@ -222,33 +223,36 @@ namespace
 		const auto sectionEnd = sectionAddress + sectionSize;
 
 		int32_t count = 0;
+		const __m128i callOpcode = _mm_set1_epi8(0xE8);
+		const size_t simdEnd = sectionSize / 16 * 16;
 
-		ZydisDecoder decoder{};
-		ZydisDecoderInit(&decoder, ZYDIS_MACHINE_MODE_LONG_64, ZYDIS_STACK_WIDTH_64);
+		for (size_t i = 0; i < simdEnd; i += 16) {
+			// load 16 bytes from the current address
+			const __m128i chunk = _mm_loadu_si128((__m128i*)(sectionAddress + i));
 
-		ZydisDecodedInstruction instruction{};
-		ZydisDecoderContext context{};
+			// compare the loaded chunk with 0xE8 in all 16 bytes
+			const __m128i result = _mm_cmpeq_epi8(chunk, callOpcode);
 
-		auto rip = (uint8_t*)sectionAddress;
-		while (rip < (uint8_t*)sectionEnd)
-		{
-			auto status = ZydisDecoderDecodeInstruction(&decoder, &context, rip, ZYDIS_MAX_INSTRUCTION_LENGTH, &instruction);
-			if (!ZYAN_SUCCESS(status))
-			{
-				rip += 1;
-				continue;
-			}
+			// move the comparison results into a mask
+			int mask = _mm_movemask_epi8(result);
 
-			if (instruction.mnemonic == ZYDIS_MNEMONIC_CALL)
-			{
-				const auto offset = *(int32_t*)(rip + 1);
-				const auto destination = rip + 5 + offset;
-				if (destination == target) {
+			while (mask != 0) {
+				DWORD first_match_idx = 0;
+				_BitScanForward(&first_match_idx, mask); // index of the first set bit (match)
+
+				// index of the instruction
+				const size_t instruction_index = i + first_match_idx;
+
+				const int32_t delta = *(int32_t*)(sectionAddress + instruction_index + 1);
+				const uintptr_t dest = sectionAddress + instruction_index + 5 + delta;
+
+				if (dest == (uintptr_t)target) {
 					count++;
 				}
-			}
 
-			rip += instruction.length;
+				// clear the bit we just processed and continue with the next match
+				mask &= ~(1 << first_match_idx);
+			}
 		}
 
 		return count;
@@ -277,11 +281,6 @@ namespace
 		return address;
 	}
 
-	/// <summary>
-	/// can be very slow to resolve on low-end machine,
-	/// consider updating static offset after it is resolved in development environment
-	/// </summary>
-	/// <returns></returns>
 	uintptr_t Resolve_BitConverter_ToUInt16()
 	{
 		size_t sectionSize;

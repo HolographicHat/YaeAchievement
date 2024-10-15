@@ -23,8 +23,8 @@ namespace Globals
 	class Offsets
 	{
 	public:
-		//PROPERTY2(uintptr_t, BitConverter_ToUInt16, 0, 0);
-		PROPERTY2(uintptr_t, BitConverter_ToUInt16, 0x0F826CF0, 0x0F825F10); // use non-zero to override dynamic search
+		PROPERTY2(uintptr_t, BitConverter_ToUInt16, 0, 0);
+		//PROPERTY2(uintptr_t, BitConverter_ToUInt16, 0x0F826CF0, 0x0F825F10); // use non-zero to override dynamic search
 	};
 
 	inline Offsets Offset;
