@@ -48,15 +48,11 @@
     <IntDir>build\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>YaeLib</TargetName>
     <GenerateManifest>false</GenerateManifest>
-    <IncludePath>$(ProjectDir)vendor\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)vendor\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)build\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>build\$(Platform)\$(Configuration)\</IntDir>
     <GenerateManifest>false</GenerateManifest>
-    <IncludePath>$(ProjectDir)vendor\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)vendor\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -70,7 +66,6 @@
     <Link>
       <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
-      <AdditionalDependencies>Zycored.lib;Zydisd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy $(TargetPath) $(ProjectDir)..\bin\Debug\net6.0</Command>
@@ -94,7 +89,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
-      <AdditionalDependencies>Zydis.lib;Zycore.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy $(TargetPath) $(ProjectDir)..\bin\Debug\net8.0-windows\win-x64\YaeAchievementLib.dll /y</Command>
@@ -105,11 +99,13 @@
     <ClInclude Include="src\il2cpp-types.h" />
     <ClInclude Include="src\il2cpp-init.h" />
     <ClInclude Include="src\util.h" />
+    <ClInclude Include="src\Zydis.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\dllmain.cpp" />
     <ClCompile Include="src\il2cpp-init.cpp" />
     <ClCompile Include="src\util.cpp" />
+    <ClCompile Include="src\Zydis.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

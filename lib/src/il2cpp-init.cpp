@@ -10,7 +10,7 @@
 #include <mutex>
 
 #include "globals.h"
-#include <Zydis/Zydis.h>
+#include "Zydis.h"
 #include "util.h"
 
 namespace
@@ -130,7 +130,7 @@ namespace
 			const auto& op = instr.Operands[1];
 
 			// access to memory, based off of rip, 32-bit displacement
-			return op.type == ZYDIS_OPERAND_TYPE_MEMORY && op.mem.base == ZYDIS_REGISTER_RIP && op.mem.disp.size == 32;
+			return op.type == ZYDIS_OPERAND_TYPE_MEMORY && op.mem.base == ZYDIS_REGISTER_RIP && op.mem.disp.has_displacement;
 		}));
 	}
 
