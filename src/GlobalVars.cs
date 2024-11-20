@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Proto;
 
 namespace YaeAchievement;
 
@@ -25,6 +26,9 @@ public static class GlobalVars {
 
     public const string PipeName = "YaeAchievementPipe";
     public const string BucketHost = "https://cn-cd-1259389942.file.myqcloud.com";
+
+    public static AchievementInfo AchievementInfo { get; } 
+        = AchievementInfo.Parser.ParseFrom(Utils.GetBucketFileAsByteArray("schicksal/metadata"));
 
     static GlobalVars() {
         Directory.CreateDirectory(DataPath);

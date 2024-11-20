@@ -93,7 +93,7 @@ public static class Utils {
         if (GlobalVars.AppVersionCode < info.VersionCode) {
             Console.WriteLine(App.UpdateNewVersion, GlobalVars.AppVersionName, info.VersionName);
             Console.WriteLine(App.UpdateDescription, info.Description);
-            if (info.EnableAutoDownload) {
+            if (info.EnableAutoUpdate) {
                 Console.WriteLine(App.UpdateDownloading);
                 var tmpPath = Path.GetTempFileName();
                 File.WriteAllBytes(tmpPath, GetBucketFileAsByteArray(info.PackageLink));
@@ -205,22 +205,8 @@ public static class Utils {
         };
     }
 
-    private static bool CheckGenshinIsLatestVersion(string path) {
-        #if DEBUG
-        return true;
-        #else
-        if (!File.Exists(path)) return false;
-        var hash = File.ReadAllBytes(path).MD5Hash();
-        return hash == _updateInfo.CurrentCNGameHash || hash == _updateInfo.CurrentOSGameHash;
-        #endif
-    }
-
     // ReSharper disable once UnusedMethodReturnValue.Global
     public static Thread StartAndWaitResult(string exePath, Func<string, bool> onReceive) {
-        if (!CheckGenshinIsLatestVersion(exePath)) {
-            Console.WriteLine(App.GenshinHashError);
-            Environment.Exit(0);
-        }
         AppDomain.CurrentDomain.ProcessExit += (_, _) => {
             try {
                 File.Delete(GlobalVars.LibFilePath);

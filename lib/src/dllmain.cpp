@@ -132,7 +132,7 @@ DWORD __stdcall ThreadProc(LPVOID hInstance)
 	}
 
 	initFuture.get();
-	
+
 	MessagePipe = CreateFileA(R"(\\.\pipe\YaeAchievementPipe)", GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
 	if (MessagePipe == INVALID_HANDLE_VALUE)
 	{

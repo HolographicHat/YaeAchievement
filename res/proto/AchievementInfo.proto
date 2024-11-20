@@ -2,6 +2,14 @@ syntax = "proto3";
 
 option csharp_namespace = "Proto";
 
+message AchievementProtoFieldInfo {
+    uint32 id = 1;
+    uint32 status = 2;
+    uint32 total_progress = 3;
+    uint32 current_progress = 4;
+    uint32 finish_timestamp = 5;
+}
+
 message AchievementItem {
     uint32 pre = 1;
     uint32 group = 2;
@@ -13,4 +21,5 @@ message AchievementInfo {
     string version = 1;
     map<uint32, string> group = 2;
     map<uint32, AchievementItem> items = 3;
+    AchievementProtoFieldInfo pb_info = 4;
 }

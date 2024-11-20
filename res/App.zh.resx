@@ -127,4 +127,7 @@
     <data name="ExportToTauriSuccess" xml:space="preserve">
         <value>在 Teyvat Guide 进行下一步操作</value>
     </data>
+    <data name="WaitMetadataUpdate" xml:space="preserve">
+        <value>当前元数据版本不匹配，请更新原神至最新版本或等待元数据更新后重试。</value>
+    </data>
 </root>

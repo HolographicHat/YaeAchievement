@@ -5,9 +5,8 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Win32;
-using Proto;
+using YaeAchievement.Parsers;
 using YaeAchievement.res;
-using static Proto.Achievement.Types;
 
 namespace YaeAchievement;
 
@@ -120,10 +119,10 @@ public static class Export {
     }
 
     private static void ToPaimon(AchievementAllDataNotify data) {
-        var info = LoadAchievementInfo().Items.ToDictionary(pair => pair.Key, pair => pair.Value.Group);
+        var info = GlobalVars.AchievementInfo.Items.ToDictionary(pair => pair.Key, pair => pair.Value.Group);
         var final = new Dictionary<string, Dictionary<uint, Dictionary<uint, bool>>> {
-            ["achievement"] = data.List
-                .Where(achievement => achievement.Status is Status.Finished or Status.RewardTaken)
+            ["achievement"] = data.AchievementList
+                .Where(achievement => achievement.Status is AchievementStatus.Finished or AchievementStatus.RewardTaken)
                 .Where(achievement => info.ContainsKey(achievement.Id))
                 .GroupBy(achievement => info[achievement.Id], achievement => achievement.Id)
                 .OrderBy(group => group.Key)
@@ -137,7 +136,7 @@ public static class Export {
 
     private static void ToSeelie(AchievementAllDataNotify data) {
         var output = new Dictionary<uint, Dictionary<string, bool>>();
-        foreach (var ach in data.List.Where(a => a.Status is Status.Finished or Status.RewardTaken)) {
+        foreach (var ach in data.AchievementList.Where(a => a.Status is AchievementStatus.Finished or AchievementStatus.RewardTaken)) {
             output[ach.Id] = new Dictionary<string, bool> {
                 ["done"] = true
             };
@@ -153,23 +152,25 @@ public static class Export {
 
     // ReSharper disable once InconsistentNaming
     private static void ToCSV(AchievementAllDataNotify data) {
-        var info = LoadAchievementInfo();
+        var info = GlobalVars.AchievementInfo;
         var outList = new List<List<object>>();
-        foreach (var ach in data.List.OrderBy(a => a.Id)) {
+        foreach (var ach in data.AchievementList.OrderBy(a => a.Id)) {
             if (UnusedAchievement.Contains(ach.Id)) continue;
             if (!info.Items.TryGetValue(ach.Id, out var achInfo) || achInfo == null) {
                 Console.WriteLine($@"Unable to find {ach.Id} in metadata.");
                 continue;
             }
             var finishAt = "";
-            if (ach.Timestamp != 0) {
-                var ts = Convert.ToInt64(ach.Timestamp);
+            if (ach.FinishTimestamp != 0) {
+                var ts = Convert.ToInt64(ach.FinishTimestamp);
                 finishAt = DateTimeOffset.FromUnixTimeSeconds(ts).ToLocalTime().ToString("yyyy/MM/dd HH:mm:ss");
             }
-            var current = ach.Status != Status.Unfinished ? ach.Current == 0 ? ach.Total : ach.Current : ach.Current;
+            var current = ach.Status != AchievementStatus.Unfinished
+                ? ach.CurrentProgress == 0 ? ach.TotalProgress : ach.CurrentProgress
+                : ach.CurrentProgress;
             outList.Add([
                 ach.Id, ach.Status.ToDesc(), achInfo.Group, achInfo.Name,
-                achInfo.Description, current, ach.Total, finishAt
+                achInfo.Description, current, ach.TotalProgress, finishAt
             ]);
         }
         var output = new List<string> { "ID,状态,特辑,名称,描述,当前进度,目标进度,完成时间" };
@@ -194,13 +195,13 @@ public static class Export {
 
     // ReSharper disable once InconsistentNaming
     private static Dictionary<string, object> ExportToUIAFApp(AchievementAllDataNotify data) {
-        var output = data.List
-            .Where(a => (uint)a.Status > 1 || a.Current > 0)
+        var output = data.AchievementList
+            .Where(a => (uint)a.Status > 1 || a.CurrentProgress > 0)
             .Select(ach => new Dictionary<string, uint> {
                 ["id"] = ach.Id,
                 ["status"] = (uint) ach.Status,
-                ["current"] = ach.Current,
-                ["timestamp"] = ach.Timestamp
+                ["current"] = ach.CurrentProgress,
+                ["timestamp"] = ach.FinishTimestamp
             })
             .ToList();
         return new Dictionary<string, object> {
@@ -225,19 +226,14 @@ public static class Export {
 
     private static readonly List<uint> UnusedAchievement = [ 84517 ];
 
-    private static string ToDesc(this Status status) {
+    private static string ToDesc(this AchievementStatus status) {
         return status switch {
-            Status.Invalid => App.StatusInvalid,
-            Status.Finished => App.StatusFinished,
-            Status.Unfinished => App.StatusUnfinished,
-            Status.RewardTaken => App.StatusRewardTaken,
+            AchievementStatus.Invalid => App.StatusInvalid,
+            AchievementStatus.Finished => App.StatusFinished,
+            AchievementStatus.Unfinished => App.StatusUnfinished,
+            AchievementStatus.RewardTaken => App.StatusRewardTaken,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, null)
         };
-    }
-
-    private static AchievementInfo LoadAchievementInfo() {
-        var b = Utils.GetBucketFileAsByteArray("schicksal/metadata");
-        return AchievementInfo.Parser.ParseFrom(b);
     }
 
     public static int PrintMsgAndReturnErrCode(this Win32Exception ex, string msg) {

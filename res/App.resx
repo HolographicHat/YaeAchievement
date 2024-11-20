@@ -137,4 +137,7 @@ Input a number (0-8): </value>
     <data name="ExportToTauriFail" xml:space="preserve">
         <value>Please launch/update Teyvat Guide and retry.</value>
     </data>
+    <data name="WaitMetadataUpdate" xml:space="preserve">
+        <value>Please update game and retry.</value>
+    </data>
 </root>

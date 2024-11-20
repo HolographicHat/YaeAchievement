@@ -1,6 +1,6 @@
 ﻿using System.Text;
-using Proto;
 using YaeAchievement;
+using YaeAchievement.Parsers;
 using YaeAchievement.res;
 using static YaeAchievement.Utils;
 
@@ -29,7 +29,7 @@ var historyCache = new CacheFile("ExportData");
 
 AchievementAllDataNotify? data = null;
 try {
-    data = AchievementAllDataNotify.Parser.ParseFrom(historyCache.Read().Content);
+    data = AchievementAllDataNotify.ParseFrom(historyCache.Read().Content.ToByteArray());
 } catch (Exception) { /* ignored */ }
 
 if (historyCache.LastWriteTime.AddMinutes(60) > DateTime.UtcNow && data != null) {
@@ -43,7 +43,7 @@ if (historyCache.LastWriteTime.AddMinutes(60) > DateTime.UtcNow && data != null)
 StartAndWaitResult(AppConfig.GamePath, str => {
     GlobalVars.UnexpectedExit = false;
     var bytes = Convert.FromBase64String(str);
-    var list = AchievementAllDataNotify.Parser.ParseFrom(bytes);
+    var list = AchievementAllDataNotify.ParseFrom(bytes);
     historyCache.Write(bytes);
     Export.Choose(list);
     return true;
