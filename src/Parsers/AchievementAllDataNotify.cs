@@ -27,23 +27,37 @@ public class AchievementAllDataNotify {
 
     public static AchievementAllDataNotify ParseFrom(byte[] bytes) {
         using var stream = new CodedInputStream(bytes);
-        uint tag;
         var data = new List<Dictionary<uint, uint>>();
-        while ((tag = stream.ReadTag()) != 0) {
-            if ((tag & 7) == 2) { // is LengthDelimited
-                var dict = new Dictionary<uint, uint>();
-                using var eStream = new CodedInputStream(ReadRawBytes(stream, stream.ReadLength()));
-                while ((tag = eStream.ReadTag()) != 0) {
-                    if ((tag & 7) != 0) { // not VarInt
-                        dict = null;
-                        break;
+        var errTimes = 0;
+        try {
+            uint tag;
+            while ((tag = stream.ReadTag()) != 0) {
+                if ((tag & 7) == 2) { // is LengthDelimited
+                    var dict = new Dictionary<uint, uint>();
+                    using var eStream = new CodedInputStream(ReadRawBytes(stream, stream.ReadLength()));
+                    try {
+                        while ((tag = eStream.ReadTag()) != 0) {
+                            if ((tag & 7) != 0) { // not VarInt
+                                dict = null;
+                                break;
+                            }
+                            dict[tag >> 3] = eStream.ReadUInt32();
+                        }
+                        if (dict != null) {
+                            data.Add(dict);
+                        }
+                    } catch (InvalidProtocolBufferException) {
+                        if (errTimes++ > 0) { // allows 1 fail on 'reward_taken_goal_id_list'
+                            throw;
+                        }
                     }
-                    dict[tag >> 3] = eStream.ReadUInt32();
-                }
-                if (dict != null) {
-                    data.Add(dict);
                 }
             }
+        } catch (InvalidProtocolBufferException) {
+            // ReSharper disable once LocalizableElement
+            Console.WriteLine("Parse failed");
+            File.WriteAllBytes("achievement_raw_data.bin", bytes);
+            Environment.Exit(0);
         }
         if (data.Count == 0) {
             return new AchievementAllDataNotify();
