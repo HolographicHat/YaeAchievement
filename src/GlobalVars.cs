@@ -21,17 +21,17 @@ public static class GlobalVars {
     public static readonly string CachePath = Path.Combine(DataPath, "cache");
     public static readonly string LibFilePath = Path.Combine(DataPath, "YaeAchievement.dll");
 
-    public const uint   AppVersionCode = 233;
+    public const uint   AppVersionCode = 234;
     public const string AppVersionName = "5.2";
 
     public const string PipeName = "YaeAchievementPipe";
     public const string BucketHost = "https://cn-cd-1259389942.file.myqcloud.com";
 
-    public static AchievementInfo AchievementInfo { get; } 
-        = AchievementInfo.Parser.ParseFrom(Utils.GetBucketFileAsByteArray("schicksal/metadata"));
+    public static AchievementInfo AchievementInfo { get; }
 
     static GlobalVars() {
         Directory.CreateDirectory(DataPath);
         Directory.CreateDirectory(CachePath);
+        AchievementInfo = AchievementInfo.Parser.ParseFrom(Utils.GetBucketFileAsByteArray("schicksal/metadata"));
     }
 }
