@@ -12,7 +12,6 @@ InstallExitHook();
 InstallExceptionHook();
 
 CheckSelfIsRunning();
-await CheckVcRuntime();
 CheckGenshinIsRunning();
 
 Console.WriteLine(@"----------------------------------------------------");

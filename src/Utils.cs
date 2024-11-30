@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.IO.Pipes;
 using System.Net;
@@ -268,40 +267,5 @@ public static class Utils {
         var th = new Thread(ts);
         th.Start();
         return th;
-    }
-
-    public static async Task CheckVcRuntime() {
-        using var root = Registry.LocalMachine;
-        using var sub = root.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")!;
-        var installed = sub.GetSubKeyNames()
-            .Select(subKeyName => {
-                try {
-                    return sub.OpenSubKey(subKeyName);
-                } catch (Exception) {
-                    return null;
-                }
-            })
-            .Select(item => item?.GetValue("DisplayName") as string ?? string.Empty)
-            .Any(name => name.Contains("Microsoft Visual C++ 2022 X64 ") || name.Contains("Microsoft Visual C++ 2015-2022 Redistributable (x64)"));
-        if (!installed) {
-            Console.WriteLine(App.VcRuntimeDownload);
-            var pkgPath = Path.Combine(GlobalVars.DataPath, "vc_redist.x64.exe");
-            byte[] bytes;
-            try {
-                bytes = await CHttpClient.GetByteArrayAsync("https://aka.ms/vs/17/release/vc_redist.x64.exe");
-            } catch (Exception e) when(e is SocketException or TaskCanceledException) {
-                Console.WriteLine(App.NetworkError, e.Message);
-                Environment.Exit(-1);
-                return;
-            }
-            await File.WriteAllBytesAsync(pkgPath, bytes);
-            Console.WriteLine(App.VcRuntimeInstalling);
-            using var process = new Process();
-            process.StartInfo.FileName = pkgPath;
-            process.StartInfo.Arguments = "/install /passive /norestart";
-            process.Start();
-            await process.WaitForExitAsync();
-            File.Delete(pkgPath);
-        }
     }
 }
