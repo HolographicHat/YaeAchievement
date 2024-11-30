@@ -28,30 +28,33 @@ public static class Utils {
         }
     };
 
-    public static byte[] GetBucketFileAsByteArray(string path, bool cache = true) {
+    public static async Task<byte[]> GetBucketFile(string path, bool cache = true) {
         try {
+            return await await Task.WhenAny(GetFile(GlobalVars.RinBucketHost), GetFile(GlobalVars.SakuraBucketHost));
+        } catch (Exception e) when(e is SocketException or TaskCanceledException) {
+            Console.WriteLine(App.NetworkError, e.Message);
+            Environment.Exit(-1);
+            return null!;
+        }
+        async Task<byte[]> GetFile(string host) {
             using var msg = new HttpRequestMessage();
             msg.Method = HttpMethod.Get;
-            msg.RequestUri = new Uri($"{GlobalVars.BucketHost}/{path}");
+            msg.RequestUri = new Uri($"{host}/{path}");
             var cacheFile = new CacheFile(path);
             if (cache && cacheFile.Exists()) {
                 msg.Headers.TryAddWithoutValidation("If-None-Match", $"{cacheFile.Read().Etag}");
             }
-            using var response = CHttpClient.Send(msg);
+            using var response = await CHttpClient.SendAsync(msg);
             if (cache && response.StatusCode == HttpStatusCode.NotModified) {
                 return cacheFile.Read().Content.ToByteArray();
             }
             response.EnsureSuccessStatusCode();
-            var responseBytes = response.Content.ReadAsByteArrayAsync().Result;
+            var responseBytes = await response.Content.ReadAsByteArrayAsync();
             if (cache) {
                 var etag = response.Headers.ETag!.Tag;
                 cacheFile.Write(responseBytes, etag);
             }
             return responseBytes;
-        } catch (Exception e) when(e is SocketException or TaskCanceledException) {
-            Console.WriteLine(App.NetworkError, e.Message);
-            Environment.Exit(-1);
-            return null!;
         }
     }
 
@@ -88,18 +91,18 @@ public static class Utils {
     // ReSharper disable once NotAccessedField.Local
     private static UpdateInfo _updateInfo = null!;
 
-    public static void CheckUpdate(bool useLocalLib) {
-        var info = UpdateInfo.Parser.ParseFrom(GetBucketFileAsByteArray("schicksal/version"))!;
+    public static async Task CheckUpdate(bool useLocalLib) {
+        var info = UpdateInfo.Parser.ParseFrom(await GetBucketFile("schicksal/version"))!;
         if (GlobalVars.AppVersionCode < info.VersionCode) {
             Console.WriteLine(App.UpdateNewVersion, GlobalVars.AppVersionName, info.VersionName);
             Console.WriteLine(App.UpdateDescription, info.Description);
             if (info.EnableAutoUpdate) {
                 Console.WriteLine(App.UpdateDownloading);
                 var tmpPath = Path.GetTempFileName();
-                File.WriteAllBytes(tmpPath, GetBucketFileAsByteArray(info.PackageLink));
+                await File.WriteAllBytesAsync(tmpPath, await GetBucketFile(info.PackageLink));
                 var updaterArgs = $"{Environment.ProcessId}|{Environment.ProcessPath}|{tmpPath}";
                 var updaterPath = Path.Combine(GlobalVars.DataPath, "update.exe");
-                File.WriteAllBytes(updaterPath, App.Updater);
+                await File.WriteAllBytesAsync(updaterPath, App.Updater);
                 ShellOpen(updaterPath, updaterArgs.ToBytes().ToBase64());
                 GlobalVars.PauseOnExit = false;
                 Environment.Exit(0);
@@ -113,7 +116,8 @@ public static class Utils {
             Console.WriteLine(@"[DEBUG] Use local native lib.");
             File.Copy(Path.Combine(GlobalVars.AppPath, "YaeAchievementLib.dll"), GlobalVars.LibFilePath, true);
         } else if (info.EnableLibDownload) {
-            File.WriteAllBytes(GlobalVars.LibFilePath, GetBucketFileAsByteArray("schicksal/lib.dll"));
+            var data = await GetBucketFile("schicksal/lib.dll");
+            await File.WriteAllBytesAsync(GlobalVars.LibFilePath, data);
         }
         _updateInfo = info;
     }

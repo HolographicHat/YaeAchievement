@@ -23,7 +23,7 @@ Console.WriteLine(@"----------------------------------------------------");
 AppConfig.Load(args.GetOrNull(0) ?? "auto");
 Export.ExportTo = ToUIntOrNull(args.GetOrNull(1)) ?? uint.MaxValue;
 
-CheckUpdate(ToBooleanOrFalse(args.GetOrNull(2)));
+await CheckUpdate(ToBooleanOrFalse(args.GetOrNull(2)));
 
 var historyCache = new CacheFile("ExportData");
 
