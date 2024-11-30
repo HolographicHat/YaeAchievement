@@ -1,4 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Google.Protobuf;
 using YaeAchievement.res;
 
@@ -108,4 +110,17 @@ public class AchievementAllDataNotify {
     [UnsafeAccessor(UnsafeAccessorKind.Method)]
     private static extern byte[] ReadRawBytes(CodedInputStream stream, int size);
 
+}
+
+[JsonSerializable(typeof(AchievementAllDataNotify))]
+[JsonSourceGenerationOptions(
+    WriteIndented = true,
+    GenerationMode = JsonSourceGenerationMode.Serialization,
+    PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower
+)]
+public partial class AchievementRawDataSerializer : JsonSerializerContext {
+
+    public static string Serialize(AchievementAllDataNotify ntf) {
+        return JsonSerializer.Serialize(ntf, Default.AchievementAllDataNotify);
+    }
 }

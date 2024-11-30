@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Win32;
+using YaeAchievement.Outputs;
 using YaeAchievement.Parsers;
 using YaeAchievement.res;
 
@@ -13,10 +14,6 @@ namespace YaeAchievement;
 public static class Export {
 
     public static uint ExportTo { get; set; } = uint.MaxValue;
-
-    private static readonly JsonSerializerOptions JsonOpts = new () {
-        WriteIndented = true
-    };
 
     public static void Choose(AchievementAllDataNotify data) {
         if (ExportTo == uint.MaxValue) {
@@ -41,12 +38,8 @@ public static class Export {
         })).Invoke(data);
     }
 
-    private class CocogoatResponse {
-        [JsonPropertyName("key")] public string Code { get; init; } = null!;
-    }
-
     private static void ToCocogoat(AchievementAllDataNotify data) {
-        var result = JsonSerializer.Serialize(ExportToUIAFApp(data));
+        var result = UIAFSerializer.Serialize(data);
         using var request = new HttpRequestMessage();
         request.Method = HttpMethod.Post;
         request.RequestUri = new Uri($"https://77.cocogoat.cn/v1/memo?source={App.AllAchievement}");
@@ -57,18 +50,15 @@ public static class Export {
             return;
         }
         var responseText = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-        var responseJson = JsonSerializer.Deserialize<CocogoatResponse>(responseText)!;
-        Console.WriteLine(Utils.ShellOpen($"https://cocogoat.work/achievement?memo={responseJson.Code}")
+        var responseJson = JsonSerializer.Deserialize(responseText, CocogoatResponseContext.Default.CocogoatResponse)!;
+        Console.WriteLine(Utils.ShellOpen($"https://cocogoat.work/achievement?memo={responseJson.Key}")
             ? App.ExportToCocogoatSuccess
-            : $"https://cocogoat.work/achievement?memo={responseJson.Code}");
+            : $"https://cocogoat.work/achievement?memo={responseJson.Key}");
     }
 
     private static void ToWxApp1(AchievementAllDataNotify data) {
         var id = Guid.NewGuid().ToString("N").Substring(20, 8);
-        var result = JsonSerializer.Serialize(new Dictionary<string, object> {
-            { "key", id },
-            { "data", ExportToUIAFApp(data) }
-        });
+        var result = WxApp1Serializer.Serialize(data, id);
         using var request = new HttpRequestMessage();
         request.Method = HttpMethod.Post;
         request.RequestUri = new Uri("https://api.qyinter.com/achievementRedis");
@@ -79,7 +69,7 @@ public static class Export {
 
     private static void ToHuTao(AchievementAllDataNotify data) {
         if (CheckWinUIAppScheme("hutao")) {
-            Utils.CopyToClipboard(JsonSerializer.Serialize(ExportToUIAFApp(data)));
+            Utils.CopyToClipboard(UIAFSerializer.Serialize(data));
             Utils.ShellOpen("hutao://achievement/import");
             Console.WriteLine(App.ExportToSnapGenshinSuccess);
         } else {
@@ -90,7 +80,7 @@ public static class Export {
 
     private static void ToXunkong(AchievementAllDataNotify data) {
         if (CheckWinUIAppScheme("xunkong")) {
-            Utils.CopyToClipboard(JsonSerializer.Serialize(ExportToUIAFApp(data)));
+            Utils.CopyToClipboard(UIAFSerializer.Serialize(data));
             Utils.ShellOpen("xunkong://import-achievement?caller=YaeAchievement&from=clipboard");
             Console.WriteLine(App.ExportToXunkongSuccess);
         } else {
@@ -101,7 +91,7 @@ public static class Export {
 
     private static void ToTeyvatGuide(AchievementAllDataNotify data) {
         if (Process.GetProcessesByName("TeyvatGuide").Length != 0) {
-            Utils.CopyToClipboard(JsonSerializer.Serialize(ExportToUIAFApp(data)));
+            Utils.CopyToClipboard(UIAFSerializer.Serialize(data));
             Utils.ShellOpen("teyvatguide://import_uigf?app=YaeAchievement");
             Console.WriteLine(App.ExportToTauriSuccess);
         } else {
@@ -113,39 +103,21 @@ public static class Export {
     // ReSharper disable once InconsistentNaming
     private static void ToUIAFJson(AchievementAllDataNotify data) {
         var path = Path.GetFullPath($"uiaf-{DateTime.Now:yyyyMMddHHmmss}.json");
-        if (TryWriteToFile(path, JsonSerializer.Serialize(ExportToUIAFApp(data)))) {
+        if (TryWriteToFile(path, UIAFSerializer.Serialize(data))) {
             Console.WriteLine(App.ExportToFileSuccess, path);
         }
     }
 
     private static void ToPaimon(AchievementAllDataNotify data) {
-        var info = GlobalVars.AchievementInfo.Items.ToDictionary(pair => pair.Key, pair => pair.Value.Group);
-        var final = new Dictionary<string, Dictionary<uint, Dictionary<uint, bool>>> {
-            ["achievement"] = data.AchievementList
-                .Where(achievement => achievement.Status is AchievementStatus.Finished or AchievementStatus.RewardTaken)
-                .Where(achievement => info.ContainsKey(achievement.Id))
-                .GroupBy(achievement => info[achievement.Id], achievement => achievement.Id)
-                .OrderBy(group => group.Key)
-                .ToDictionary(group => group.Key, group => group.ToDictionary(id => id, _ => true))
-        };
         var path = Path.GetFullPath($"export-{DateTime.Now:yyyyMMddHHmmss}-paimon.json");
-        if (TryWriteToFile(path, JsonSerializer.Serialize(final))) {
+        if (TryWriteToFile(path, PaimonSerializer.Serialize(data))) {
             Console.WriteLine(App.ExportToFileSuccess, path);
         }
     }
 
     private static void ToSeelie(AchievementAllDataNotify data) {
-        var output = new Dictionary<uint, Dictionary<string, bool>>();
-        foreach (var ach in data.AchievementList.Where(a => a.Status is AchievementStatus.Finished or AchievementStatus.RewardTaken)) {
-            output[ach.Id] = new Dictionary<string, bool> {
-                ["done"] = true
-            };
-        }
-        var final = new Dictionary<string, Dictionary<uint, Dictionary<string, bool>>> {
-            ["achievements"] = output.OrderBy(pair => pair.Key).ToDictionary(pair => pair.Key, pair => pair.Value)
-        };
         var path = Path.GetFullPath($"export-{DateTime.Now:yyyyMMddHHmmss}-seelie.json");
-        if (TryWriteToFile(path, JsonSerializer.Serialize(final))) {
+        if (TryWriteToFile(path, SeelieSerializer.Serialize(data))) {
             Console.WriteLine(App.ExportToFileSuccess, path);
         }
     }
@@ -187,32 +159,10 @@ public static class Export {
 
     private static void ToRawJson(AchievementAllDataNotify data) {
         var path = Path.GetFullPath($"export-{DateTime.Now:yyyyMMddHHmmss}-raw.json");
-        var text = JsonSerializer.Serialize(data, JsonOpts);
+        var text = AchievementRawDataSerializer.Serialize(data);
         if (TryWriteToFile(path, text)) {
             Console.WriteLine(App.ExportToFileSuccess, path);
         }
-    }
-
-    // ReSharper disable once InconsistentNaming
-    private static Dictionary<string, object> ExportToUIAFApp(AchievementAllDataNotify data) {
-        var output = data.AchievementList
-            .Where(a => (uint)a.Status > 1 || a.CurrentProgress > 0)
-            .Select(ach => new Dictionary<string, uint> {
-                ["id"] = ach.Id,
-                ["status"] = (uint) ach.Status,
-                ["current"] = ach.CurrentProgress,
-                ["timestamp"] = ach.FinishTimestamp
-            })
-            .ToList();
-        return new Dictionary<string, object> {
-            ["info"] = new Dictionary<string, object> {
-                ["export_app"] = "YaeAchievement",
-                ["export_timestamp"] = DateTimeOffset.Now.ToUnixTimeSeconds(),
-                ["export_app_version"] = GlobalVars.AppVersionName,
-                ["uiaf_version"] = "v1.1"
-            },
-            ["list"] = output
-        };
     }
 
     // ReSharper disable once InconsistentNaming
@@ -252,3 +202,30 @@ public static class Export {
         }
     }
 }
+
+public class WxApp1Root {
+
+    public string Key { get; init; } = null!;
+
+    public UIAFRoot Data { get; init; } = null!;
+
+}
+
+[JsonSerializable(typeof(WxApp1Root))]
+[JsonSourceGenerationOptions(
+    GenerationMode = JsonSourceGenerationMode.Serialization,
+    PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower
+)]
+public partial class WxApp1Serializer : JsonSerializerContext {
+
+    public static string Serialize(AchievementAllDataNotify ntf, string key) => JsonSerializer.Serialize(new WxApp1Root {
+        Key = key,
+        Data = Outputs.UIAFRoot.FromNotify(ntf)
+    }, Default.WxApp1Root);
+}
+
+public record CocogoatResponse(string Key);
+
+[JsonSerializable(typeof(CocogoatResponse))]
+[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
+public partial class CocogoatResponseContext : JsonSerializerContext;

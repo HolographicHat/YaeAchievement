@@ -18,7 +18,6 @@ namespace YaeAchievement;
 public static class Utils {
 
     public static readonly HttpClient CHttpClient = new (new HttpClientHandler {
-        Proxy = GlobalVars.DebugProxy ? new WebProxy("http://127.0.0.1:8888") : null,
         AutomaticDecompression = DecompressionMethods.Brotli | DecompressionMethods.GZip
     }) {
         DefaultRequestHeaders = {

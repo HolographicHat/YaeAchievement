@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using Proto;
 
 namespace YaeAchievement;
@@ -10,7 +11,6 @@ namespace YaeAchievement;
 
 public static class GlobalVars {
 
-    public static bool DebugProxy => false;
     public static bool UnexpectedExit { get; set; } = true;
     public static bool PauseOnExit { get; set; } = true;
     public static Version AppVersion { get; } = Assembly.GetEntryAssembly()!.GetName().Version!;
@@ -28,11 +28,12 @@ public static class GlobalVars {
     public const string RinBucketHost = "https://rin.holohat.work";
     public const string SakuraBucketHost = "https://cn-cd-1259389942.file.myqcloud.com";
 
-    public static AchievementInfo AchievementInfo { get; }
+    [field:MaybeNull]
+    public static AchievementInfo AchievementInfo =>
+        field ??= AchievementInfo.Parser.ParseFrom(Utils.GetBucketFile("schicksal/metadata").GetAwaiter().GetResult());
 
     static GlobalVars() {
         Directory.CreateDirectory(DataPath);
         Directory.CreateDirectory(CachePath);
-        AchievementInfo = AchievementInfo.Parser.ParseFrom(Utils.GetBucketFile("schicksal/metadata").GetAwaiter().GetResult());
     }
 }
