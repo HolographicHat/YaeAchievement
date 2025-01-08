@@ -68,8 +68,9 @@ namespace
 	/// decodes all instruction until next push, ignores branching
 	/// </summary>
 	/// <param name="address"></param>
+	/// <param name="maxInstructions"></param>
 	/// <returns>std::vector DecodedInstruction</returns>
-	std::vector<DecodedInstruction> DecodeFunction(uintptr_t address)
+	std::vector<DecodedInstruction> DecodeFunction(uintptr_t address, int32_t maxInstructions = -1)
 	{
 		using namespace Globals;
 
@@ -109,6 +110,10 @@ namespace
 			instructions.emplace_back(rva, instruction, operands, instruction.operand_count_visible);
 
 			address += instruction.length;
+
+			if (maxInstructions != -1 && instructions.size() >= maxInstructions)
+				break;
+
 		}
 
 		return instructions;
@@ -163,8 +168,11 @@ namespace
 		}));
 	}
 
-	void ResolveCmdId()
+	void ResolveAchivementCmdId()
 	{
+		if (Globals::AchievementId != 0)
+			return;
+
 		const auto il2cppSection = GetSection("il2cpp");
 
 		std::println("Section Address: 0x{:X}", reinterpret_cast<uintptr_t>(il2cppSection.data()));
@@ -178,7 +186,7 @@ namespace
 
 		std::vector<std::vector<DecodedInstruction>> filteredInstructions;
 		std::ranges::copy_if(
-			candidates | std::views::transform(DecodeFunction),
+			candidates | std::views::transform([](auto va) { return DecodeFunction(va); }),
 			std::back_inserter(filteredInstructions),
 			[](const std::vector<DecodedInstruction>& instr) {
 			return GetDataReferenceCount(instr) == 5 && GetCallCount(instr) == 10 &&
@@ -207,20 +215,20 @@ namespace
 
 		for (const auto& cmdId : cmdIds)
 		{
-			std::println("CmdId: {}", cmdId);
-			Globals::DynamicCmdIds.insert(static_cast<uint16_t>(cmdId));
+			std::println("AchievementId: {}", cmdId);
+			Globals::AchievementIdSet.insert(static_cast<uint16_t>(cmdId));
 		}
 
 
 	}
 
-	int32_t GetCallCount(uint8_t* target)
+	std::vector<uintptr_t> GetCalls(uint8_t* target)
 	{
 		const auto il2cppSection = GetSection("il2cpp");
 		const auto sectionAddress = reinterpret_cast<uintptr_t>(il2cppSection.data());
 		const auto sectionSize = il2cppSection.size();
 
-		int32_t count = 0;
+		std::vector<uintptr_t> callSites;
 		const __m128i callOpcode = _mm_set1_epi8(0xE8);
 		const size_t simdEnd = sectionSize / 16 * 16;
 
@@ -245,7 +253,7 @@ namespace
 				const uintptr_t dest = sectionAddress + instruction_index + 5 + delta;
 
 				if (dest == (uintptr_t)target) {
-					count++;
+					callSites.push_back(sectionAddress + instruction_index);
 				}
 
 				// clear the bit we just processed and continue with the next match
@@ -253,7 +261,7 @@ namespace
 			}
 		}
 
-		return count;
+		return callSites;
 	}
 
 	uintptr_t FindFunctionEntry(uintptr_t address) // not a correct way to find function entry
@@ -279,8 +287,13 @@ namespace
 		return address;
 	}
 
-	uintptr_t Resolve_BitConverter_ToUInt16()
+	void Resolve_BitConverter_ToUInt16()
 	{
+		if (Globals::Offset.BitConverter_ToUInt16 != 0) {
+			Globals::Offset.BitConverter_ToUInt16 += Globals::BaseAddress;
+			return;
+		}
+
 		const auto il2cppSection = GetSection("il2cpp");
 
 		std::print("Section Address: 0x{:X}", reinterpret_cast<uintptr_t>(il2cppSection.data()));
@@ -316,9 +329,9 @@ namespace
 		std::vector<std::future<void>> futures;
 		std::ranges::transform(filteredEntries, std::back_inserter(futures), [&](uintptr_t entry) {
 			return std::async(std::launch::async, [&](uintptr_t e) {
-				const auto count = GetCallCount((uint8_t*)e);
+				const auto callSites = GetCalls((uint8_t*)e);
 				std::lock_guard lock(mutex);
-				callCounts[e] = count;
+				callCounts[e] = callSites.size();
 			}, entry);
 		});
 
@@ -335,12 +348,186 @@ namespace
 			}
 		}
 
-		return targetEntry;
+		Globals::Offset.BitConverter_ToUInt16 = targetEntry;
+	}
+
+	void ResolveInventoryCmdId()
+	{
+		if (Globals::PlayerStoreId != 0)
+			return;
+
+		const auto il2cppSection = GetSection("il2cpp");
+		std::println("Section Address: 0x{:X}", reinterpret_cast<uintptr_t>(il2cppSection.data()));
+		std::println("Section End: 0x{:X}", reinterpret_cast<uintptr_t>(il2cppSection.data() + il2cppSection.size()));
+		
+		/*
+			cmp r8d, 2
+			jz 0x3B
+			cmd r8d, 1
+			mov rax
+		*/
+
+		// look for ItemModule.GetBagManagerByStoreType
+		const auto candidates = Util::PatternScanAll(il2cppSection, "41 83 F8 02 74 ? 41 83 F8 01 48 8B 05");
+		std::println("Candidates: {}", candidates.size());
+		if (candidates.empty())
+			return;
+
+		auto pGetBagManagerByStoreType = candidates.front();
+		std::println("GetBagManagerByStoreType: 0x{:X}", pGetBagManagerByStoreType);
+		for (auto i = 0; i < 213; ++i) 
+		{
+
+			const auto va = pGetBagManagerByStoreType - i;
+			uint8_t* code = reinterpret_cast<uint8_t*>(va);
+			if (va % 16 == 0 && 
+				code[0] == 0x56 && // push rsi
+				code[1] == 0x57) // push rdi
+			{
+				pGetBagManagerByStoreType = va;
+				break;
+			}
+
+		}
+
+		std::println("GetBagManagerByStoreType: 0x{:X}", pGetBagManagerByStoreType);
+		if (pGetBagManagerByStoreType == candidates.front())
+		{
+			std::println("Failed to find function entry");
+			return;
+		}
+
+
+		uintptr_t pOnPlayerStoreNotify = 0;
+		{
+			// get all calls to GetBagManagerByStoreType
+			auto calls = GetCalls((uint8_t*)pGetBagManagerByStoreType);
+			auto decodedInstructions = calls | std::views::transform([](auto va) { return DecodeFunction(va); });
+
+			// from the call sites, find the one that has an arbitary branch after the call
+			const auto targetInstructions = std::ranges::find_if(decodedInstructions, [](const std::vector<DecodedInstruction>& instr) {
+				return std::ranges::any_of(instr, [](const DecodedInstruction& i) {
+					return (i.Instruction.mnemonic == ZYDIS_MNEMONIC_JMP || i.Instruction.mnemonic == ZYDIS_MNEMONIC_CALL) &&
+						i.Operands.size() == 1 && i.Operands[0].type == ZYDIS_OPERAND_TYPE_REGISTER;
+				});
+			});
+
+			if (targetInstructions == decodedInstructions.end())
+			{
+				std::println("Failed to find target instruction");
+				return;
+			}
+
+			// ItemModule.OnPlayerStoreNotify
+			const auto& instructions = *targetInstructions;
+			pOnPlayerStoreNotify = Globals::BaseAddress + instructions.front().RVA;
+			for (auto i = 0; i < 126; ++i)
+			{
+
+				const auto va = pOnPlayerStoreNotify - i;
+				uint8_t* code = reinterpret_cast<uint8_t*>(va);
+
+				if (va % 16 == 0 &&
+					code[0] == 0x56 && // push rsi
+					(*(uint32_t*)&code[1] & ~0xFF000000) == _byteswap_ulong(0x4883EC00)) // sub rsp, ??
+				{
+					pOnPlayerStoreNotify = va;
+					break;
+				}
+
+			}
+
+			std::println("OnPlayerStoreNotify: 0x{:X}", pOnPlayerStoreNotify);
+			if (pOnPlayerStoreNotify == Globals::BaseAddress + instructions.front().RVA)
+			{
+				std::println("Failed to find function entry");
+				return;
+			}
+		}
+
+		uintptr_t pOnPacket = 0;
+		{
+			// get all calls to OnPlayerStoreNotify
+			const auto calls = GetCalls((uint8_t*)pOnPlayerStoreNotify);
+			if (calls.size() != 1)
+			{
+				std::println("Failed to find call site");
+				return;
+			}
+
+			// ItemModule.OnPacket
+			pOnPacket = calls.front();
+			for (auto i = 0; i < 3044; ++i)
+			{
+
+				const auto va = pOnPacket - i;
+				uint8_t* code = reinterpret_cast<uint8_t*>(va);
+
+				if (va % 16 == 0 &&
+					code[0] == 0x56 && // push rsi
+					(*(uint32_t*)&code[1] & ~0xFF000000) == _byteswap_ulong(0x4883EC00)) // sub rsp, ??
+				{
+					pOnPacket = va;
+					break;
+				}
+
+			}
+
+			if (pOnPacket == calls.front())
+			{
+				std::println("Failed to find function entry");
+				return;
+			}
+
+			std::println("OnPacket: 0x{:X}", pOnPacket);
+		}
+
+		const auto decodedInstructions = DecodeFunction(pOnPacket);
+		std::unordered_map<uint32_t, uintptr_t> immBranch; // <imm, branch address>
+		uint32_t immValue = 0;
+		for (const auto& i : decodedInstructions)
+		{
+			if (i.Instruction.mnemonic == ZYDIS_MNEMONIC_CMP && 
+				i.Operands.size() == 2 &&
+				i.Operands[0].type == ZYDIS_OPERAND_TYPE_REGISTER &&
+				i.Operands[1].type == ZYDIS_OPERAND_TYPE_IMMEDIATE)
+			{
+				immValue = static_cast<uint32_t>(i.Operands[1].imm.value.u);
+			}
+
+			if (i.Instruction.meta.branch_type == ZYDIS_BRANCH_TYPE_NEAR && i.Operands.size() == 1) {
+				immBranch[immValue] = Globals::BaseAddress + i.RVA + i.Instruction.length + i.Operands[0].imm.value.s;
+			}
+
+		}
+
+		uint32_t cmdid = 0;
+		for (const auto& [imm, branch] : immBranch)
+		{
+			const auto instructions = DecodeFunction(branch, 10);
+			const auto isMatch = std::ranges::any_of(instructions, [pOnPlayerStoreNotify](const DecodedInstruction& i) {
+				if (i.Instruction.mnemonic != ZYDIS_MNEMONIC_CALL)
+					return false;
+
+				uintptr_t destination = 0;
+				ZydisCalcAbsoluteAddress(&i.Instruction, i.Operands.data(), Globals::BaseAddress + i.RVA, &destination);
+				return destination == pOnPlayerStoreNotify;
+			});
+
+			if (!isMatch)
+				continue;
+
+			cmdid = imm;
+			break;
+		}
+
+		Globals::PlayerStoreId = static_cast<uint16_t>(cmdid);
+		std::println("PlayerStoreId: {}", Globals::PlayerStoreId);
 	}
 
 }
 
-void InitIL2CPP()
+bool InitIL2CPP()
 {
 	std::string buffer;
 	buffer.resize(MAX_PATH);
@@ -358,25 +545,29 @@ void InitIL2CPP()
 	IsCNREL = buffer.find("YuanShen.exe") != std::string::npos;
 	BaseAddress = (uintptr_t)GetModuleHandleA(nullptr);
 
-	std::future<void> resolveFuncFuture = std::async(std::launch::async, [] {
-		if (Offset.BitConverter_ToUInt16 != 0) {
-			Offset.BitConverter_ToUInt16 += BaseAddress;
-		}
-		else {
-			Offset.BitConverter_ToUInt16 = Resolve_BitConverter_ToUInt16();
-		}
-	});
-
-	std::future<void> resolveCmdIdFuture = std::async(std::launch::async, [] {
-		if (CmdId == 0) {
-			ResolveCmdId();
-		}
-	});
+	std::future<void> resolveFuncFuture = std::async(std::launch::async, Resolve_BitConverter_ToUInt16);
+	std::future<void> resolveCmdIdFuture = std::async(std::launch::async, ResolveAchivementCmdId);
+	std::future<void> resolveInventoryFuture = std::async(std::launch::async, ResolveInventoryCmdId);
 
 	resolveFuncFuture.get();
 	resolveCmdIdFuture.get();
+	resolveInventoryFuture.get();
 
 	std::println("BaseAddress: 0x{:X}", BaseAddress);
 	std::println("IsCNREL: {:d}", IsCNREL);
 	std::println("BitConverter_ToUInt16: 0x{:X}", Offset.BitConverter_ToUInt16);
+
+	if (!AchievementId && AchievementIdSet.empty())
+	{
+		Util::ErrorDialog("Failed to resolve achievement data");
+		return false;
+	}
+
+	if (!PlayerStoreId)
+	{
+		Util::ErrorDialog("Failed to resolve inventory data");
+		return false;
+	}
+
+	return true;
 }
