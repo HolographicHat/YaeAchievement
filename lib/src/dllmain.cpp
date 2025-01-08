@@ -1,5 +1,6 @@
 ﻿// ReSharper disable CppClangTidyCertErr33C
 #include <Windows.h>
+#include <print>
 #include <string>
 #include <future>
 #include <TlHelp32.h>
@@ -49,11 +50,11 @@ namespace Hook {
 			const auto headLength = _byteswap_ushort(packet->HeaderLength);
 			const auto dataLength = _byteswap_ulong(packet->DataLength);
 
-			printf("CmdId: %d\n", _byteswap_ushort(packet->CmdId));
-			printf("DataLength: %d\n", dataLength);
+			std::println("CmdId: {}", _byteswap_ushort(packet->CmdId));
+			std::println("DataLength: {}", dataLength);
 
 			const auto base64 = Util::Base64Encode(packet->Data + headLength, dataLength) + "\n";
-			printf("Base64: %s\n", base64.c_str());
+			std::println("Base64: {}", base64);
 
 #ifdef _DEBUG
 			system("pause");
@@ -137,7 +138,7 @@ DWORD __stdcall ThreadProc(LPVOID hInstance)
 	if (MessagePipe == INVALID_HANDLE_VALUE)
 	{
 #ifdef _DEBUG
-		printf("CreateFile failed: %d\n", GetLastError());
+		std::println("CreateFile failed: {}", GetLastError());
 #else
 		Util::Win32ErrorDialog(1001, GetLastError());
 		ExitProcess(0);

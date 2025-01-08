@@ -1,4 +1,5 @@
 #include <Windows.h>
+#include <print>
 #include <string>
 #include <vector>
 #include <iterator>
@@ -40,11 +41,11 @@ namespace
 		std::vector<ZydisDecodedOperand> Operands;
 	};
 
-	uintptr_t GetSection(LPCSTR name, size_t* sectionSize = nullptr)
+	std::span<uint8_t> GetSection(LPCSTR name)
 	{
 		using namespace Globals;
 		if (BaseAddress == 0)
-			return 0;
+			return {};
 
 		const auto dosHeader = (PIMAGE_DOS_HEADER)BaseAddress;
 		const auto ntHeader = (PIMAGE_NT_HEADERS)((uintptr_t)dosHeader + dosHeader->e_lfanew);
@@ -54,14 +55,13 @@ namespace
 		{
 			if (strcmp((char*)sectionHeader[i].Name, name) == 0)
 			{
-				if (sectionSize != nullptr) {
-					*sectionSize = sectionHeader[i].Misc.VirtualSize;
-				}
-				return BaseAddress + sectionHeader[i].VirtualAddress;
+				const auto sectionSize = sectionHeader[i].Misc.VirtualSize;
+				const auto virtualAddress = BaseAddress + sectionHeader[i].VirtualAddress;
+				return std::span(reinterpret_cast<uint8_t*>(virtualAddress), sectionSize);
 			}
 		}
 
-		return 0;
+		return {};
 	}
 
 	/// <summary>
@@ -148,7 +148,7 @@ namespace
 		for (const auto& instr : instructions)
 		{
 			if (instr.Instruction.mnemonic == ZYDIS_MNEMONIC_CALL) {
-				uint32_t destination = instr.RVA + instr.Instruction.length + instr.Operands[0].imm.value.s;
+				uint32_t destination = instr.Operands[0].imm.value.s + instr.RVA + instr.Instruction.length;
 				calls.insert(destination);
 			}
 		}
@@ -165,52 +165,50 @@ namespace
 
 	void ResolveCmdId()
 	{
-		size_t sectionSize;
-		const auto sectionAddress = GetSection("il2cpp", &sectionSize);
-		const auto sectionEnd = sectionAddress + sectionSize;
+		const auto il2cppSection = GetSection("il2cpp");
 
-		printf("Section Address: 0x%llX\n", sectionAddress);
-		printf("Section End: 0x%llX\n", sectionEnd);
+		std::println("Section Address: 0x{:X}", reinterpret_cast<uintptr_t>(il2cppSection.data()));
+		std::println("Section End: 0x{:X}", reinterpret_cast<uintptr_t>(il2cppSection.data() + il2cppSection.size()));
 
-		if (sectionAddress == 0)
+		if (il2cppSection.empty())
 			return; // message box?
 
-		const auto candidates = Util::PatternScanAll(sectionAddress, sectionEnd, "56 48 83 EC 20 48 89 D0 48 89 CE 80 3D ? ? ? ? 00");
-		printf("Candidates: %llu\n", candidates.size());
-
-		std::vector<std::vector<DecodedInstruction>> candidateInstructions;
-		std::ranges::transform(candidates, std::back_inserter(candidateInstructions), DecodeFunction);
+		const auto candidates = Util::PatternScanAll(il2cppSection, "56 48 83 EC 20 48 89 D0 48 89 CE 80 3D ? ? ? ? 00");
+		std::println("Candidates: {}", candidates.size());
 
 		std::vector<std::vector<DecodedInstruction>> filteredInstructions;
-		std::ranges::copy_if(candidateInstructions, std::back_inserter(filteredInstructions), [](const std::vector<DecodedInstruction>& instr) {
-			return GetDataReferenceCount(instr) == 5 && GetCallCount(instr) == 10 && GetUniqueCallCount(instr) == 6 && GetCmpImmCount(instr) == 5;
+		std::ranges::copy_if(
+			candidates | std::views::transform(DecodeFunction),
+			std::back_inserter(filteredInstructions),
+			[](const std::vector<DecodedInstruction>& instr) {
+			return GetDataReferenceCount(instr) == 5 && GetCallCount(instr) == 10 &&
+				GetUniqueCallCount(instr) == 6 && GetCmpImmCount(instr) == 5;
 		});
 
 		// should have only one result
 		if (filteredInstructions.size() != 1)
 		{
-			printf("Filtered Instructions: %llu\n", filteredInstructions.size());
+			std::println("Filtered Instructions: {}", filteredInstructions.size());
 			return;
 		}
 
 		const auto& instructions = filteredInstructions[0];
-		printf("RVA: 0x%08X\n", instructions.front().RVA);
+		std::println("RVA: 0x{:08X}", instructions.front().RVA);
 
 		// extract all the non-zero immediate values from the cmp instructions
-		std::decay_t<decltype(instructions)> cmpInstructions;
-		std::ranges::copy_if(instructions, std::back_inserter(cmpInstructions), [](const DecodedInstruction& instr) {
-			return instr.Instruction.mnemonic == ZYDIS_MNEMONIC_CMP && instr.Operands[1].type == ZYDIS_OPERAND_TYPE_IMMEDIATE && instr.Operands[1].imm.value.u;
-		});
-
 		std::vector<uint32_t> cmdIds;
-		std::ranges::transform(cmpInstructions, std::back_inserter(cmdIds), [](const DecodedInstruction& instr) {
-			return instr.Operands[1].imm.value.u;
+		std::ranges::for_each(instructions, [&cmdIds](const DecodedInstruction& instr) {
+			if (instr.Instruction.mnemonic == ZYDIS_MNEMONIC_CMP &&
+				instr.Operands[1].type == ZYDIS_OPERAND_TYPE_IMMEDIATE &&
+				instr.Operands[1].imm.value.u != 0) {
+				cmdIds.push_back(static_cast<uint32_t>(instr.Operands[1].imm.value.u));
+			}
 		});
 
 		for (const auto& cmdId : cmdIds)
 		{
-			printf("CmdId: %u\n", cmdId);
-			Globals::DynamicCmdIds.insert(cmdId);
+			std::println("CmdId: {}", cmdId);
+			Globals::DynamicCmdIds.insert(static_cast<uint16_t>(cmdId));
 		}
 
 
@@ -218,9 +216,9 @@ namespace
 
 	int32_t GetCallCount(uint8_t* target)
 	{
-		size_t sectionSize;
-		const auto sectionAddress = GetSection("il2cpp", &sectionSize);
-		const auto sectionEnd = sectionAddress + sectionSize;
+		const auto il2cppSection = GetSection("il2cpp");
+		const auto sectionAddress = reinterpret_cast<uintptr_t>(il2cppSection.data());
+		const auto sectionSize = il2cppSection.size();
 
 		int32_t count = 0;
 		const __m128i callOpcode = _mm_set1_epi8(0xE8);
@@ -283,12 +281,10 @@ namespace
 
 	uintptr_t Resolve_BitConverter_ToUInt16()
 	{
-		size_t sectionSize;
-		const auto sectionAddress = GetSection("il2cpp", &sectionSize);
-		const auto sectionEnd = sectionAddress + sectionSize;
+		const auto il2cppSection = GetSection("il2cpp");
 
-		printf("Section Address: 0x%llX\n", sectionAddress);
-		printf("Section End: 0x%llX\n", sectionEnd);
+		std::print("Section Address: 0x{:X}", reinterpret_cast<uintptr_t>(il2cppSection.data()));
+		std::println("Section End: 0x{:X}", reinterpret_cast<uintptr_t>(il2cppSection.data() + il2cppSection.size()));
 
 		/*
 			mov ecx, 0Fh
@@ -299,8 +295,8 @@ namespace
 			mov ecx, 5
 			call ThrowHelper.ThrowArgumentException
 		*/
-		auto candidates = Util::PatternScanAll(sectionAddress, sectionEnd, "B9 0F 00 00 00 E8 ? ? ? ? B9 0E 00 00 00 BA 16 00 00 00 E8 ? ? ? ? B9 05 00 00 00 E8 ? ? ? ?");
-		printf("Candidates: %llu\n", candidates.size());
+		auto candidates = Util::PatternScanAll(il2cppSection, "B9 0F 00 00 00 E8 ? ? ? ? B9 0E 00 00 00 BA 16 00 00 00 E8 ? ? ? ? B9 05 00 00 00 E8 ? ? ? ?");
+		std::println("Candidates: {}", candidates.size());
 
 		std::vector<uintptr_t> filteredEntries;
 		std::ranges::copy_if(candidates, std::back_inserter(filteredEntries), [](uintptr_t& entry) {
@@ -310,10 +306,10 @@ namespace
 
 		for (const auto& entry : filteredEntries)
 		{
-			printf("Entry: 0x%llX\n", entry);
+			std::println("Entry: 0x{:X}", entry);
 		}
 
-		printf("Looking for call counts...\n");
+		std::println("Looking for call counts...");
 		std::mutex mutex;
 		std::unordered_map<uintptr_t, int32_t> callCounts;
 		// find the call counts to candidate functions
@@ -333,7 +329,7 @@ namespace
 		uintptr_t targetEntry = 0;
 		for (const auto& [entry, count] : callCounts)
 		{
-			printf("Entry: 0x%llX, RVA: 0x%08llX, Count: %d\n", entry, entry - Globals::BaseAddress, count);
+			std::println("Entry: 0x{:X}, RVA: 0x{:08X}, Count: {}", entry, entry - Globals::BaseAddress, count);
 			if (count == 5) {
 				targetEntry = entry;
 			}
@@ -380,7 +376,7 @@ void InitIL2CPP()
 	resolveFuncFuture.get();
 	resolveCmdIdFuture.get();
 
-	printf("BaseAddress: 0x%llX\n", BaseAddress);
-	printf("IsCNREL: %d\n", IsCNREL);
-	printf("BitConverter_ToUInt16: 0x%llX\n", Offset.BitConverter_ToUInt16);
+	std::println("BaseAddress: 0x{:X}", BaseAddress);
+	std::println("IsCNREL: {:d}", IsCNREL);
+	std::println("BitConverter_ToUInt16: 0x{:X}", Offset.BitConverter_ToUInt16);
 }

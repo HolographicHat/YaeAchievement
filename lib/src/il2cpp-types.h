@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <span>
 
 template <typename T>
 class Array
@@ -16,6 +17,10 @@ public:
 	T* data() {
 		return vector;
 	}
+
+	std::span<T> AsSpan() {
+		return { vector, max_length };
+	}
 };
 
 static_assert(alignof(Array<uint8_t>) == 8, "Array alignment is incorrect");
@@ -29,6 +34,10 @@ struct PacketMeta
 	uint16_t HeaderLength;
 	uint32_t DataLength;
 	uint8_t Data[1];
+
+	std::span<uint8_t> AsSpan() {
+		return {Data, DataLength};
+	}
 };
 #pragma pack(pop)
 

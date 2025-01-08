@@ -1,5 +1,9 @@
 #include <string>
+#include <array>
+#include <ranges>
+#include <intrin.h>
 #include "util.h"
+
 #include "globals.h"
 
 #ifdef _DEBUG
@@ -11,12 +15,12 @@
 namespace
 {
 	struct HandleData {
-		DWORD pid;
-		HWND hwnd;
+		DWORD Pid;
+		HWND Hwnd;
 	};
 
 	bool IsMainWindow(HWND handle) {
-		return GetWindow(handle, GW_OWNER) == (HWND)0 && IsWindowVisible(handle) == TRUE;
+		return GetWindow(handle, GW_OWNER) == nullptr && IsWindowVisible(handle) == TRUE;
 	}
 
 	bool IsUnityWindow(HWND handle) {
@@ -29,16 +33,16 @@ namespace
 		HandleData& data = *(HandleData*)lParam;
 		DWORD pid = 0;
 		GetWindowThreadProcessId(handle, &pid);
-		if (data.pid != pid || !IsMainWindow(handle) || !IsUnityWindow(handle))
+		if (data.Pid != pid || !IsMainWindow(handle) || !IsUnityWindow(handle))
 			return TRUE;
-		data.hwnd = handle;
+		data.Hwnd = handle;
 		return FALSE;
 	}
 
-	std::tuple<std::vector<uint8_t>, std::vector<bool>> PatternToBytes(const char* pattern)
+	std::tuple<std::vector<uint8_t>, std::string> PatternToBytes(const char* pattern)
 	{
 		std::vector<uint8_t> bytes;
-		std::vector<bool> maskBytes;
+		std::string mask;
 
 		const auto start = const_cast<char*>(pattern);
 		const auto end = const_cast<char*>(pattern) + strlen(pattern);
@@ -49,14 +53,14 @@ namespace
 				if (*current == '?')
 					++current;
 				bytes.push_back(-1);
-				maskBytes.push_back(false);
+				mask.push_back('?');
 			}
 			else {
 				bytes.push_back(strtoul(current, &current, 16));
-				maskBytes.push_back(true);
+				mask.push_back('x');
 			}
 		}
-		return { bytes, maskBytes };
+		return { bytes, mask };
 	}
 
 }
@@ -69,17 +73,25 @@ namespace Util
 {
 	HWND FindMainWindowByPID(DWORD pid)
 	{
-		HandleData data = { pid, 0 };
+		HandleData data = { 
+			.Pid = pid,
+			.Hwnd = nullptr
+		};
 		EnumWindows(EnumWindowsCallback, (LPARAM)&data);
-		return data.hwnd;
+		return data.Hwnd;
 	}
 
-	std::string Base64Encode(BYTE const* buf, unsigned int bufLen)
+	std::string Base64Encode(std::span<uint8_t> data)
+	{
+		return Base64Encode(data.data(), data.size());
+	}
+
+	std::string Base64Encode(uint8_t const* buf, size_t bufLen)
 	{
 		std::string ret;
 		int i = 0;
-		BYTE char_array_3[3];
-		BYTE char_array_4[4];
+		uint8_t char_array_3[3];
+		uint8_t char_array_4[4];
 		while (bufLen--) {
 			char_array_3[i++] = *buf++;
 			if (i == 3) {
@@ -126,51 +138,67 @@ namespace Util
 		ErrorDialog("YaeAchievement", msg.c_str());
 	}
 
-	uintptr_t PatternScan(uintptr_t start, uintptr_t end, const char* pattern)
-	{
-		const auto [patternBytes, patternMask] = PatternToBytes(pattern);
-		const auto scanBytes = reinterpret_cast<uint8_t*>(start);
-
-		const auto patternSize = patternBytes.size();
-		const auto pBytes = patternBytes.data();
-
-		for (auto i = 0ul; i < end - start - patternSize; ++i) {
-			bool found = true;
-			for (auto j = 0ul; j < patternSize; ++j) {
-				if (scanBytes[i + j] != pBytes[j] && patternMask[j]) {
-					found = false;
-					break;
-				}
-			}
-			if (found) {
-				return reinterpret_cast<uintptr_t>(&scanBytes[i]);
-			}
-		}
-
-		return 0;
-	}
-
-	std::vector<uintptr_t> PatternScanAll(uintptr_t start, uintptr_t end, const char* pattern)
+	std::vector<uintptr_t> PatternScanAll(std::span<uint8_t> bytes, const char* pattern)
 	{
 		std::vector<uintptr_t> results;
 		const auto [patternBytes, patternMask] = PatternToBytes(pattern);
-		const auto scanBytes = reinterpret_cast<uint8_t*>(start);
+		constexpr std::size_t chunkSize = 16;
 
-		const auto patternSize = patternBytes.size();
-		const auto pBytes = patternBytes.data();
+		const auto maskCount = static_cast<std::size_t>(std::ceil(patternMask.size() / chunkSize));
+		std::array<int32_t, 32> masks{};
 
-		for (auto i = 0ul; i < end - start - patternSize; ++i) {
-			bool found = true;
-			for (auto j = 0ul; j < patternSize; ++j) {
-				if (scanBytes[i + j] != pBytes[j] && patternMask[j]) {
-					found = false;
-					break;
+		auto chunks = patternMask | std::views::chunk(chunkSize);
+		for (std::size_t i = 0; auto chunk : chunks) {
+			int32_t mask = 0;
+			for (std::size_t j = 0; j < chunk.size(); ++j) {
+				if (chunk[j] == 'x') {
+					mask |= 1 << j;
 				}
 			}
-			if (found) {
-				results.push_back(reinterpret_cast<uintptr_t>(&scanBytes[i]));
-				i += patternSize - 1;
+			masks[i++] = mask;
+		}
+
+		__m128i xmm1 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(patternBytes.data()));
+		__m128i xmm2, xmm3, mask;
+
+		auto pData = bytes.data();
+		const auto end = pData + bytes.size() - patternMask.size();
+
+		while (pData < end)
+		{
+			_mm_prefetch(reinterpret_cast<const char*>(pData + 64), _MM_HINT_NTA);
+
+			if (patternBytes[0] == pData[0])
+			{
+				xmm2 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(pData));
+				mask = _mm_cmpeq_epi8(xmm1, xmm2);
+
+				if ((_mm_movemask_epi8(mask) & masks[0]) == masks[0])
+				{
+					bool found = true;
+					for (int i = 1; i < maskCount; ++i)
+					{
+						xmm2 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(pData + i * chunkSize));
+						xmm3 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(patternBytes.data() + i * chunkSize));
+						mask = _mm_cmpeq_epi8(xmm2, xmm3);
+						if ((_mm_movemask_epi8(mask) & masks[i]) != masks[i])
+						{
+							found = false;
+							break;
+						}
+					}
+
+
+					if (found) {
+						results.push_back(reinterpret_cast<uintptr_t>(pData));
+					}
+
+				}
+
+
 			}
+
+			++pData;
 		}
 
 		return results;
