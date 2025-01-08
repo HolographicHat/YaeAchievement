@@ -373,47 +373,47 @@ namespace
 		if (candidates.empty())
 			return;
 
-		auto pGetBagManagerByStoreType = candidates.front();
-		std::println("GetBagManagerByStoreType: 0x{:X}", pGetBagManagerByStoreType);
-		for (auto i = 0; i < 213; ++i) 
+		uintptr_t pGetBagManagerByStoreType = candidates.front();
 		{
+			std::println("GetBagManagerByStoreType: 0x{:X}", pGetBagManagerByStoreType);
 
-			const auto va = pGetBagManagerByStoreType - i;
-			uint8_t* code = reinterpret_cast<uint8_t*>(va);
-			if (va % 16 == 0 && 
-				code[0] == 0x56 && // push rsi
-				code[1] == 0x57) // push rdi
+			const auto isFunctionEntry = [](uintptr_t va) -> bool {
+				auto* code = reinterpret_cast<uint8_t*>(va);
+				return (va % 16 == 0 &&
+					code[0] == 0x56 && // push rsi
+					code[1] == 0x57);  // push rdi
+			};
+
+			auto range = std::views::iota(0, 213);
+			if (const auto it = std::ranges::find_if(range, [&](int i) { return isFunctionEntry(pGetBagManagerByStoreType - i); });
+				it != range.end())
 			{
-				pGetBagManagerByStoreType = va;
-				break;
+				pGetBagManagerByStoreType -= *it;
+			}
+			else {
+				std::println("Failed to find function entry");
+				return;
 			}
 
-		}
-
-		std::println("GetBagManagerByStoreType: 0x{:X}", pGetBagManagerByStoreType);
-		if (pGetBagManagerByStoreType == candidates.front())
-		{
-			std::println("Failed to find function entry");
-			return;
+			std::println("GetBagManagerByStoreType: 0x{:X}", pGetBagManagerByStoreType);
 		}
 
 
 		uintptr_t pOnPlayerStoreNotify = 0;
 		{
 			// get all calls to GetBagManagerByStoreType
-			auto calls = GetCalls((uint8_t*)pGetBagManagerByStoreType);
+			auto calls = GetCalls(reinterpret_cast<uint8_t*>(pGetBagManagerByStoreType));
 			auto decodedInstructions = calls | std::views::transform([](auto va) { return DecodeFunction(va); });
 
-			// from the call sites, find the one that has an arbitary branch after the call
-			const auto targetInstructions = std::ranges::find_if(decodedInstructions, [](const std::vector<DecodedInstruction>& instr) {
+			// find the call site with an arbitrary branch (JMP or CALL) after the call
+			auto targetInstructions = std::ranges::find_if(decodedInstructions, [](const auto& instr) {
 				return std::ranges::any_of(instr, [](const DecodedInstruction& i) {
 					return (i.Instruction.mnemonic == ZYDIS_MNEMONIC_JMP || i.Instruction.mnemonic == ZYDIS_MNEMONIC_CALL) &&
 						i.Operands.size() == 1 && i.Operands[0].type == ZYDIS_OPERAND_TYPE_REGISTER;
 				});
 			});
 
-			if (targetInstructions == decodedInstructions.end())
-			{
+			if (targetInstructions == decodedInstructions.end()) {
 				std::println("Failed to find target instruction");
 				return;
 			}
@@ -421,60 +421,53 @@ namespace
 			// ItemModule.OnPlayerStoreNotify
 			const auto& instructions = *targetInstructions;
 			pOnPlayerStoreNotify = Globals::BaseAddress + instructions.front().RVA;
-			for (auto i = 0; i < 126; ++i)
-			{
 
-				const auto va = pOnPlayerStoreNotify - i;
-				uint8_t* code = reinterpret_cast<uint8_t*>(va);
-
-				if (va % 16 == 0 &&
+			const auto isFunctionEntry = [](uintptr_t va) -> bool {
+				auto* code = reinterpret_cast<uint8_t*>(va);
+				return (va % 16 == 0 &&
 					code[0] == 0x56 && // push rsi
-					(*(uint32_t*)&code[1] & ~0xFF000000) == _byteswap_ulong(0x4883EC00)) // sub rsp, ??
-				{
-					pOnPlayerStoreNotify = va;
-					break;
-				}
+					(*reinterpret_cast<uint32_t*>(&code[1]) & ~0xFF000000) == _byteswap_ulong(0x4883EC00)); // sub rsp, ??
+			};
 
-			}
-
-			std::println("OnPlayerStoreNotify: 0x{:X}", pOnPlayerStoreNotify);
-			if (pOnPlayerStoreNotify == Globals::BaseAddress + instructions.front().RVA)
+			auto range = std::views::iota(0, 126);
+			if (const auto it = std::ranges::find_if(range, [&](int i) { return isFunctionEntry(pOnPlayerStoreNotify - i); });
+				it != range.end())
 			{
+				pOnPlayerStoreNotify -= *it;
+			}
+			else {
 				std::println("Failed to find function entry");
 				return;
 			}
+
+			std::println("OnPlayerStoreNotify: 0x{:X}", pOnPlayerStoreNotify);
 		}
 
 		uintptr_t pOnPacket = 0;
 		{
 			// get all calls to OnPlayerStoreNotify
-			const auto calls = GetCalls((uint8_t*)pOnPlayerStoreNotify);
-			if (calls.size() != 1)
-			{
+			const auto calls = GetCalls(reinterpret_cast<uint8_t*>(pOnPlayerStoreNotify));
+			if (calls.size() != 1) {
 				std::println("Failed to find call site");
 				return;
 			}
 
-			// ItemModule.OnPacket
+			// ItemModule.OnPacket - search backwards for function entry
 			pOnPacket = calls.front();
-			for (auto i = 0; i < 3044; ++i)
-			{
-
-				const auto va = pOnPacket - i;
-				uint8_t* code = reinterpret_cast<uint8_t*>(va);
-
-				if (va % 16 == 0 &&
+			const auto isFunctionEntry = [](uintptr_t va) -> bool {
+				auto* code = reinterpret_cast<uint8_t*>(va);
+				return (va % 16 == 0 &&
 					code[0] == 0x56 && // push rsi
-					(*(uint32_t*)&code[1] & ~0xFF000000) == _byteswap_ulong(0x4883EC00)) // sub rsp, ??
-				{
-					pOnPacket = va;
-					break;
-				}
+					(*reinterpret_cast<uint32_t*>(&code[1]) & ~0xFF000000) == _byteswap_ulong(0x4883EC00)); // sub rsp, ??
+			};
 
-			}
-
-			if (pOnPacket == calls.front())
+			auto range = std::views::iota(0, 3044);
+			if (const auto it = std::ranges::find_if(range, [&](int i) { return isFunctionEntry(pOnPacket - i); });
+				it != range.end())
 			{
+				pOnPacket -= *it;
+			}
+			else {
 				std::println("Failed to find function entry");
 				return;
 			}
@@ -483,11 +476,11 @@ namespace
 		}
 
 		const auto decodedInstructions = DecodeFunction(pOnPacket);
-		std::unordered_map<uint32_t, uintptr_t> immBranch; // <imm, branch address>
-		uint32_t immValue = 0;
-		for (const auto& i : decodedInstructions)
-		{
-			if (i.Instruction.mnemonic == ZYDIS_MNEMONIC_CMP && 
+		uint32_t cmdid = 0;
+		std::ranges::for_each(decodedInstructions, [&cmdid, pOnPlayerStoreNotify](const DecodedInstruction& i) {
+			static uint32_t immValue = 0; // keep track of the last immediate value
+
+			if (i.Instruction.mnemonic == ZYDIS_MNEMONIC_CMP &&
 				i.Operands.size() == 2 &&
 				i.Operands[0].type == ZYDIS_OPERAND_TYPE_REGISTER &&
 				i.Operands[1].type == ZYDIS_OPERAND_TYPE_IMMEDIATE)
@@ -496,30 +489,26 @@ namespace
 			}
 
 			if (i.Instruction.meta.branch_type == ZYDIS_BRANCH_TYPE_NEAR && i.Operands.size() == 1) {
-				immBranch[immValue] = Globals::BaseAddress + i.RVA + i.Instruction.length + i.Operands[0].imm.value.s;
+				uintptr_t branchAddr = Globals::BaseAddress + i.RVA + i.Instruction.length + i.Operands[0].imm.value.s;
+
+				// decode the branch address immediately
+				const auto instructions = DecodeFunction(branchAddr, 10);
+				const auto isMatch = std::ranges::any_of(instructions, [pOnPlayerStoreNotify](const DecodedInstruction& instr) {
+					if (instr.Instruction.mnemonic != ZYDIS_MNEMONIC_CALL)
+						return false;
+
+					uintptr_t destination = 0;
+					ZydisCalcAbsoluteAddress(&instr.Instruction, instr.Operands.data(), Globals::BaseAddress + instr.RVA, &destination);
+					return destination == pOnPlayerStoreNotify;
+				});
+
+				if (isMatch) {
+					cmdid = immValue;
+				}
+
 			}
-
-		}
-
-		uint32_t cmdid = 0;
-		for (const auto& [imm, branch] : immBranch)
-		{
-			const auto instructions = DecodeFunction(branch, 10);
-			const auto isMatch = std::ranges::any_of(instructions, [pOnPlayerStoreNotify](const DecodedInstruction& i) {
-				if (i.Instruction.mnemonic != ZYDIS_MNEMONIC_CALL)
-					return false;
-
-				uintptr_t destination = 0;
-				ZydisCalcAbsoluteAddress(&i.Instruction, i.Operands.data(), Globals::BaseAddress + i.RVA, &destination);
-				return destination == pOnPlayerStoreNotify;
-			});
-
-			if (!isMatch)
-				continue;
-
-			cmdid = imm;
-			break;
-		}
+			return cmdid == 0; // stop processing if cmdid is found
+		});
 
 		Globals::PlayerStoreId = static_cast<uint16_t>(cmdid);
 		std::println("PlayerStoreId: {}", Globals::PlayerStoreId);
