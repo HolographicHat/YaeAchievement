@@ -25,7 +25,7 @@ namespace Globals
 	inline uint16_t PlayerStoreId = 0; // use non-zero to override dynamic search
 
 	inline bool AchievementsWritten = false;
-	inline int32_t PlayerStoreWrittenCount = 0;
+	inline bool PlayerStoreWritten = false;
 
 	class Offsets
 	{

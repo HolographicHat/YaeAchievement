@@ -58,7 +58,7 @@ namespace Hook {
 #ifdef _DEBUG
 		std::println("PacketType: {}", static_cast<uint8_t>(packetType));
 		std::println("CmdId: {}", packet->CmdId);
-		std::println("DataLength: {}", packet->m_DataLength);
+		std::println("DataLength: {}", packet->DataLength);
 		//std::println("Data: {}", Util::Base64Encode(packet->AsSpan()));
 #endif
 
@@ -74,10 +74,10 @@ namespace Hook {
 		if (!AchievementsWritten)
 			AchievementsWritten = packetType == PacketType::Achivement;
 
-		if (packetType == PacketType::Inventory)
-			PlayerStoreWrittenCount++;
+		if (!PlayerStoreWritten)
+			PlayerStoreWritten = packetType == PacketType::Inventory;
 
-		if (AchievementsWritten && PlayerStoreWrittenCount == 2)
+		if (AchievementsWritten && PlayerStoreWritten)
 		{
 #ifdef _DEBUG
 			system("pause");

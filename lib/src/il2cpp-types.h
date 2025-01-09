@@ -45,12 +45,12 @@ static_assert(offsetof(Array<uint8_t>, vector) == 32, "vector offset is incorrec
 #pragma pack(push, 1)
 class PacketMeta
 {
-public:
 	uint16_t m_HeadMagic;
 	uint16_t m_CmdId;
 	uint16_t m_HeaderLength;
 	uint32_t m_DataLength;
 	uint8_t m_Data[1];
+public:
 
 	PacketMeta() = delete;
 
@@ -60,13 +60,17 @@ public:
 	PROPERTY_GET_CONST(uint32_t, DataLength, { return _byteswap_ulong(m_DataLength); });
 
 	std::span<uint8_t> AsSpan() {
-		return { m_Data, DataLength };
+		return { m_Data + HeaderLength, DataLength };
 	}
 
+	friend struct PacketMetaStaticAssertHelper;
 };
 #pragma pack(pop)
 
-static_assert(offsetof(PacketMeta, m_CmdId) == 2, "CmdId offset is incorrect");
-static_assert(offsetof(PacketMeta, m_HeaderLength) == 4, "HeadLength offset is incorrect");
-static_assert(offsetof(PacketMeta, m_DataLength) == 6, "DataLength offset is incorrect");
-static_assert(offsetof(PacketMeta, m_Data) == 10, "Data offset is incorrect");
+struct PacketMetaStaticAssertHelper
+{
+	static_assert(offsetof(PacketMeta, m_CmdId) == 2, "CmdId offset is incorrect");
+	static_assert(offsetof(PacketMeta, m_HeaderLength) == 4, "HeadLength offset is incorrect");
+	static_assert(offsetof(PacketMeta, m_DataLength) == 6, "DataLength offset is incorrect");
+	static_assert(offsetof(PacketMeta, m_Data) == 10, "Data offset is incorrect");
+};

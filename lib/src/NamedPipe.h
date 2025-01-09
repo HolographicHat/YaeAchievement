@@ -2,6 +2,13 @@
 #include <Windows.h>
 #include <span>
 
+template <typename T>
+concept IsSpan = requires(T t) {
+	{ t.data() } -> std::convertible_to<const void*>;
+	{ t.size() } -> std::convertible_to<std::size_t>;
+	{ t.size_bytes() } -> std::convertible_to<std::size_t>;
+};
+
 class NamedPipe
 {
 	HANDLE m_hPipe = INVALID_HANDLE_VALUE;
@@ -24,9 +31,10 @@ public:
 		return true;
 	}
 
-	bool Write(std::span<const uint8_t> data) const
+	template <IsSpan T>
+	bool Write(const T data) const
 	{
-		return Write(data.data(), data.size());
+		return Write(data.data(), data.size_bytes());
 	}
 
 	template <typename T>
