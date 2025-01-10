@@ -60,7 +60,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;YAEACHIEVEMENTLIB_EXPORTS;_WINDOWS;_USRDLL;WIN32_LEAN_AND_MEAN;ZYDIS_STATIC_BUILD;ZYCORE_STATIC_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -78,7 +78,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_AMD64_;NDEBUG;YAEACHIEVEMENTLIB_EXPORTS;_WINDOWS;_USRDLL;WIN32_LEAN_AND_MEAN;ZYDIS_STATIC_BUILD;ZYCORE_STATIC_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <SDLCheck>true</SDLCheck>
@@ -99,6 +99,7 @@
     <ClInclude Include="src\globals.h" />
     <ClInclude Include="src\il2cpp-types.h" />
     <ClInclude Include="src\il2cpp-init.h" />
+    <ClInclude Include="src\NamedPipe.h" />
     <ClInclude Include="src\util.h" />
     <ClInclude Include="src\Zydis.h" />
   </ItemGroup>

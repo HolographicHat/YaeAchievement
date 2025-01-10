@@ -1,5 +1,6 @@
 ﻿// ReSharper disable CppClangTidyCertErr33C
 #include <Windows.h>
+#include <print>
 #include <string>
 #include <future>
 #include <TlHelp32.h>
@@ -11,6 +12,26 @@
 
 CRITICAL_SECTION CriticalSection;
 void SetBreakpoint(HANDLE thread, uintptr_t address, bool enable, uint8_t index = 0);
+
+namespace
+{
+	PacketType GetPacketType(const PacketMeta* packet)
+	{
+		using namespace Globals;
+		const auto cmdid = packet->CmdId;
+		
+		if (AchievementId && cmdid == AchievementId)
+			return PacketType::Achivement;
+
+		if (AchievementIdSet.contains(cmdid) && packet->DataLength > 500)
+			return PacketType::Achivement;
+
+		if (PlayerStoreId && cmdid == PlayerStoreId)
+			return PacketType::Inventory;
+
+		return PacketType::None;
+	}
+}
 
 namespace Hook {
 
@@ -26,41 +47,41 @@ namespace Hook {
 		SetBreakpoint((HANDLE)-2, Offset.BitConverter_ToUInt16, true);
 		LeaveCriticalSection(&CriticalSection);
 
-		const auto packet = reinterpret_cast<PacketMeta*>(val->data());
+		if (ret != 0xAB89)
+			return ret;
 
-		auto CheckPacket = [](const PacketMeta* packet) -> bool {
-			const auto cmdid = _byteswap_ushort(packet->CmdId);
-			const auto dataLength = _byteswap_ulong(packet->DataLength);
+		const auto packet = val->As<PacketMeta*>();
+		const auto packetType = GetPacketType(packet);
+		if (packetType == PacketType::None)
+			return ret;
 
-			if (dataLength < 500) {
-				return false;
-			}
+#ifdef _DEBUG
+		std::println("PacketType: {}", static_cast<uint8_t>(packetType));
+		std::println("CmdId: {}", packet->CmdId);
+		std::println("DataLength: {}", packet->DataLength);
+		//std::println("Data: {}", Util::Base64Encode(packet->AsSpan()));
+#endif
 
-			if (CmdId != 0) {
-				return cmdid == CmdId;
-			}
+		if (!MessagePipe.Write(packetType))
+			Util::Win32ErrorDialog(1002, GetLastError());
 
-			return DynamicCmdIds.contains(cmdid);
-		};
+		if (!MessagePipe.Write(packet->DataLength))
+			Util::Win32ErrorDialog(1003, GetLastError());
 
-		using namespace Globals;
-		if (ret == 0xAB89 && CheckPacket(packet))
+		if (!MessagePipe.Write(packet->AsSpan()))
+			Util::Win32ErrorDialog(1004, GetLastError());
+		
+		if (!AchievementsWritten)
+			AchievementsWritten = packetType == PacketType::Achivement;
+
+		if (!PlayerStoreWritten)
+			PlayerStoreWritten = packetType == PacketType::Inventory;
+
+		if (AchievementsWritten && PlayerStoreWritten)
 		{
-			const auto headLength = _byteswap_ushort(packet->HeaderLength);
-			const auto dataLength = _byteswap_ulong(packet->DataLength);
-
-			printf("CmdId: %d\n", _byteswap_ushort(packet->CmdId));
-			printf("DataLength: %d\n", dataLength);
-
-			const auto base64 = Util::Base64Encode(packet->Data + headLength, dataLength) + "\n";
-			printf("Base64: %s\n", base64.c_str());
-
 #ifdef _DEBUG
 			system("pause");
 #endif
-
-			WriteFile(MessagePipe, base64.c_str(), (DWORD)base64.length(), nullptr, nullptr);
-			CloseHandle(MessagePipe);
 			ExitProcess(0);
 		}
 
@@ -96,11 +117,6 @@ void SetBreakpoint(HANDLE thread, uintptr_t address, bool enable, uint8_t index)
 		return;
 	}
 
-	if (!BaseAddress || Offset.BitConverter_ToUInt16 <= BaseAddress) {
-		// not initialized yet
-		return;
-	}
-
 	CONTEXT ctx{};
 	ctx.ContextFlags = CONTEXT_DEBUG_REGISTERS;
 	GetThreadContext(thread, &ctx);
@@ -119,6 +135,7 @@ DWORD __stdcall ThreadProc(LPVOID hInstance)
 #ifdef _DEBUG
 	AllocConsole();
 	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
+	system("pause");
 #endif
 	InitializeCriticalSection(&CriticalSection);
 
@@ -131,13 +148,14 @@ DWORD __stdcall ThreadProc(LPVOID hInstance)
 		SwitchToThread();
 	}
 
-	initFuture.get();
+	if (!initFuture.get())
+		ExitProcess(0);
 
 	MessagePipe = CreateFileA(R"(\\.\pipe\YaeAchievementPipe)", GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
-	if (MessagePipe == INVALID_HANDLE_VALUE)
+	if (!MessagePipe)
 	{
 #ifdef _DEBUG
-		printf("CreateFile failed: %d\n", GetLastError());
+		std::println("CreateFile failed: {}", GetLastError());
 #else
 		Util::Win32ErrorDialog(1001, GetLastError());
 		ExitProcess(0);

@@ -1,6 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include <unordered_set>
+#include "NamedPipe.h"
 
 #define PROPERTY2(type, name, cn, os) \
 	type name##_cn = cn; \
@@ -12,13 +13,19 @@
 namespace Globals
 {
 	inline HWND GameWindow = nullptr;
-	inline HANDLE MessagePipe = nullptr;
+	inline NamedPipe MessagePipe = nullptr;
 	inline bool IsCNREL = true;
 	inline uintptr_t BaseAddress = 0;
 
 	// 5.1.0 - 24082
-	inline uint16_t CmdId = 0; // use non-zero to override dynamic search
-	inline std::unordered_set<uint16_t> DynamicCmdIds;
+	inline uint16_t AchievementId = 0; // use non-zero to override dynamic search
+	inline std::unordered_set<uint16_t> AchievementIdSet;
+
+	// 5.3.0 - 23233
+	inline uint16_t PlayerStoreId = 0; // use non-zero to override dynamic search
+
+	inline bool AchievementsWritten = false;
+	inline bool PlayerStoreWritten = false;
 
 	class Offsets
 	{
