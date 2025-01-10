@@ -10,7 +10,7 @@
         <ApplicationManifest>res\app.manifest</ApplicationManifest>
         <AssemblyVersion>5.3.0</AssemblyVersion>
         <FileVersion>5.3.0</FileVersion>
-        <ApplicationIcon>icon.ico</ApplicationIcon>
+        <ApplicationIcon>res\icon.ico</ApplicationIcon>
 
         <DebugType>embedded</DebugType>
         <SelfContained>false</SelfContained>

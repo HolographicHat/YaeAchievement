@@ -1,4 +1,4 @@
-<div align="center"><img width="100" src="https://github.com/HolographicHat/YaeAchievement/blob/master/icon.ico">
+<div align="center"><img width="100" src="https://github.com/HolographicHat/YaeAchievement/blob/master/YaeAchievement/res/icon.ico" alt="AppIcon">
 
 # YaeAchievement
 
