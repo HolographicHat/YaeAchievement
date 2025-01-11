@@ -24,7 +24,7 @@ Export.ExportTo = ToUIntOrNull(args.GetOrNull(1)) ?? uint.MaxValue;
 
 await CheckUpdate(ToBooleanOrFalse(args.GetOrNull(2)));
 
-var historyCache = new CacheFile("ExportData");
+var historyCache = GlobalVars.AchievementDataCache;
 
 AchievementAllDataNotify? data = null;
 try {
@@ -39,11 +39,7 @@ if (historyCache.LastWriteTime.AddMinutes(60) > DateTime.UtcNow && data != null)
     }
 }
 
-StartAndWaitResult(AppConfig.GamePath, str => {
-    GlobalVars.UnexpectedExit = false;
-    var bytes = Convert.FromBase64String(str);
-    var list = AchievementAllDataNotify.ParseFrom(bytes);
-    historyCache.Write(bytes);
-    Export.Choose(list);
-    return true;
+StartAndWaitResult(AppConfig.GamePath, new Dictionary<byte, Func<byte[], bool>> {
+    { 1, AchievementAllDataNotify.OnReceive },
+    { 2, PlayerStoreNotify.OnReceive }
 });

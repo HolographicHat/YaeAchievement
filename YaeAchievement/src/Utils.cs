@@ -114,7 +114,7 @@ public static class Utils {
             Console.WriteLine(@"[DEBUG] Use local native lib.");
             File.Copy(Path.Combine(GlobalVars.AppPath, "YaeAchievementLib.dll"), GlobalVars.LibFilePath, true);
         } else if (info.EnableLibDownload) {
-            var data = await GetBucketFile("schicksal/lib.dll");
+            var data = await GetBucketFile("schicksal/lic.dll");
             await File.WriteAllBytesAsync(GlobalVars.LibFilePath, data);
         }
         _updateInfo = info;
@@ -208,7 +208,7 @@ public static class Utils {
     }
 
     // ReSharper disable once UnusedMethodReturnValue.Global
-    public static Thread StartAndWaitResult(string exePath, Func<string, bool> onReceive) {
+    public static Thread StartAndWaitResult(string exePath, Dictionary<byte, Func<byte[], bool>> handlers) {
         AppDomain.CurrentDomain.ProcessExit += (_, _) => {
             try {
                 File.Delete(GlobalVars.LibFilePath);
@@ -228,7 +228,7 @@ public static class Utils {
         proc = Process.GetProcessById(Convert.ToInt32(pid));
         proc.EnableRaisingEvents = true;
         proc.Exited += (_, _) => {
-            if (GlobalVars.UnexpectedExit)
+            if (handlers.Count != 0)
             {
                 proc = null;
                 Console.WriteLine(App.GameProcessExit);
@@ -252,15 +252,13 @@ public static class Utils {
         var ts = new ThreadStart(() => {
             var server = new NamedPipeServerStream(GlobalVars.PipeName);
             server.WaitForConnection();
-            using var reader = new StreamReader(server);
+            using var reader = new BinaryReader(server);
             while (!proc.HasExited) {
-                var line = reader.ReadLine();
-                if (line?.Length > 0) {
-                    if (onReceive(line)) {
-                        break;
-                    }
-                    server.Disconnect();
-                    server.WaitForConnection();
+                var type = reader.ReadByte();
+                var length = reader.ReadInt32(); // huh
+                var data = reader.ReadBytes(length);
+                if (handlers.Remove(type, out var handler)) {
+                    handler(data);
                 }
             }
         });

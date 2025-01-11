@@ -28,6 +28,8 @@ public static class GlobalVars {
     public const string RinBucketHost = "https://rin.holohat.work";
     public const string SakuraBucketHost = "https://cn-cd-1259389942.file.myqcloud.com";
 
+    public static CacheFile AchievementDataCache { get; } = new ("achievement_data");
+
     [field:MaybeNull]
     public static AchievementInfo AchievementInfo =>
         field ??= AchievementInfo.Parser.ParseFrom(Utils.GetBucketFile("schicksal/metadata").GetAwaiter().GetResult());
@@ -36,4 +38,5 @@ public static class GlobalVars {
         Directory.CreateDirectory(DataPath);
         Directory.CreateDirectory(CachePath);
     }
+
 }

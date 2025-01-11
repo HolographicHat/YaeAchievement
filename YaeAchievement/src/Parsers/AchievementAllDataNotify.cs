@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using Google.Protobuf;
 using YaeAchievement.res;
@@ -27,6 +26,12 @@ public class AchievementAllDataNotify {
 
     public List<AchievementItem> AchievementList { get; private init; } = [];
 
+    public static bool OnReceive(byte[] bytes) {
+        GlobalVars.AchievementDataCache.Write(bytes);
+        Export.Choose(ParseFrom(bytes));
+        return true;
+    }
+
     public static AchievementAllDataNotify ParseFrom(byte[] bytes) {
         using var stream = new CodedInputStream(bytes);
         var data = new List<Dictionary<uint, uint>>();
@@ -36,7 +41,7 @@ public class AchievementAllDataNotify {
             while ((tag = stream.ReadTag()) != 0) {
                 if ((tag & 7) == 2) { // is LengthDelimited
                     var dict = new Dictionary<uint, uint>();
-                    using var eStream = new CodedInputStream(ReadRawBytes(stream, stream.ReadLength()));
+                    using var eStream = stream.ReadLengthDelimitedAsStream();
                     try {
                         while ((tag = eStream.ReadTag()) != 0) {
                             if ((tag & 7) != 0) { // not VarInt
@@ -106,9 +111,6 @@ public class AchievementAllDataNotify {
             }).ToList()
         };
     }
-
-    [UnsafeAccessor(UnsafeAccessorKind.Method)]
-    private static extern byte[] ReadRawBytes(CodedInputStream stream, int size);
 
 }
 
