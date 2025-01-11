@@ -32,7 +32,7 @@ public:
 	}
 
 	template <IsSpan T>
-	bool Write(const T data) const
+	bool Write(const T& data) const
 	{
 		return Write(data.data(), data.size_bytes());
 	}
