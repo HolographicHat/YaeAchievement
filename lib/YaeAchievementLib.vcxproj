@@ -96,6 +96,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ntprivate.h" />
     <ClInclude Include="src\globals.h" />
     <ClInclude Include="src\il2cpp-types.h" />
     <ClInclude Include="src\il2cpp-init.h" />
