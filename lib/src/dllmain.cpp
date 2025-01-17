@@ -192,6 +192,11 @@ DWORD __stdcall ThreadProc(LPVOID hInstance)
 // DLL entry point
 BOOL __stdcall DllMain(HMODULE hInstance, DWORD fdwReason, LPVOID lpReserved)
 {
+	// check injectee
+	if (!GetModuleHandleW(L"mhypbase.dll"))
+	{
+		return TRUE;
+	}
 
 	if (fdwReason == DLL_PROCESS_ATTACH)
 	{
@@ -201,4 +206,15 @@ BOOL __stdcall DllMain(HMODULE hInstance, DWORD fdwReason, LPVOID lpReserved)
 	}
 
 	return TRUE;
+}
+
+static LRESULT WINAPI YaeGetWindowHookImpl(int code, WPARAM wParam, LPARAM lParam)
+{
+	return CallNextHookEx(NULL, code, wParam, lParam);
+}
+
+EXTERN_C __declspec(dllexport) HRESULT WINAPI YaeGetWindowHook(_Out_ HOOKPROC* pHookProc)
+{
+	*pHookProc = YaeGetWindowHookImpl;
+	return S_OK;
 }
