@@ -9,6 +9,7 @@
 #include "util.h"
 #include "il2cpp-init.h"
 #include "il2cpp-types.h"
+#include "ntprivate.h"
 
 CRITICAL_SECTION CriticalSection;
 void SetBreakpoint(HANDLE thread, uintptr_t address, bool enable, uint8_t index = 0);
@@ -200,6 +201,11 @@ BOOL __stdcall DllMain(HMODULE hInstance, DWORD fdwReason, LPVOID lpReserved)
 
 	if (fdwReason == DLL_PROCESS_ATTACH)
 	{
+		if (hInstance)
+		{
+			LdrAddRefDll(LDR_ADDREF_DLL_PIN, hInstance);
+		}
+
 		if (const auto hThread = CreateThread(nullptr, 0, ThreadProc, hInstance, 0, nullptr)) {
 			CloseHandle(hThread);
 		}
