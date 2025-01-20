@@ -193,8 +193,11 @@ DWORD __stdcall ThreadProc(LPVOID hInstance)
 // DLL entry point
 BOOL __stdcall DllMain(HMODULE hInstance, DWORD fdwReason, LPVOID lpReserved)
 {
-	// check injectee
-	if (!GetModuleHandleW(L"mhypbase.dll"))
+	// Check injectee
+	WCHAR szFileName[MAX_PATH]{};
+	DWORD length = 0;
+	GetModuleFileNameW(NULL, szFileName, MAX_PATH);
+	if (!(wcsstr(szFileName, L"YuanShen.exe") || wcsstr(szFileName, L"GenshinImpact.exe")))
 	{
 		return TRUE;
 	}
