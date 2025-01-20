@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Text;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Console;
@@ -110,10 +109,7 @@ public static class Utils {
                 Environment.Exit(0);
             }
         }
-        if (useLocalLib) {
-            Console.WriteLine(@"[DEBUG] Use local native lib.");
-            File.Copy(Path.Combine(GlobalVars.AppPath, "YaeAchievementLib.dll"), GlobalVars.LibFilePath, true);
-        } else if (info.EnableLibDownload) {
+        if (info.EnableLibDownload && !useLocalLib) {
             var data = await GetBucketFile("schicksal/lic.dll");
             await File.WriteAllBytesAsync(GlobalVars.LibFilePath, data);
         }
@@ -207,17 +203,14 @@ public static class Utils {
         };
     }
 
+    private static bool _isUnexpectedExit;
+    
     // ReSharper disable once UnusedMethodReturnValue.Global
-    public static Thread StartAndWaitResult(string exePath, Dictionary<byte, Func<byte[], bool>> handlers) {
-        AppDomain.CurrentDomain.ProcessExit += (_, _) => {
-            try {
-                File.Delete(GlobalVars.LibFilePath);
-            } catch (Exception) { /* ignored */ }
-        };
+    public static Thread StartAndWaitResult(string exePath, Dictionary<byte, Func<BinaryReader, bool>> handlers, Action onFinish) {
         if (!Injector.CreateProcess(exePath, out var hProcess, out var hThread, out var pid)) {
             Environment.Exit(new Win32Exception().PrintMsgAndReturnErrCode("ICreateProcess fail"));
         }
-        if (Injector.LoadLibraryAndInject(hProcess,Encoding.UTF8.GetBytes(GlobalVars.LibFilePath)) != 0)
+        if (Injector.LoadLibraryAndInject(hProcess,GlobalVars.LibFilePath.AsSpan()) != 0)
         {
             if (!Native.TerminateProcess(hProcess, 0))
             {
@@ -228,7 +221,7 @@ public static class Utils {
         proc = Process.GetProcessById(Convert.ToInt32(pid));
         proc.EnableRaisingEvents = true;
         proc.Exited += (_, _) => {
-            if (handlers.Count != 0)
+            if (_isUnexpectedExit)
             {
                 proc = null;
                 Console.WriteLine(App.GameProcessExit);
@@ -255,10 +248,15 @@ public static class Utils {
             using var reader = new BinaryReader(server);
             while (!proc.HasExited) {
                 var type = reader.ReadByte();
-                var length = reader.ReadInt32(); // huh
-                var data = reader.ReadBytes(length);
-                if (handlers.Remove(type, out var handler)) {
-                    handler(data);
+                if (type == 0xFF) {
+                    _isUnexpectedExit = false;
+                    onFinish();
+                    break;
+                }
+                if (handlers.TryGetValue(type, out var handler)) {
+                    if (handler(reader)) {
+                        handlers.Remove(type);
+                    }
                 }
             }
         });

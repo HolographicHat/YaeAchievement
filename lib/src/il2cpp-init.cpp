@@ -514,6 +514,46 @@ namespace
 		std::println("PlayerStoreId: {}", Globals::PlayerStoreId);
 	}
 
+	void Resolve_AccountDataItem_UpdateNormalProp()
+	{
+		if (Globals::Offset.AccountDataItem_UpdateNormalProp != 0) {
+			Globals::Offset.AccountDataItem_UpdateNormalProp += Globals::BaseAddress;
+			return;
+		}
+
+		const auto il2cppSection = GetSection("il2cpp");
+
+		/*
+			add   ??, 0FFFFD8EEh
+			cmp   ??, 30h
+		*/
+		auto candidates = Util::PatternScanAll(il2cppSection, "81 ? EE D8 FF FF ? 83 ? 30");
+		// should have only one result
+		if (candidates.size() != 1)
+		{
+			std::println("Filtered Instructions: {}", candidates.size());
+			return;
+		}
+		auto fp = candidates[0];
+
+		const auto isFunctionEntry = [](uintptr_t va) -> bool {
+			auto* code = reinterpret_cast<uint8_t*>(va);
+			/* push rsi */
+			/* push rdi */
+			return (va % 16 == 0 && code[0] == 0x56 && code[1] == 0x57);
+		};
+
+		auto range = std::views::iota(0, 213);
+		if (const auto it = std::ranges::find_if(range, [&](int i) { return isFunctionEntry(fp - i); }); it != range.end()) {
+			fp -= *it;
+		} else {
+			std::println("Failed to find function entry");
+			return;
+		}
+
+		Globals::Offset.AccountDataItem_UpdateNormalProp = fp;
+	}
+
 }
 
 bool InitIL2CPP()
@@ -537,14 +577,17 @@ bool InitIL2CPP()
 	std::future<void> resolveFuncFuture = std::async(std::launch::async, Resolve_BitConverter_ToUInt16);
 	std::future<void> resolveCmdIdFuture = std::async(std::launch::async, ResolveAchivementCmdId);
 	std::future<void> resolveInventoryFuture = std::async(std::launch::async, ResolveInventoryCmdId);
+	std::future<void> resolveUpdatePropFuture = std::async(std::launch::async, Resolve_AccountDataItem_UpdateNormalProp);
 
 	resolveFuncFuture.get();
 	resolveCmdIdFuture.get();
 	resolveInventoryFuture.get();
+	resolveUpdatePropFuture.get();
 
 	std::println("BaseAddress: 0x{:X}", BaseAddress);
 	std::println("IsCNREL: {:d}", IsCNREL);
 	std::println("BitConverter_ToUInt16: 0x{:X}", Offset.BitConverter_ToUInt16);
+	std::println("AccountDataItem_UpdateNormalProp: 0x{:X}", Offset.AccountDataItem_UpdateNormalProp);
 
 	if (!AchievementId && AchievementIdSet.empty())
 	{

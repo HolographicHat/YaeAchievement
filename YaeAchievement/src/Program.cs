@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json;
 using YaeAchievement;
 using YaeAchievement.Parsers;
 using YaeAchievement.res;
@@ -39,7 +40,17 @@ if (historyCache.LastWriteTime.AddMinutes(60) > DateTime.UtcNow && data != null)
     }
 }
 
-StartAndWaitResult(AppConfig.GamePath, new Dictionary<byte, Func<byte[], bool>> {
+StartAndWaitResult(AppConfig.GamePath, new Dictionary<byte, Func<BinaryReader, bool>> {
     { 1, AchievementAllDataNotify.OnReceive },
-    { 2, PlayerStoreNotify.OnReceive }
+    { 2, PlayerStoreNotify.OnReceive },
+    { 100, PlayerPropNotify.OnReceive },
+}, () => {
+#if DEBUG
+    PlayerPropNotify.OnFinish();
+    File.WriteAllText("store_data.json", JsonSerializer.Serialize(PlayerStoreNotify.Instance, new JsonSerializerOptions {
+        WriteIndented = true,
+        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+    }));
+#endif
+    AchievementAllDataNotify.OnFinish();
 });

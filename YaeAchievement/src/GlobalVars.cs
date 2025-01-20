@@ -11,7 +11,6 @@ namespace YaeAchievement;
 
 public static class GlobalVars {
 
-    public static bool UnexpectedExit { get; set; } = true;
     public static bool PauseOnExit { get; set; } = true;
     public static Version AppVersion { get; } = Assembly.GetEntryAssembly()!.GetName().Version!;
 

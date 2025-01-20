@@ -12,7 +12,7 @@
 #include "ntprivate.h"
 
 CRITICAL_SECTION CriticalSection;
-void SetBreakpoint(HANDLE thread, uintptr_t address, bool enable, uint8_t index = 0);
+void SetBreakpoint(HANDLE thread, uintptr_t address, bool enable, uint8_t index);
 
 namespace
 {
@@ -43,9 +43,9 @@ namespace Hook {
 		const auto ToUInt16 = reinterpret_cast<decltype(&BitConverter_ToUInt16)>(Offset.BitConverter_ToUInt16);
 
 		EnterCriticalSection(&CriticalSection);
-		SetBreakpoint((HANDLE)-2, 0, false);
+		SetBreakpoint((HANDLE)-2, 0, false, 0);
 		const auto ret = ToUInt16(val, startIndex);
-		SetBreakpoint((HANDLE)-2, Offset.BitConverter_ToUInt16, true);
+		SetBreakpoint((HANDLE)-2, Offset.BitConverter_ToUInt16, true, 0);
 		LeaveCriticalSection(&CriticalSection);
 
 		if (ret != 0xAB89)
@@ -78,8 +78,10 @@ namespace Hook {
 		if (!PlayerStoreWritten)
 			PlayerStoreWritten = packetType == PacketType::Inventory;
 
-		if (AchievementsWritten && PlayerStoreWritten)
+		if (AchievementsWritten && PlayerStoreWritten && RequiredPlayerProperties.size() == 0)
 		{
+			if (!MessagePipe.Write(PacketType::End))
+				Util::Win32ErrorDialog(9001, GetLastError());
 #ifdef _DEBUG
 			system("pause");
 #endif
@@ -87,6 +89,44 @@ namespace Hook {
 		}
 
 		return ret;
+	}
+
+	void __fastcall AccountDataItem_UpdateNormalProp(const void* __this, const int type, const double value, const double lastValue, const int state)
+	{
+		using namespace Globals;
+		const auto UpdateNormalProp = reinterpret_cast<decltype(&AccountDataItem_UpdateNormalProp)>(Offset.AccountDataItem_UpdateNormalProp);
+
+		EnterCriticalSection(&CriticalSection);
+		SetBreakpoint((HANDLE)-2, 0, false, 1);
+		UpdateNormalProp(__this, type, value, lastValue, state);
+		SetBreakpoint((HANDLE)-2, Offset.AccountDataItem_UpdateNormalProp, true, 1);
+		LeaveCriticalSection(&CriticalSection);
+
+#ifdef _DEBUG
+		std::println("PropType: {}", type);
+		std::println("PropState: {}", state);
+		std::println("PropValue: {}", value);
+		std::println("PropLastValue: {}", lastValue);
+#endif
+		if (RequiredPlayerProperties.erase(type) != 0)
+		{
+			if (!MessagePipe.Write(PacketType::PropData))
+				Util::Win32ErrorDialog(2002, GetLastError());
+			if (!MessagePipe.Write(type))
+				Util::Win32ErrorDialog(2003, GetLastError());
+			if (!MessagePipe.Write(value))
+				Util::Win32ErrorDialog(2004, GetLastError());
+		}
+
+		if (AchievementsWritten && PlayerStoreWritten && RequiredPlayerProperties.size() == 0)
+		{
+			if (!MessagePipe.Write(PacketType::End))
+				Util::Win32ErrorDialog(9001, GetLastError());
+#ifdef _DEBUG
+			system("pause");
+#endif
+			ExitProcess(0);
+		}
 	}
 }
 
@@ -98,13 +138,17 @@ LONG __stdcall VectoredExceptionHandler(PEXCEPTION_POINTERS ep)
 
 	if (exceptionRecord->ExceptionCode == EXCEPTION_SINGLE_STEP)
 	{
-		if (exceptionRecord->ExceptionAddress != reinterpret_cast<void*>(Offset.BitConverter_ToUInt16)) {
-			return EXCEPTION_CONTINUE_SEARCH;
+		if (exceptionRecord->ExceptionAddress == reinterpret_cast<void*>(Offset.BitConverter_ToUInt16)) {
+			contextRecord->Rip = reinterpret_cast<DWORD64>(Hook::BitConverter_ToUInt16);
+			contextRecord->EFlags &= ~0x100; // clear the trap flag
+			return EXCEPTION_CONTINUE_EXECUTION;
 		}
-
-		contextRecord->Rip = reinterpret_cast<DWORD64>(Hook::BitConverter_ToUInt16);
-		contextRecord->EFlags &= ~0x100; // clear the trap flag
-		return EXCEPTION_CONTINUE_EXECUTION;
+		if (exceptionRecord->ExceptionAddress == reinterpret_cast<void*>(Offset.AccountDataItem_UpdateNormalProp)) {
+			contextRecord->Rip = reinterpret_cast<DWORD64>(Hook::AccountDataItem_UpdateNormalProp);
+			contextRecord->EFlags &= ~0x100; // clear the trap flag
+			return EXCEPTION_CONTINUE_EXECUTION;
+		}
+		return EXCEPTION_CONTINUE_SEARCH;
 	}
 
 	return EXCEPTION_CONTINUE_SEARCH;
@@ -178,7 +222,8 @@ DWORD __stdcall ThreadProc(LPVOID hInstance)
 			if (const auto hThread = OpenThread(THREAD_ALL_ACCESS, FALSE, te32.th32ThreadID))
 			{
 				EnterCriticalSection(&CriticalSection);
-				SetBreakpoint(hThread, Offset.BitConverter_ToUInt16, true);
+				SetBreakpoint(hThread, Offset.BitConverter_ToUInt16, true, 0);
+				SetBreakpoint(hThread, Offset.AccountDataItem_UpdateNormalProp, true, 1);
 				CloseHandle(hThread);
 				LeaveCriticalSection(&CriticalSection);
 			}

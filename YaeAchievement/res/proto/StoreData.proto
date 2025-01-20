@@ -63,6 +63,10 @@ message Furniture {
   uint32 count = 1;
 }
 
+message VirtualItem {
+  int64 count = 1;
+}
+
 message Item {
   uint32 item_id = 1;
   uint64 guid = 2;
@@ -70,5 +74,6 @@ message Item {
     Material material = 5;
     Equip equip = 6;
     Furniture furniture = 7;
+    VirtualItem virtual_item = 255;
   }
 }

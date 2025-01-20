@@ -11,6 +11,8 @@ enum class PacketType : uint8_t
 	None = 0,
 	Achivement = 1,
 	Inventory = 2,
+	PropData = 100,
+	End = 255,
 };
 
 template <typename T>

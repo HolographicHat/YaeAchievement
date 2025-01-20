@@ -1,6 +1,10 @@
-﻿using System.Text.Json;
-using Google.Protobuf;
+﻿using Google.Protobuf;
 using Proto;
+
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable CollectionNeverQueried.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 
 namespace YaeAchievement.Parsers;
 
@@ -12,19 +16,16 @@ public class PlayerStoreNotify {
 
     public List<Item> ItemList { get; set; } = [];
 
-    public static bool OnReceive(byte[] bytes) {
-        #if DEBUG
-        var ntf = ParseFrom(bytes);
-        File.WriteAllText("store_data.json", JsonSerializer.Serialize(ntf, new JsonSerializerOptions {
-            WriteIndented = true
-        }));
-        #endif
+    public static PlayerStoreNotify Instance { get; } = new ();
+
+    public static bool OnReceive(BinaryReader reader) {
+        var bytes = reader.ReadBytes(reader.ReadInt32());
+        Instance.ParseFrom(bytes);
         return true;
     }
 
-    private static PlayerStoreNotify ParseFrom(byte[] bytes) {
+    private void ParseFrom(byte[] bytes) {
         using var stream = new CodedInputStream(bytes);
-        var ntf = new PlayerStoreNotify();
         try {
             uint tag;
             while ((tag = stream.ReadTag()) != 0) {
@@ -33,16 +34,16 @@ public class PlayerStoreNotify {
                     case 0: { // is VarInt
                         var value = stream.ReadUInt32();
                         if (value < 10) {
-                            ntf.StoreType = (StoreType) value;
+                            StoreType = (StoreType) value;
                         } else {
-                            ntf.WeightLimit = value;
+                            WeightLimit = value;
                         }
                         continue;
                     }
                     case 2: { // is LengthDelimited
                         using var eStream = stream.ReadLengthDelimitedAsStream();
                         while (eStream.PeekTag() != 0) {
-                            ntf.ItemList.Add(Item.Parser.ParseFrom(eStream));
+                            ItemList.Add(Item.Parser.ParseFrom(eStream));
                         }
                         break;
                     }
@@ -54,7 +55,6 @@ public class PlayerStoreNotify {
             File.WriteAllBytes("store_raw_data.bin", bytes);
             Environment.Exit(0);
         }
-        return ntf;
     }
 
 }

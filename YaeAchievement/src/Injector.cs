@@ -25,23 +25,24 @@ public static class Injector {
     }
 
     // todo: refactor
-    public static unsafe int LoadLibraryAndInject(HANDLE hProc, ReadOnlySpan<byte> libPath) {
+    public static unsafe int LoadLibraryAndInject(HANDLE hProc, ReadOnlySpan<char> libPath) {
         fixed (char* lpModelName = "kernel32.dll") {
             var hKernel = Native.GetModuleHandle(lpModelName);
             if (hKernel.IsNull) {
                 return new Win32Exception().PrintMsgAndReturnErrCode("GetModuleHandle fail");
             }
-            fixed(byte* lpProcName = "LoadLibraryA"u8) {
+            fixed(byte* lpProcName = "LoadLibraryW"u8) {
                 var pLoadLibrary = Native.GetProcAddress(hKernel, (PCSTR)lpProcName);
                 if (pLoadLibrary.IsNull) {
                     return new Win32Exception().PrintMsgAndReturnErrCode("GetProcAddress fail");
                 }
-                var pBase = Native.VirtualAllocEx(hProc, default, unchecked((uint)libPath.Length + 1), VIRTUAL_ALLOCATION_TYPE.MEM_RESERVE | VIRTUAL_ALLOCATION_TYPE.MEM_COMMIT, PAGE_PROTECTION_FLAGS.PAGE_READWRITE);
+                var libPathByteLen = (uint) libPath.Length * 2;
+                var pBase = Native.VirtualAllocEx(hProc, default, libPathByteLen + 2, VIRTUAL_ALLOCATION_TYPE.MEM_RESERVE | VIRTUAL_ALLOCATION_TYPE.MEM_COMMIT, PAGE_PROTECTION_FLAGS.PAGE_READWRITE);
                 if ((nint)pBase == 0) {
                     return new Win32Exception().PrintMsgAndReturnErrCode("VirtualAllocEx fail");
                 }
                 fixed (void* lpBuffer = libPath) {
-                    if (!Native.WriteProcessMemory(hProc, pBase, lpBuffer, unchecked((uint)libPath.Length))) {
+                    if (!Native.WriteProcessMemory(hProc, pBase, lpBuffer, libPathByteLen)) {
                         return new Win32Exception().PrintMsgAndReturnErrCode("WriteProcessMemory fail");
                     }
                 }

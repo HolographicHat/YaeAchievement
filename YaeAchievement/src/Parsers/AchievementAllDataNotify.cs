@@ -25,11 +25,21 @@ public class AchievementItem {
 public class AchievementAllDataNotify {
 
     public List<AchievementItem> AchievementList { get; private init; } = [];
+    
+    private static AchievementAllDataNotify? Instance { get; set; }
 
-    public static bool OnReceive(byte[] bytes) {
+    public static bool OnReceive(BinaryReader reader) {
+        var bytes = reader.ReadBytes(reader.ReadInt32());
         GlobalVars.AchievementDataCache.Write(bytes);
-        Export.Choose(ParseFrom(bytes));
+        Instance = ParseFrom(bytes);
         return true;
+    }
+
+    public static void OnFinish() {
+        if (Instance == null) {
+            throw new ApplicationException("No data received");
+        }
+        Export.Choose(Instance);
     }
 
     public static AchievementAllDataNotify ParseFrom(byte[] bytes) {
