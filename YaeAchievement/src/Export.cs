@@ -51,9 +51,12 @@ public static class Export {
         }
         var responseText = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
         var responseJson = JsonSerializer.Deserialize(responseText, CocogoatResponseContext.Default.CocogoatResponse)!;
-        Console.WriteLine(Utils.ShellOpen($"https://cocogoat.work/achievement?memo={responseJson.Key}")
-            ? App.ExportToCocogoatSuccess
-            : $"https://cocogoat.work/achievement?memo={responseJson.Key}");
+        var cocogoatUrl = $"https://cocogoat.work/achievement?memo={responseJson.Key}";
+        Console.WriteLine(cocogoatUrl);
+        if (Utils.ShellOpen(cocogoatUrl))
+        {
+            Console.WriteLine(App.ExportToCocogoatSuccess);
+        }
     }
 
     private static void ToWxApp1(AchievementAllDataNotify data) {
