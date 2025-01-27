@@ -1,0 +1,17 @@
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Yae.Lib</id>
+    <version>5.3.0</version>
+    <authors>HolographicHat</authors>
+    <developmentDependency>true</developmentDependency>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">GPL-3.0-only</license>
+    <licenseUrl>https://licenses.nuget.org/GPL-3.0-only</licenseUrl>
+    <projectUrl>https://github.com/HolographicHat/Yae</projectUrl>
+	<description>Yae Lib</description>
+	<repository type="git" url="https://github.com/HolographicHat/Yae" commit="$commit$" />
+  </metadata>
+  <files>
+    <file src="build\x64\Release\YaeLib.dll" target="runtimes\win-x64\native" />
+  </files>
+</package>

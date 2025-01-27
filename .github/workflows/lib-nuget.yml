@@ -1,0 +1,27 @@
+name: YaeLib NuGet Publish
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restore NuGet Packages
+      run: nuget restore lib\YaeAchievementLib.sln
+
+    - name: Build
+      run: msbuild lib\YaeAchievementLib.sln /p:Configuration=Release
+
+    - name: Pack
+      run: nuget pack lib\YaeAchievementLib.nuspec
+
+    - name: Publish to NuGet
+      run: nuget push *.nupkg ${{ secrets.NUGET_API_KEY }} -src https://api.nuget.org/v3/index.json
